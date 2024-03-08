@@ -13,7 +13,7 @@ type UserDao interface {
 
 	FindUsersByName(name string) ([]entity.User, error)
 
-	SetUserInfo(userID int, user entity.User) error
+	SetUserInfo(user entity.User) error
 
 	SetPassword(userID int, password string) error
 
