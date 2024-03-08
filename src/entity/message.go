@@ -1,8 +1,6 @@
 package entity
 
-import (
-	"time"
-)
+import "time"
 
 const (
 	UnknownMessageType = iota
@@ -29,12 +27,19 @@ const (
 )
 
 type Message struct {
+	ID      ID `json:"m_id" gorm:"primaryKey"`
+	OwnerID ID `json:"from"`
+	ProjID  ID `json:"p_id"`
+	CampID  ID `json:"c_id"`
+	ReplyID ID `json:"r_id"`
+
 	Timestamp time.Time `json:"timestamp"`
 	Type      int       `json:"m_type"`
-	From      int       `json:"from"`
-	CampID    int       `json:"c_id"`
-	ReplyID   int       `json:"r_id,omitempty"`
 	Content   string    `json:"content"`
+
+	Owner User    `json:"-" gorm:"foreignKey:FromID"`
+	Proj  Project `json:"-" gorm:"foreignKey:ProjID"`
+	Camp  Camp    `json:"-" gorm:"foreignKey:CampID"`
 }
 
 type UnknownMessage struct {

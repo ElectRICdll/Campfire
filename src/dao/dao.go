@@ -1,15 +1,25 @@
 package dao
 
-import "gorm.io/gorm"
-
-var (
-	UserDaoContainer UserDao = nil
+import (
+	"campfire/util"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 )
 
-//需要给让db连接数据库
-var db *gorm.DB
+var (
+	UserDaoContainer    UserDao    = nil
+	ProjectDaoContainer ProjectDao = nil
+)
+
+// 需要给让db连接数据库
+var db *gorm.DB = DBConn()
 
 //--------------------
 
-type DB struct {
+func DBConn() *gorm.DB {
+	db, err := gorm.Open(mysql.Open(util.CONFIG.SQLConn), &gorm.Config{})
+	if err != nil {
+		panic("Failed to connect database")
+	}
+	return db
 }

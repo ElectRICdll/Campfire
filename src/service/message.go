@@ -6,30 +6,28 @@ import (
 	"encoding/json"
 )
 
-type MessageHandler func(entity.Message) (json.RawMessage, []entity.User, error)
+type MessageHandler func(entity.Message) (json.RawMessage, error)
 
 type MessageService interface {
-	MessageRecord(messageId int)
+	MessageRecord(messageID int)
 
 	FindMessageRecordByKeyword(keyword string)
 
-	FindMessageRecordByMember(userId string)
+	FindMessageRecordByMember(userID string)
 
 	AllMessageRecord()
 
 	newMessageRecord(message ...entity.Message) error
 
-	PullTentMessageRecord(userId int, campId int, tentId int, beginMessageId int) ([]entity.Message, error)
+	PullMessageRecord(userID int, projID int, campID int, beginMessageID int) ([]entity.Message, error)
 
-	PullCampMessageRecord(userId int, campId int, beginMessageId int) ([]entity.Message, error)
+	unknownMessageHandler(message entity.Message) (json.RawMessage, error)
 
-	unknownMessageHandler(message entity.Message) (json.RawMessage, []entity.User, error)
+	textMessageHandler(message entity.Message) (json.RawMessage, error)
 
-	textMessageHandler(message entity.Message) (json.RawMessage, []entity.User, error)
+	binaryMessageHandler(message entity.Message) (json.RawMessage, error)
 
-	binaryMessageHandler(message entity.Message) (json.RawMessage, []entity.User, error)
-
-	eventMessageHandler(message entity.Message) (json.RawMessage, []entity.User, error)
+	eventMessageHandler(message entity.Message) (json.RawMessage, error)
 }
 
 func NewMessageService() MessageService {
@@ -39,15 +37,10 @@ func NewMessageService() MessageService {
 }
 
 type messageService struct {
-	query dao.CampsiteDao
+	query dao.MessageDao
 }
 
-func (s messageService) PullTentMessageRecord(userId int, campId int, tentId int, beginMessageId int) ([]entity.Message, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (s messageService) PullCampMessageRecord(userId int, campId int, beginMessageId int) ([]entity.Message, error) {
+func (s messageService) PullMessageRecord(userID int, projID int, campID int, beginMessageID int) ([]entity.Message, error) {
 	//TODO implement me
 	panic("implement me")
 }
@@ -57,7 +50,7 @@ func (s messageService) newMessageRecord(message ...entity.Message) error {
 	panic("implement me")
 }
 
-func (s messageService) MessageRecord(messageId int) {
+func (s messageService) MessageRecord(messageID int) {
 	//TODO implement me
 	panic("implement me")
 }
@@ -67,7 +60,7 @@ func (s messageService) FindMessageRecordByKeyword(keyword string) {
 	panic("implement me")
 }
 
-func (s messageService) FindMessageRecordByMember(userId string) {
+func (s messageService) FindMessageRecordByMember(userID string) {
 	//TODO implement me
 	panic("implement me")
 }
@@ -77,83 +70,60 @@ func (s messageService) AllMessageRecord() {
 	panic("implement me")
 }
 
-func (s messageService) unknownMessageHandler(message entity.Message) (json.RawMessage, []entity.User, error) {
-	return nil, nil, entity.ExternalError{
-		Message: "unknown type message."}
+func (s messageService) unknownMessageHandler(message entity.Message) (json.RawMessage, error) {
+	return nil, entity.ExternalError{Message: "unknown type message."}
 }
 
-func (s messageService) textMessageHandler(message entity.Message) (json.RawMessage, []entity.User, error) {
+func (s messageService) textMessageHandler(message entity.Message) (json.RawMessage, error) {
 	res, err := json.Marshal(entity.TextMessage{
 		Message: message,
 		Content: (string)(message.Content),
 	})
 	if err != nil {
-		return nil, nil, entity.ExternalError{
+		return nil, entity.ExternalError{
 			Message: "No such private channel.",
 		}
 	}
 
-	members, err := s.query.MemberList(message.CampID)
-	if err != nil {
-		return nil, nil, err
+	if err := s.newMessageRecord(message); err != nil {
+		return nil, err
 	}
-	users := []entity.User{}
-	for _, member := range members {
-		users = append(users, *member.User)
-	}
-	return res, users, nil
+
+	return res, nil
 }
 
-func (s messageService) binaryMessageHandler(message entity.Message) (json.RawMessage, []entity.User, error) {
-	res, err := json.Marshal(entity.BinaryMessage{
-		Message: message,
-	})
-	if err != nil {
-		return nil, nil, entity.ExternalError{
-			Message: "No such private channel.",
-		}
-	}
-
-	members, err := s.query.MemberList(message.CampID)
-	if err != nil {
-		return nil, nil, err
-	}
-	users := []entity.User{}
-	for _, member := range members {
-		users = append(users, *member.User)
-	}
-	return res, users, nil
-}
-
-func (s messageService) eventMessageHandler(message entity.Message) (json.RawMessage, []entity.User, error) {
+func (s messageService) binaryMessageHandler(message entity.Message) (json.RawMessage, error) {
 	res, err := json.Marshal(entity.TextMessage{
 		Message: message,
 		Content: (string)(message.Content),
 	})
 	if err != nil {
-		return nil, nil, entity.ExternalError{
+		return nil, entity.ExternalError{
+			Message: "invalid syntax",
+		}
+	}
+
+	if err := s.newMessageRecord(message); err != nil {
+		return nil, err
+	}
+
+	return res, nil
+}
+
+func (s messageService) eventMessageHandler(message entity.Message) (json.RawMessage, error) {
+	res, err := json.Marshal(entity.TextMessage{
+		Message: message,
+		Content: (string)(message.Content),
+	})
+	if err != nil {
+		return nil, entity.ExternalError{
 			Message: "No such private channel.",
 		}
 	}
 
-	members, err := s.query.MemberList(message.CampID)
-	if err != nil {
-		return nil, nil, err
+	if err := s.newMessageRecord(message); err != nil {
+		return nil, err
 	}
-	users := []entity.User{}
-	for _, member := range members {
-		users = append(users, *member.User)
-	}
-	return res, users, nil
-}
 
-//func tentTest(message entity.Message, res []byte) (json.RawMessage, []entity.User, error) {
-//	if message.TentID != 0 {
-//		if value, ok := cache.TestProjects[0].Camps[0].Tents[(entity.ID)(message.TentID)]; ok {
-//			return res, []entity.User{*value.Target()}, nil
-//		}
-//		return nil, nil, entity.ExternalError{
-//			Message: "No such private channel.",
-//		}
-//	}
-//}
+	return res, nil
+}

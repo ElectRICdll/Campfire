@@ -3,85 +3,78 @@ package service
 import (
 	"campfire/cache"
 	"campfire/dao"
-	"campfire/entity"
+	. "campfire/entity"
 )
 
 type UserService interface {
-	UserInfo(id int) (entity.UserDTO, error)
+	UserInfo(id ID) (UserDTO, error)
 
-	userInfo(id int) (entity.User, error)
+	userInfo(id ID) (User, error)
 
-	FindUsersByName(name string) ([]entity.UserDTO, error)
+	FindUsersByName(name string) ([]UserDTO, error)
 
-	findUsersByName(name string) ([]entity.User, error)
+	findUsersByName(name string) ([]User, error)
 
-	EditUserInfo(user entity.UserDTO) error
+	EditUserInfo(user UserDTO) error
 
-	ChangePassword(userId int, password string) error
+	ChangePassword(userID ID, password string) error
 
-	online(user *entity.User)
+	online(user *User)
 
-	offline(id entity.ID)
+	offline(id ID)
 
-	Tents(userId int) ([]entity.BriefTentDTO, error)
+	Tasks(userID ID) ([]TaskDTO, error)
 
-	Projects(userId int) ([]entity.BriefProjectDTO, error)
+	PrivateCamps(userID ID) ([]CampDTO, error)
 
-	Campsites(userId int) ([]entity.BriefCampDTO, error)
+	PublicCamps(userID ID) ([]BriefCampDTO, error)
+
+	Projects(userID ID) ([]BriefProjectDTO, error)
 }
 
 func NewUserService() UserService {
 	return &userService{
 		dao.UserDaoContainer,
-		cache.TestUsers,
+		dao.ProjectDaoContainer,
 	}
 }
 
 type userService struct {
-	query       dao.UserDao
-	onlineUsers map[entity.ID]*entity.User
+	userQuery dao.UserDao
+	projQuery dao.ProjectDao
 }
 
-func (s *userService) Tents(userId int) ([]entity.BriefTentDTO, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (s *userService) Projects(userId int) ([]entity.BriefProjectDTO, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (s *userService) Campsites(userId int) ([]entity.BriefCampDTO, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (s *userService) ChangePassword(userId int, password string) error {
-	err := s.query.SetPassword(userId, password)
+func (s *userService) ChangePassword(userID ID, password string) error {
+	err := s.userQuery.SetPassword(userID, password)
 	return err
 }
 
-func (s *userService) UserInfo(id int) (entity.UserDTO, error) {
-	user, err := s.query.UserInfoByID(id)
+func (s *userService) UserInfo(id ID) (UserDTO, error) {
+	user, err := s.userQuery.UserInfoByID(id)
 
 	return user.DTO(), err
 }
 
-func (s *userService) userInfo(id int) (entity.User, error) {
-	user, err := s.query.UserInfoByID(id)
+func (s *userService) userInfo(id ID) (User, error) {
+	user, err := s.userQuery.UserInfoByID(id)
 
 	return user, err
 }
 
-func (s *userService) EditUserInfo(dto entity.UserDTO) error {
-	if err := s.query.SetUserInfo(dto); err != nil {
+func (s *userService) EditUserInfo(dto UserDTO) error {
+	if err := s.userQuery.SetUserInfo(User{
+		ID:        dto.ID,
+		Name:      dto.Name,
+		Email:     dto.Email,
+		Signature: dto.Signature,
+		AvatarUrl: dto.AvatarUrl,
+	}); err != nil {
 		return err
 	}
 
-	user := cache.TestUsers[(entity.ID)(dto.ID)]
+	user := cache.TestUsers[dto.ID]
 	if user == nil {
-		user = &entity.User{ID: (entity.ID)(dto.ID)}
+		user = &User{ID: dto.ID}
 	}
 	if len(dto.Name) != 0 {
 		user.Name = dto.Name
@@ -90,36 +83,97 @@ func (s *userService) EditUserInfo(dto entity.UserDTO) error {
 		user.Signature = dto.Signature
 	}
 	if dto.Status != 0 {
-		user.Status = (entity.Status)(dto.Status)
+		user.Status = dto.Status
 	}
 
 	return nil
 }
 
-func (s *userService) FindUsersByName(name string) ([]entity.UserDTO, error) {
-	users, err := s.query.FindUsersByName(name)
-	userDTOs := []entity.UserDTO{}
+func (s *userService) FindUsersByName(name string) ([]UserDTO, error) {
+	users, err := s.userQuery.FindUsersByName(name)
+	userDTOs := []UserDTO{}
 	for _, user := range users {
 		userDTOs = append(userDTOs, user.DTO())
 	}
 
-	return userDTOs, entity.ExternalError{
+	return userDTOs, ExternalError{
 		Message: err.Error(),
 	}
 }
 
-func (s *userService) findUsersByName(name string) ([]entity.User, error) {
-	users, err := s.query.FindUsersByName(name)
+func (s *userService) findUsersByName(name string) ([]User, error) {
+	users, err := s.userQuery.FindUsersByName(name)
 
-	return users, entity.ExternalError{
+	return users, ExternalError{
 		Message: err.Error(),
 	}
 }
 
-func (s *userService) online(user *entity.User) {
-	s.onlineUsers[user.ID] = user
+func (s *userService) Tasks(userID ID) ([]TaskDTO, error) {
+	res, err := s.userQuery.TasksOfUser(userID)
+	tasks := []TaskDTO{}
+	for _, task := range res {
+		tasks = append(tasks, TaskDTO{
+			ID:         task.ID,
+			OwnerID:    task.OwnerID,
+			ReceiverID: task.ReceiverID,
+			Title:      task.Title,
+			Content:    task.Content,
+			Begin:      task.Begin,
+			End:        task.End,
+			Status:     task.Status,
+		})
+	}
+	return tasks, err
 }
 
-func (s *userService) offline(id entity.ID) {
-	delete(s.onlineUsers, id)
+func (s *userService) PrivateCamps(userID ID) ([]CampDTO, error) {
+	res, err := s.userQuery.PrivateCampsOfUser(userID)
+	if err != nil {
+		return nil, err
+	}
+	camps := []CampDTO{}
+	for _, camp := range res {
+		camps = append(camps, CampDTO{
+			ID:   camp.ID,
+			Name: camp.Name,
+			//Members: camp.Members,
+		})
+	}
+	return camps, nil
+}
+
+func (s *userService) PublicCamps(userID ID) ([]BriefCampDTO, error) {
+	res, err := s.userQuery.PrivateCampsOfUser(userID)
+	camps := []BriefCampDTO{}
+	for _, camp := range res {
+		camps = append(camps, BriefCampDTO{
+			ID:           camp.ID,
+			Name:         camp.Name,
+			OwnerID:      camp.OwnerID,
+			MembersCount: len(camp.Members),
+		})
+	}
+	return camps, err
+}
+
+func (s *userService) Projects(userID ID) ([]BriefProjectDTO, error) {
+	res, err := s.userQuery.ProjectsOfUser(userID)
+	projs := []BriefProjectDTO{}
+	for _, proj := range res {
+		projs = append(projs, BriefProjectDTO{
+			ID:          proj.ID,
+			Title:       proj.Title,
+			Description: proj.Description,
+		})
+	}
+	return projs, err
+}
+
+func (s *userService) online(user *User) {
+	//s.onlineUsers[user.ID] = user
+}
+
+func (s *userService) offline(id ID) {
+	//delete(s.onlineUsers, id)
 }

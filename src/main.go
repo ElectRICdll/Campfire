@@ -2,6 +2,8 @@ package main
 
 import (
 	"campfire/controller"
+	"campfire/dao"
+	"campfire/entity"
 	"campfire/service"
 	"github.com/gin-gonic/gin"
 )
@@ -22,6 +24,21 @@ func registerHandlers(engine *gin.Engine) {
 
 func main() {
 	r := gin.Default()
+
+	err2 := dao.DBConn().AutoMigrate(
+		&entity.Announcement{},
+		&entity.Project{},
+		&entity.Member{},
+		&entity.User{},
+		&entity.Camp{},
+		&entity.Task{},
+		&entity.Message{},
+	)
+
+	if err2 != nil {
+		println(err2)
+		return
+	}
 
 	registerHandlers(r)
 

@@ -71,7 +71,7 @@ path: /user/change
 jwt_auth: true
 */
 func (c *userController) EditUserInfo(ctx *gin.Context) {
-	id := (int)(ctx.Keys["id"].(float64))
+	id := (entity.ID)(ctx.Keys["id"].(float64))
 	user := entity.UserDTO{ID: id}
 	if err := ctx.BindJSON(&user); err != nil {
 		responseError(ctx, entity.ExternalError{Message: "invalid syntax"})
@@ -93,7 +93,7 @@ path: /user/change/p
 jwt_auth: true
 */
 func (c *userController) ChangePassword(ctx *gin.Context) {
-	id := (int)(ctx.Keys["id"].(float64))
+	id := (entity.ID)(ctx.Keys["id"].(float64))
 	p := struct {
 		Password string `json:"p"`
 	}{}

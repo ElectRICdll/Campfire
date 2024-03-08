@@ -1,33 +1,33 @@
 package dao
 
-import "campfire/entity"
+import . "campfire/entity"
 
 type CampDao interface {
-	CampInfo(queryMemberID int, projID int, campID int) (entity.Camp, error)
+	CampInfo(queryMemberID ID, projID ID, campID ID) (Camp, error)
 
-	AddCamp(queryMemberID int, projID int, camp entity.Camp) error
+	AddCamp(queryMemberID ID, projID ID, camp Camp) error
 
-	SetCampInfo(queryOwnerID int, projID int, camp entity.Camp) error
+	SetCampInfo(queryOwnerID ID, projID ID, camp Camp) error
 
-	DeleteCamp(queryOwnerID, projID int, campID int) error
+	DeleteCamp(queryOwnerID, projID ID, campID ID) error
 
-	MemberList(queryMemberID int, projID int, campID int) ([]entity.Member, error)
+	MemberList(queryMemberID ID, projID ID, campID ID) ([]Member, error)
 
-	MemberInfo(queryMemberID int, projID int, campID int, userID int) (entity.Member, error)
+	MemberInfo(queryMemberID ID, projID ID, campID ID, userID ID) (Member, error)
 
-	AddMember(queryOwnerID int, projID int, campID int, userID int) error
+	AddMember(queryOwnerID ID, projID ID, campID ID, userID ID) error
 
-	DeleteMember(queryOwnerID int, projID int, campID int, userID int) error
+	DeleteMember(queryOwnerID ID, projID ID, campID ID, userID ID) error
 
-	SetMemberInfo(projID int, campID int, member entity.Member) error
+	SetMemberInfo(projID ID, campID ID, member Member) error
 
-	AnnouncementInfo(queryMemberID int, projID int, campID int, annoID int) (entity.Announcement, error)
+	AnnouncementInfo(queryMemberID ID, projID ID, campID ID, annoID ID) (Announcement, error)
 
-	Announcements(queryMemberID int, projID int, campID int) ([]entity.Announcement, error)
+	Announcements(queryMemberID ID, projID ID, campID ID) ([]Announcement, error)
 
-	EditAnnouncement(queryOwnerID int, projID int, campID int, anno entity.Announcement) error
+	EditAnnouncement(queryOwnerID ID, projID ID, campID ID, anno Announcement) error
 
-	AddAnnouncement(queryOwnerID int, projID int, campID int, anno entity.Announcement) error
+	AddAnnouncement(queryOwnerID ID, projID ID, campID ID, anno Announcement) error
 
-	DeleteAnnouncement(queryOwnerID int, projID int, campID int, annoID int) error
+	DeleteAnnouncement(queryOwnerID ID, projID ID, campID ID, annoID ID) error
 }

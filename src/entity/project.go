@@ -1,27 +1,36 @@
 package entity
 
 type Project struct {
-	ID          ID
+	ID      ID `gorm:"primaryKey"`
+	OwnerID ID
+
 	Title       string
-	LeaderId    int
 	Description string
-	Members     map[ID]*Member
-	Camps       map[ID]*Camp
-	Tasks       map[ID]*Task
-	FUrl        string
+
+	Members []*Member
+	Camps   []*Camp
+	Tasks   []*Task
+	FUrl    string
+
+	Owner User `gorm:"foreignKey:OwnerID"`
 }
 
 type BriefProjectDTO struct {
-	ID          int    `json:"id"`
-	LeaderId    int    `json:"leader"`
-	Title       string `json:"title"`
-	Description string `json:"des"`
-	CampCount   int    `json:"camp_count"`
-	TaskCount   int    `json:"task_count"`
+	ID          ID     `json:"id,omitempty"`
+	OwnerID     ID     `json:"leader,omitempty"`
+	Title       string `json:"title,omitempty"`
+	Description string `json:"des,omitempty"`
+	CampCount   int    `json:"camp_count,omitempty"`
+	TaskCount   int    `json:"task_count,omitempty"`
 }
 
 type ProjectDTO struct {
-	BriefProjectDTO
-	Camps []CampDTO `json:"camps"`
-	Tasks []Task    `json:"tasks"`
+	ID          ID        `json:"id,omitempty"`
+	OwnerID     ID        `json:"leader,omitempty"`
+	Title       string    `json:"title,omitempty"`
+	Description string    `json:"des,omitempty"`
+	CampCount   int       `json:"camp_count,omitempty"`
+	TaskCount   int       `json:"task_count,omitempty"`
+	Camps       []CampDTO `json:"camps,omitempty"`
+	Tasks       []Task    `json:"tasks,omitempty"`
 }

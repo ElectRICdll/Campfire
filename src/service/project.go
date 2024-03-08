@@ -1,31 +1,36 @@
 package service
 
 import (
-	"campfire/entity"
+	. "campfire/entity"
 	"github.com/gin-gonic/gin"
 )
 
 type ProjectService interface {
-	CreateProject(project entity.Project) error
+	CreateProject(project Project) error
 
-	ProjectInfo(projectID int) (entity.BriefProjectDTO, error)
+	ProjectInfo(queryID ID, projectID ID) (BriefProjectDTO, error)
 
-	EditProjectInfo(*gin.Context)
+	EditProjectInfo(queryID ID, project Project) error
 
-	DisableProject(*gin.Context)
+	DisableProject(queryID ID, projID ID) error
 
-	UploadProject(*gin.Context)
+	// UploadProject 暂时搁置
+	UploadProject(queryID ID)
 
-	DownloadProject(*gin.Context)
+	// DownloadProject 暂时搁置
+	DownloadProject(queryID ID)
 
-	Tasks(*gin.Context)
+	CreateTask(queryID ID, task Task) error
 
-	TaskInfo(*gin.Context)
+	Tasks(queryID ID, projID ID) ([]TaskDTO, error)
 
-	EditTaskInfo(*gin.Context)
+	TaskInfo(queryID ID, projID ID, taskID ID) (TaskDTO, error)
 
-	DeleteTask(*gin.Context)
+	EditTaskInfo(queryID ID, projID ID, task Task) error
 
+	DeleteTask(queryID ID, projID ID, taskID ID) error
+
+	// 以下暂时搁置
 	FileCatalogue(*gin.Context)
 
 	FileDetail(*gin.Context)

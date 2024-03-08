@@ -1,33 +1,39 @@
 package service
 
-import "campfire/entity"
+import (
+	. "campfire/entity"
+)
 
 type CampService interface {
-	CampInfo(userId int, campId int) (entity.CampDTO, error)
+	PublicCamps(queryID ID, projID ID) ([]Camp, error)
 
-	CreateCamp(camp entity.Camp) error
+	CampInfo(queryID ID, projID ID, campID ID) (CampDTO, error)
 
-	EditCampInfo(userId int, camp entity.Camp) error
+	CreateCamp(queryID ID, projID ID, camp Camp) error
 
-	DisableCampInfo(camp entity.Camp) error
+	EditCampInfo(queryID ID, projID ID, camp Camp) error
 
-	MemberList(campId int) ([]entity.Member, error)
+	DisableCamp(queryID ID, projID ID, campID ID) error
 
-	EditNickname(campId int, userId int, nickname string) error
+	MemberList(queryID ID, projID ID, campID ID) ([]Member, error)
 
-	EditMemberTitle(campId int, userId int, title string) error
+	MemberInfo(queryID ID, projID ID, campID ID, userID ID) (Member, error)
 
-	InviteMember(campId int, userId int) error
+	InviteMember(queryID ID, projID ID, campID ID, userID ID) error
 
-	KickMember(campId int, userId int) error
+	KickMember(queryID ID, projID ID, campID ID, userID ID) error
 
-	AnnouncementInfo(campId int, annoId int) (entity.AnnouncementDTO, error)
+	EditNickname(projID ID, campID ID, userID ID, nickname string) error
 
-	CreateAnnouncement(anno entity.Announcement) error
+	EditMemberTitle(projID ID, campID ID, userID ID, title string) error
 
-	EditAnnouncementInfo(anno entity.Announcement) error
+	AnnouncementInfo(queryID ID, projID ID, campID ID, annoID ID) (AnnouncementDTO, error)
 
-	DeleteAnnouncement(annoId int) error
+	CreateAnnouncement(queryID ID, projID ID, campID ID, anno Announcement) error
+
+	EditAnnouncementInfo(queryID ID, projID ID, campID ID, anno Announcement) error
+
+	DeleteAnnouncement(queryID ID, projID ID, campID ID, annoID ID) error
 }
 
 type campService struct {

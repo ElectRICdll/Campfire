@@ -1,32 +1,31 @@
 package entity
 
-type ID int
-type Status int
+type ID uint
 
 type User struct {
-	ID        ID
+	ID        ID `gorm:"primaryKey"`
 	Email     string
 	Name      string
-	Avatar    string
+	AvatarUrl string
 	Signature string
-	Status    Status
+	Status    int
 	Token     string
-	IsOnline  bool
+	IsOnline  bool `gorm:"-"`
 }
 
 func (d User) DTO() UserDTO {
 	return UserDTO{
 		Email:     d.Email,
-		ID:        (int)(d.ID),
+		ID:        d.ID,
 		Name:      d.Name,
-		AvatarUrl: d.Avatar,
+		AvatarUrl: d.AvatarUrl,
 		Signature: d.Signature,
-		Status:    (int)(d.Status),
+		Status:    d.Status,
 	}
 }
 
 type UserDTO struct {
-	ID        int    `json:"id,omitempty" uri:"user_id" binding:"required"`
+	ID        ID     `json:"id,omitempty" uri:"user_id" binding:"required"`
 	Email     string `json:"email,omitempty"`
 	Name      string `json:"name,omitempty"`
 	AvatarUrl string `json:"avatar_url,omitempty"`

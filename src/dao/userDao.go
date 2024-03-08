@@ -2,26 +2,30 @@ package dao
 
 import (
 	"campfire/cache"
-	"campfire/entity"
+	. "campfire/entity"
 )
 
 type UserDao interface {
 	// CheckIdentity 用于登录接口的方法，向sql后台验证用户是否存在，返回其id即可。
-	CheckIdentity(email string, password string) (int, error)
+	CheckIdentity(email string, password string) (ID, error)
 
-	UserInfoByID(userID int) (entity.User, error)
+	UserInfoByID(userID ID) (User, error)
 
-	FindUsersByName(name string) ([]entity.User, error)
+	FindUsersByName(name string) ([]User, error)
 
-	SetUserInfo(user entity.User) error
+	SetUserInfo(user User) error
 
-	SetPassword(userID int, password string) error
+	SetPassword(userID ID, password string) error
 
-	CreateUser(user entity.User, password string) error
+	CreateUser(user User, password string) error
 
-	CampsOfUser(userID int) ([]entity.Camp, error)
+	TasksOfUser(userID ID) ([]Task, error)
 
-	PrivateCampsOfUser(userID int) ([]entity.Camp, error)
+	CampsOfUser(userID ID) ([]Camp, error)
+
+	PrivateCampsOfUser(userID ID) ([]Camp, error)
+
+	ProjectsOfUser(userID ID) ([]Project, error)
 }
 
 // func NewUserDaoTest() UserDao {
@@ -30,7 +34,7 @@ type UserDao interface {
 
 type userDaoTest struct{}
 
-func (d userDaoTest) SetUserSign(userID int, signature string) error {
+func (d userDaoTest) SetUserSign(userID ID, signature string) error {
 	result := db.Exec("UPDATE user_info SET signature = %s WHERE user_id = %d", signature, userID)
 	if result.Error != nil {
 		return result.Error
@@ -38,10 +42,10 @@ func (d userDaoTest) SetUserSign(userID int, signature string) error {
 	if result != nil {
 		return nil
 	}
-	return entity.ExternalError{}
+	return ExternalError{}
 }
 
-func (d userDaoTest) ChangePassword(userID int, p string) error {
+func (d userDaoTest) ChangePassword(userID ID, p string) error {
 	result := db.Exec("UPDATE user_info SET password = %s WHERE user_id = %d", p, userID)
 	if result.Error != nil {
 		return result.Error
@@ -49,10 +53,10 @@ func (d userDaoTest) ChangePassword(userID int, p string) error {
 	if result != nil {
 		return nil
 	}
-	return entity.ExternalError{}
+	return ExternalError{}
 }
 
-func (d userDaoTest) ChangeEmail(userID int, email string) error {
+func (d userDaoTest) ChangeEmail(userID ID, email string) error {
 	result := db.Exec("UPDATE user_info SET email = %s WHERE user_id = %d", email, userID)
 	if result.Error != nil {
 		return result.Error
@@ -60,10 +64,10 @@ func (d userDaoTest) ChangeEmail(userID int, email string) error {
 	if result != nil {
 		return nil
 	}
-	return entity.ExternalError{}
+	return ExternalError{}
 }
 
-func (d userDaoTest) SetUserName(userID int, name string) error {
+func (d userDaoTest) SetUserName(userID ID, name string) error {
 	result := db.Exec("UPDATE user_info SET name = %s WHERE user_id = %d", name, userID)
 	if result.Error != nil {
 		return result.Error
@@ -71,11 +75,11 @@ func (d userDaoTest) SetUserName(userID int, name string) error {
 	if result != nil {
 		return nil
 	}
-	return entity.ExternalError{}
+	return ExternalError{}
 }
 
-func (d userDaoTest) CheckIdentity(email string, password string) (int, error) {
-	var id int
+func (d userDaoTest) CheckIdentity(email string, password string) (ID, error) {
+	var id ID
 	result := db.Raw("SELECT user_id FROM user_info WHERE email = %s AND password = %s", email, password).Scan(&id)
 	if result.Error != nil {
 		return 0, result.Error
@@ -83,36 +87,36 @@ func (d userDaoTest) CheckIdentity(email string, password string) (int, error) {
 	if result != nil {
 		return id, nil
 	}
-	return 0, entity.ExternalError{}
+	return 0, ExternalError{}
 }
 
-func (d userDaoTest) UserInfoByID(id int) (entity.User, error) {
+func (d userDaoTest) UserInfoByID(id ID) (User, error) {
 	if id == 1 {
 		return *cache.TestUsers[1], nil
 	} else {
-		return entity.User{
+		return User{
 			ID:        65535,
 			Email:     "",
 			Name:      "else",
-			Avatar:    "",
+			AvatarUrl: "",
 			Signature: "something else",
 		}, nil
 	}
 }
 
-func (d userDaoTest) FindUsersByName(name string) ([]entity.User, error) {
-	return []entity.User{
+func (d userDaoTest) FindUsersByName(name string) ([]User, error) {
+	return []User{
 		{
 			ID:        1,
 			Email:     "hare@mail.com",
 			Name:      "electric",
-			Avatar:    "",
+			AvatarUrl: "",
 			Signature: "",
 		},
 	}, nil
 }
 
 // TODO
-func (d userDaoTest) SetAvatar(id int, url string) error {
+func (d userDaoTest) SetAvatar(id ID, url string) error {
 	return nil
 }

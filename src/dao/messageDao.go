@@ -1,11 +1,11 @@
 package dao
 
-import "campfire/entity"
+import . "campfire/entity"
 
 type MessageDao interface {
-	AddMessageRecord(projID int, campID int, msg ...entity.Message) error
+	AddMessageRecord(projID ID, campID ID, msg ...Message) error
 
-	PullCampMessageRecord(projID int, campID int, beginMessageID int, msgCount int) ([]entity.Message, error)
+	PullCampMessageRecord(projID ID, campID ID, beginMessageID ID, msgCount ID) ([]Message, error)
 
-	MessageRecord(projID int, campID int, msgID int) (entity.Message, error)
+	MessageRecord(projID ID, campID ID, msgID ID) (Message, error)
 }

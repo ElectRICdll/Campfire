@@ -8,19 +8,15 @@ import (
 )
 
 type ChatController interface {
-	Tents(*gin.Context)
+	PrivateCamps(*gin.Context)
 
-	TentInfo(*gin.Context)
+	PublicCamps(*gin.Context)
 
-	TentMessageRecord(*gin.Context)
+	CampInfo(*gin.Context)
 
-	Campsites(*gin.Context)
+	MessageRecord(*gin.Context)
 
-	CampsiteInfo(*gin.Context)
-
-	CampsiteMessageRecord(*gin.Context)
-
-	EditCampsiteInfo(*gin.Context)
+	EditCampInfo(*gin.Context)
 
 	Projects(*gin.Context)
 }
@@ -31,26 +27,91 @@ func NewChatController() ChatController {
 
 type chatController struct {
 	userService    service.UserService
-	campService    service.CampsiteService
+	campService    service.CampService
 	messageService service.MessageService
 }
 
 /*
-EditCampsiteInfo
-修改群聊信息，只支持基础信息的修改，包括群聊名称，群主转让等。
-method: POST
-path: /campsites/{campsite_id}/edit
+PrivateCamps
+查看与用户有关联的所有私聊频道
+method: GET
+path: /user/private_camps
 jwt_auth: true
 */
-func (c chatController) EditCampsiteInfo(ctx *gin.Context) {
-	userId := (int)(ctx.Keys["id"].(float64))
+func (c chatController) PrivateCamps(ctx *gin.Context) {
+	userID := (entity.ID)(ctx.Keys["id"].(float64))
+
+	res, err := c.userService.PrivateCamps(userID)
+	responseJSON(ctx, res, err)
+
+	return
+}
+
+/*
+PublicCamps
+查看与用户有关联的全部群聊
+method: GET
+path: /user/public_camps
+jwt_auth: true
+*/
+func (c chatController) PublicCamps(ctx *gin.Context) {
+	userID := (entity.ID)(ctx.Keys["id"].(float64))
+
+	res, err := c.userService.PublicCamps(userID)
+	responseJSON(ctx, res, err)
+
+	return
+}
+
+/*
+CampInfo
+查看与用户有关联的某个群聊
+method: GET
+path: /{project_id}/{campsite_id}
+jwt_auth: true
+*/
+func (c chatController) CampInfo(ctx *gin.Context) {
+	userID := (entity.ID)(ctx.Keys["id"].(float64))
+	uri := struct {
+		PID entity.ID `uri:"p_id" binding:"required"`
+		CID entity.ID `uri:"c_id" binding:"required"`
+	}{}
+
+	if err := ctx.BindUri(&uri); err != nil {
+		responseError(ctx, err)
+		return
+	}
+
+	res, err := c.campService.CampInfo(userID, uri.PID, uri.CID)
+	responseJSON(ctx, res, err)
+
+	return
+}
+
+/*
+EditCampInfo
+修改群聊信息，只支持基础信息的修改，包括群聊名称，群主转让等。
+method: POST
+path: /{project_id}/{campsite_id}/edit
+jwt_auth: true
+*/
+func (c chatController) EditCampInfo(ctx *gin.Context) {
+	userID := (entity.ID)(ctx.Keys["id"].(float64))
 	camp := entity.CampDTO{}
+	uri := struct {
+		PID entity.ID `uri:"p_id" binding:"required"`
+		CID entity.ID `uri:"c_id" binding:"required"`
+	}{}
+	if err := ctx.BindUri(&uri); err != nil {
+		responseError(ctx, err)
+	}
 	if err := ctx.BindJSON(&camp); err != nil {
 		responseError(ctx, entity.ExternalError{Message: "invalid syntax"})
 	}
-	if err := c.campService.EditCampsiteInfo(userId, entity.Camp{
-		Name:     camp.Name,
-		LeaderId: camp.LeaderId,
+	if err := c.campService.EditCampInfo(userID, uri.PID, entity.Camp{
+		ID:      uri.CID,
+		Name:    camp.Name,
+		OwnerID: camp.OwnerID,
 	}); err != nil {
 		responseError(ctx, err)
 		return
@@ -59,125 +120,14 @@ func (c chatController) EditCampsiteInfo(ctx *gin.Context) {
 }
 
 /*
-Tents
-查看与用户有关联的所有私聊频道
-method: GET
-path: /user/tents
-jwt_auth: true
-*/
-func (c chatController) Tents(ctx *gin.Context) {
-	userId := (int)(ctx.Keys["id"].(float64))
-
-	res, err := c.userService.Tents(userId)
-	responseJSON(ctx, res, err)
-
-	return
-}
-
-/*
-TentInfo
-查看与用户有关联的某个私聊频道
-method: GET
-path: /user/{project_id}/{tent_id}
-jwt_auth: true
-*/
-func (c chatController) TentInfo(ctx *gin.Context) {
-	userId := (int)(ctx.Keys["id"].(float64))
-
-	uri := struct {
-		PID int `uri:"p_id" binding:"required"`
-		TID int `uri:"t_id" binding:"required"`
-	}{}
-	if err := ctx.BindUri(&uri); err != nil {
-		responseError(ctx, err)
-		return
-	}
-
-	res, err := c.campService.TentInfo(userId, uri.PID, uri.TID)
-	responseJSON(ctx, res, err)
-
-	return
-}
-
-/*
-TentMessageRecord
-更新Tent的消息记录，数量由配置文件决定
-method: GET
-path: /user/{project_id}/{tent_id}/record
-jwt_auth: true
-*/
-func (c chatController) TentMessageRecord(ctx *gin.Context) {
-	userId := (int)(ctx.Keys["id"].(float64))
-
-	begin, err := strconv.Atoi(ctx.Query("begin_at"))
-	if err != nil {
-		responseError(ctx, err)
-		return
-	}
-
-	uri := struct {
-		PID int `uri:"p_id" binding:"required"`
-		TID int `uri:"t_id" binding:"required"`
-	}{}
-	if err := ctx.BindUri(&uri); err != nil {
-		responseError(ctx, err)
-	}
-
-	res, err := c.messageService.PullTentMessageRecord(userId, uri.PID, uri.TID, begin)
-	responseJSON(ctx, res, err)
-
-	return
-}
-
-/*
-Campsites
-查看与用户有关联的全部群聊
-method: GET
-path: /user/campsites
-jwt_auth: true
-*/
-func (c chatController) Campsites(ctx *gin.Context) {
-	userId := (int)(ctx.Keys["id"].(float64))
-
-	res, err := c.userService.Campsites(userId)
-	responseJSON(ctx, res, err)
-
-	return
-}
-
-/*
-CampsiteInfo
-查看与用户有关联的某个群聊
-method: GET
-path: /user/{campsite_id}
-jwt_auth: true
-*/
-func (c chatController) CampsiteInfo(ctx *gin.Context) {
-	userId := (int)(ctx.Keys["id"].(float64))
-	uri := struct {
-		CID int `uri:"c_id" binding:"required"`
-	}{}
-
-	if err := ctx.BindUri(&uri); err != nil {
-		responseError(ctx, err)
-		return
-	}
-
-	res, err := c.campService.CampsiteInfo(userId, uri.CID)
-	responseJSON(ctx, res, err)
-
-	return
-}
-
-/*
-CampsiteMessageRecord
+MessageRecord
 更新Campsite的消息记录，数量由配置文件决定
 method: GET
-path: /user/{campsite_id}/record
+path: /{project_id}/{campsite_id}/record
 jwt_auth: true
 */
-func (c chatController) CampsiteMessageRecord(ctx *gin.Context) {
-	userId := (int)(ctx.Keys["id"].(float64))
+func (c chatController) MessageRecord(ctx *gin.Context) {
+	userID := (int)(ctx.Keys["id"].(float64))
 
 	begin, err := strconv.Atoi(ctx.Query("begin_at"))
 	if err != nil {
@@ -186,13 +136,14 @@ func (c chatController) CampsiteMessageRecord(ctx *gin.Context) {
 	}
 
 	uri := struct {
+		PID int `uri:"p_id" binding:"required"`
 		CID int `uri:"c_id" binding:"required"`
 	}{}
 	if err := ctx.BindUri(&uri); err != nil {
 		responseError(ctx, err)
 	}
 
-	res, err := c.messageService.PullCampsiteMessageRecord(userId, uri.CID, begin)
+	res, err := c.messageService.PullMessageRecord(userID, uri.PID, uri.CID, begin)
 	responseJSON(ctx, res, err)
 
 	return
@@ -206,9 +157,9 @@ path: /user/projects
 jwt_auth: true
 */
 func (c chatController) Projects(ctx *gin.Context) {
-	userId := (int)(ctx.Keys["id"].(float64))
+	userID := (entity.ID)(ctx.Keys["id"].(float64))
 
-	res, err := c.userService.Projects(userId)
+	res, err := c.userService.Projects(userID)
 	responseJSON(ctx, res, err)
 
 	return
