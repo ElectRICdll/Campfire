@@ -8,7 +8,7 @@ import (
 type LoginService interface {
 	Login(email string, password string) (entity.LoginDTO, error)
 
-	Register(email string, password string)
+	Register(user entity.UserDTO, password string) error
 }
 
 func NewLoginService() LoginService {
@@ -52,6 +52,7 @@ func (s *loginService) Login(email string, password string) (entity.LoginDTO, er
 	}
 }
 
-func (s *loginService) Logout() {}
-
-func (s *loginService) Register(email string, password string) {}
+func (s *loginService) Register(user entity.UserDTO, password string) error {
+	// TODO
+	panic("implement me")
+}

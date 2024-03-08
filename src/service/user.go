@@ -15,15 +15,19 @@ type UserService interface {
 
 	findUsersByName(name string) ([]entity.User, error)
 
-	ChangeUserInfo(id string) error
+	EditUserInfo(user entity.UserDTO) error
 
-	CampsiteList(campsiteId int) ([]entity.UserDTO, error)
-
-	campsiteList(campsiteId int) ([]entity.User, error)
+	ChangePassword(userId int, password string) error
 
 	online(user *entity.User)
 
 	offline(id entity.ID)
+
+	Tents(userId int) ([]entity.BriefTentDTO, error)
+
+	Projects(userId int) ([]entity.BriefProjectDTO, error)
+
+	Campsites(userId int) ([]entity.BriefCampDTO, error)
 }
 
 func NewUserService() UserService {
@@ -38,6 +42,26 @@ type userService struct {
 	onlineUsers map[entity.ID]*entity.User
 }
 
+func (s *userService) Tents(userId int) ([]entity.BriefTentDTO, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (s *userService) Projects(userId int) ([]entity.BriefProjectDTO, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (s *userService) Campsites(userId int) ([]entity.BriefCampDTO, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (s *userService) ChangePassword(userId int, password string) error {
+	err := s.query.SetPassword(userId, password)
+	return err
+}
+
 func (s *userService) UserInfo(id int) (entity.UserDTO, error) {
 	user, err := s.query.UserInfoByID(id)
 
@@ -48,6 +72,28 @@ func (s *userService) userInfo(id int) (entity.User, error) {
 	user, err := s.query.UserInfoByID(id)
 
 	return user, err
+}
+
+func (s *userService) EditUserInfo(dto entity.UserDTO) error {
+	if err := s.query.SetUserInfo(dto); err != nil {
+		return err
+	}
+
+	user := cache.TestUsers[(entity.ID)(dto.ID)]
+	if user == nil {
+		user = &entity.User{ID: (entity.ID)(dto.ID)}
+	}
+	if len(dto.Name) != 0 {
+		user.Name = dto.Name
+	}
+	if len(dto.Signature) != 0 {
+		user.Signature = dto.Signature
+	}
+	if dto.Status != 0 {
+		user.Status = (entity.Status)(dto.Status)
+	}
+
+	return nil
 }
 
 func (s *userService) FindUsersByName(name string) ([]entity.UserDTO, error) {
@@ -68,21 +114,6 @@ func (s *userService) findUsersByName(name string) ([]entity.User, error) {
 	return users, entity.ExternalError{
 		Message: err.Error(),
 	}
-}
-
-// TODO
-func (s *userService) CampsiteList(campsiteId int) ([]entity.UserDTO, error) {
-	return nil, nil
-}
-
-// TODO
-func (s *userService) campsiteList(campsiteId int) ([]entity.User, error) {
-	return nil, nil
-}
-
-// TODO
-func (s *userService) ChangeUserInfo(id string) error {
-	return nil
 }
 
 func (s *userService) online(user *entity.User) {

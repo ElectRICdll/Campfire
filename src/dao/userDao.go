@@ -13,11 +13,15 @@ type UserDao interface {
 
 	FindUsersByName(name string) ([]entity.User, error)
 
-	SetUserInfo(userID int, user entity.UserDTO) error
+	SetUserInfo(userID int, user entity.User) error
 
-	SetPassword(userID int, userid int, password string) error
+	SetPassword(userID int, password string) error
 
 	CreateUser(user entity.User, password string) error
+
+	CampsOfUser(userID int) ([]entity.Camp, error)
+
+	PrivateCampsOfUser(userID int) ([]entity.Camp, error)
 }
 
 // func NewUserDaoTest() UserDao {

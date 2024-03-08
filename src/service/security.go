@@ -23,12 +23,11 @@ func NewSecurityService() SecurityService {
 type securityService struct{}
 
 func (s securityService) AuthMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		tokenString := c.GetHeader("Authorization")
+	return func(ctx *gin.Context) {
+		tokenString := ctx.GetHeader("Authorization")
 
 		if tokenString == "" {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-			c.Abort()
+			ctx.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
 
@@ -37,22 +36,20 @@ func (s securityService) AuthMiddleware() gin.HandlerFunc {
 		})
 
 		if err != nil || !token.Valid {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
-			c.Abort()
+			ctx.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
 
 		claims, ok := token.Claims.(jwt.MapClaims)
 		if !ok {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token claims"})
-			c.Abort()
+			ctx.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
 
-		c.Set("user", claims["name"])
-		c.Set("id", claims["id"])
+		ctx.Set("user", claims["name"])
+		ctx.Set("id", claims["id"])
 
-		c.Next()
+		ctx.Next()
 	}
 }
 

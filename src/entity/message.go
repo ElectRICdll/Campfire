@@ -1,7 +1,6 @@
 package entity
 
 import (
-	"encoding/json"
 	"time"
 )
 
@@ -30,13 +29,12 @@ const (
 )
 
 type Message struct {
-	TimeStamp  time.Time `json:"timestamp"`
-	Type       int       `json:"m_type"`
-	From       int       `json:"from"`
-	CampsiteID int       `json:"cs"`
-	TentID     int       `json:"t,omitempty"`
-	ReplyID    int       `json:"r,omitempty"`
-	Content    string    `json:"content"`
+	Timestamp time.Time `json:"timestamp"`
+	Type      int       `json:"m_type"`
+	From      int       `json:"from"`
+	CampID    int       `json:"c_id"`
+	ReplyID   int       `json:"r_id,omitempty"`
+	Content   string    `json:"content"`
 }
 
 type UnknownMessage struct {
@@ -90,26 +88,4 @@ type BinaryData struct {
 	IsLastChunk bool   `json:"is_last_chunk,omitempty"`
 	Binary      []byte `json:"binary"`
 	Type        string `json:"type"`
-}
-
-func (bd *BinaryData) MarshalJSON() ([]byte, error) {
-	return json.Marshal(&struct {
-		BinaryData
-		Content interface{} `json:"content"`
-	}{
-		BinaryData: *bd,
-		Content:    bd.Binary,
-	})
-}
-
-func (bd *BinaryData) UnmarshalJSON(data []byte) error {
-	aux := &struct {
-		BinaryData
-		Content json.RawMessage `json:"content"`
-	}{}
-	if err := json.Unmarshal(data, &aux); err != nil {
-		return err
-	}
-	bd = &aux.BinaryData
-	return json.Unmarshal(aux.Content, &bd.Binary)
 }

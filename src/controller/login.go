@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"campfire/entity"
 	"campfire/service"
 	"github.com/gin-gonic/gin"
 )
@@ -18,7 +19,7 @@ func NewLoginController() LoginController {
 }
 
 type loginController struct {
-	s service.LoginService
+	loginService service.LoginService
 }
 
 /*
@@ -43,9 +44,9 @@ func (c *loginController) Login(ctx *gin.Context) {
 		Password string `json:"password"`
 	}{}
 	if err := ctx.BindJSON(&body); err != nil {
-		responseBadRequest(ctx, "invalid syntax")
+		responseError(ctx, entity.ExternalError{Message: "invalid syntax"})
 	}
-	res, err := c.s.Login(body.Email, body.Password)
+	res, err := c.loginService.Login(body.Email, body.Password)
 	responseJSON(ctx, res, err)
 	return
 }
@@ -61,5 +62,17 @@ path: /reg
 	}
 */
 func (c *loginController) Register(ctx *gin.Context) {
-	// TODO
+	newUser := struct {
+		entity.UserDTO
+		Password string `json:"password"`
+	}{}
+	if err := ctx.BindJSON(&newUser); err != nil {
+		responseError(ctx, err)
+		return
+	}
+	if err := c.loginService.Register(newUser.UserDTO, newUser.Password); err != nil {
+		responseError(ctx, err)
+		return
+	}
+	return
 }

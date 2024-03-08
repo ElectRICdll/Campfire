@@ -6,3 +6,9 @@ type Member struct {
 	Nickname string
 	Title    string
 }
+
+type MemberDTO struct {
+	UserDTO
+	NickName string `json:"nickname"`
+	Title    string `json:"member_title"`
+}

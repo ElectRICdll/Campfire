@@ -24,3 +24,12 @@ func (d User) DTO() UserDTO {
 		Status:    (int)(d.Status),
 	}
 }
+
+type UserDTO struct {
+	ID        int    `json:"id,omitempty" uri:"user_id" binding:"required"`
+	Email     string `json:"email,omitempty"`
+	Name      string `json:"name,omitempty"`
+	AvatarUrl string `json:"avatar_url,omitempty"`
+	Signature string `json:"signature,omitempty"`
+	Status    int    `json:"status,omitempty"`
+}

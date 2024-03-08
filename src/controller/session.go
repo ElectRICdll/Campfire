@@ -3,7 +3,6 @@ package controller
 import (
 	"campfire/service"
 	"github.com/gin-gonic/gin"
-	"strconv"
 )
 
 type SessionController interface {
@@ -31,13 +30,9 @@ path: /ws (WebSocket)
 	}
 */
 func (c *sessionController) NewSession(ctx *gin.Context) {
-	id, err := strconv.Atoi(ctx.Query("id"))
-	if err != nil {
-		responseBadRequest(ctx, "invalid syntax")
-	}
-
+	id := (int)(ctx.Keys["id"].(float64))
 	if err := c.s.NewSession(ctx.Writer, ctx.Request, nil, id); err != nil {
-		responseInternalError(ctx, err)
+		responseError(ctx, err)
 		return
 	}
 }

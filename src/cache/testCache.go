@@ -4,7 +4,7 @@ import "campfire/entity"
 
 var TestProjects = []entity.Project{
 	{
-		Campsites: []*entity.Campsite{
+		Campsites: []*entity.Camp{
 			{
 				ID:   1,
 				Name: "老登交流群",
@@ -61,7 +61,7 @@ var TestUsers = map[entity.ID]*entity.User{
 		IsOnline: false,
 	},
 	3: {
-		ID:       2,
+		ID:       3,
 		Email:    "koishi@email.com",
 		Name:     "koishi",
 		IsOnline: false,

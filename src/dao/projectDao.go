@@ -31,9 +31,5 @@ type ProjectDao interface {
 
 	DeleteTask(queryOwnerID, projID int, taskID int) error
 
-	TentsOfProject(queryMemberID int, campID int, tentID int) ([]entity.Tent, error)
-
-	TentsOfUser(userID int) ([]entity.Tent, error)
-
-	AddTent(tent entity.Tent) error
+	CampsOfProject(queryMemberID, projID int) ([]entity.Camp, error)
 }
