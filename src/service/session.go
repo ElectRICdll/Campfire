@@ -14,6 +14,8 @@ type SessionSender func(*websocket.Conn, int, []byte) error
 
 type SessionService interface {
 	NewSession(w http.ResponseWriter, r *http.Request, h http.Header, userid uint) error
+
+	notify(n entity.Notification)
 }
 
 func NewSessionService() SessionService {
@@ -56,6 +58,10 @@ func (s *sessionService) NewSession(w http.ResponseWriter, r *http.Request, h ht
 	return nil
 }
 
+func (s *sessionService) notify(n entity.Notification) {
+
+}
+
 func (s *sessionService) handle(conn *websocket.Conn, wsType int, payload []byte) {
 	Log.Info("Received new message")
 
@@ -77,7 +83,7 @@ func (s *sessionService) handle(conn *websocket.Conn, wsType int, payload []byte
 		s.badData(conn, err)
 	}
 
-	members, err := s.query.MemberList(10, message.ProjID, message.CampID)
+	members, err := s.query.MemberList(10, message.CampID)
 	if err != nil {
 		Log.Error(err.Error())
 		return

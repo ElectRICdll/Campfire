@@ -3,13 +3,14 @@ package service
 import (
 	"campfire/dao"
 	"campfire/entity"
+	"campfire/util"
 	"encoding/json"
 )
 
 type MessageHandler func(entity.Message) (json.RawMessage, error)
 
 type MessageService interface {
-	MessageRecord(messageID int)
+	MessageRecord(messageID uint)
 
 	FindMessageRecordByKeyword(keyword string)
 
@@ -19,7 +20,7 @@ type MessageService interface {
 
 	newMessageRecord(message ...entity.Message) error
 
-	PullMessageRecord(userID int, campID int, beginMessageID int) ([]entity.Message, error)
+	PullMessageRecord(campID uint, beginMessageID uint) ([]entity.Message, error)
 
 	unknownMessageHandler(message entity.Message) (json.RawMessage, error)
 
@@ -40,17 +41,20 @@ type messageService struct {
 	query dao.MessageDao
 }
 
-func (s messageService) PullMessageRecord(userID int, campID int, beginMessageID int) ([]entity.Message, error) {
-	//TODO implement me
-	panic("implement me")
+func (s messageService) PullMessageRecord(campID uint, beginMessageID uint) ([]entity.Message, error) {
+	res, err := s.query.PullCampMessageRecord(campID, beginMessageID, util.CONFIG.MessageRecordCount)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
 }
 
 func (s messageService) newMessageRecord(message ...entity.Message) error {
-	//TODO implement me
-	panic("implement me")
+	err := s.query.AddMessageRecord(message...)
+	return err
 }
 
-func (s messageService) MessageRecord(messageID int) {
+func (s messageService) MessageRecord(messageID uint) {
 	//TODO implement me
 	panic("implement me")
 }
