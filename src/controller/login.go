@@ -58,6 +58,7 @@ path: /reg
 
 	request_body: {
 		"email": string,
+		"name": string,
 		"p": string
 	}
 */

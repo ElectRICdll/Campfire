@@ -19,7 +19,7 @@ type MessageService interface {
 
 	newMessageRecord(message ...entity.Message) error
 
-	PullMessageRecord(userID int, projID int, campID int, beginMessageID int) ([]entity.Message, error)
+	PullMessageRecord(userID int, campID int, beginMessageID int) ([]entity.Message, error)
 
 	unknownMessageHandler(message entity.Message) (json.RawMessage, error)
 
@@ -40,7 +40,7 @@ type messageService struct {
 	query dao.MessageDao
 }
 
-func (s messageService) PullMessageRecord(userID int, projID int, campID int, beginMessageID int) ([]entity.Message, error) {
+func (s messageService) PullMessageRecord(userID int, campID int, beginMessageID int) ([]entity.Message, error) {
 	//TODO implement me
 	panic("implement me")
 }

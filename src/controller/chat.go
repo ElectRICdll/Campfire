@@ -73,7 +73,6 @@ jwt_auth: true
 func (c chatController) CampInfo(ctx *gin.Context) {
 	userID := (uint)(ctx.Keys["id"].(float64))
 	uri := struct {
-		PID uint `uri:"p_id" binding:"required"`
 		CID uint `uri:"c_id" binding:"required"`
 	}{}
 
@@ -82,7 +81,7 @@ func (c chatController) CampInfo(ctx *gin.Context) {
 		return
 	}
 
-	res, err := c.campService.CampInfo(userID, uri.PID, uri.CID)
+	res, err := c.campService.CampInfo(userID, uri.CID)
 	responseJSON(ctx, res, err)
 
 	return
@@ -99,7 +98,6 @@ func (c chatController) EditCampInfo(ctx *gin.Context) {
 	userID := (uint)(ctx.Keys["id"].(float64))
 	camp := entity.CampDTO{}
 	uri := struct {
-		PID uint `uri:"p_id" binding:"required"`
 		CID uint `uri:"c_id" binding:"required"`
 	}{}
 	if err := ctx.BindUri(&uri); err != nil {
@@ -108,7 +106,7 @@ func (c chatController) EditCampInfo(ctx *gin.Context) {
 	if err := ctx.BindJSON(&camp); err != nil {
 		responseError(ctx, entity.ExternalError{Message: "invalid syntax"})
 	}
-	if err := c.campService.EditCampInfo(userID, uri.PID, entity.Camp{
+	if err := c.campService.EditCampInfo(userID, entity.Camp{
 		ID:      uri.CID,
 		Name:    camp.Name,
 		OwnerID: camp.OwnerID,
@@ -136,14 +134,13 @@ func (c chatController) MessageRecord(ctx *gin.Context) {
 	}
 
 	uri := struct {
-		PID int `uri:"p_id" binding:"required"`
 		CID int `uri:"c_id" binding:"required"`
 	}{}
 	if err := ctx.BindUri(&uri); err != nil {
 		responseError(ctx, err)
 	}
 
-	res, err := c.messageService.PullMessageRecord(userID, uri.PID, uri.CID, begin)
+	res, err := c.messageService.PullMessageRecord(userID, uri.CID, begin)
 	responseJSON(ctx, res, err)
 
 	return

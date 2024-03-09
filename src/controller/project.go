@@ -91,7 +91,7 @@ func (p projectController) CreateCamp(ctx *gin.Context) {
 		return
 	}
 
-	if err := p.campService.CreateCamp(userID, uri.PID, entity.Camp{
+	if err := p.campService.CreateCamp(userID, entity.Camp{
 		Name:    task.Name,
 		OwnerID: userID,
 	},
@@ -140,7 +140,7 @@ func (p projectController) CampInfo(ctx *gin.Context) {
 		responseError(ctx, err)
 		return
 	}
-	res, err := p.campService.CampInfo(userID, uri.PID, uri.CID)
+	res, err := p.campService.CampInfo(userID, uri.CID)
 	responseJSON(ctx, res, err)
 	return
 }
@@ -165,7 +165,7 @@ func (p projectController) EditCamp(ctx *gin.Context) {
 	if err := ctx.BindJSON(&proj); err != nil {
 		responseError(ctx, entity.ExternalError{Message: "invalid syntax"})
 	}
-	if err := p.campService.EditCampInfo(userID, uri.PID, entity.Camp{
+	if err := p.campService.EditCampInfo(userID, entity.Camp{
 		ID:      uri.PID,
 		Name:    proj.Name,
 		OwnerID: proj.OwnerID,
@@ -189,7 +189,7 @@ func (p projectController) DisableCamp(ctx *gin.Context) {
 		PID uint `uri:"p_id" binding:"required"`
 		CID uint `uri:"p_id" binding:"required"`
 	}{}
-	if err := p.campService.DisableCamp(userID, uri.PID, uri.CID); err != nil {
+	if err := p.campService.DisableCamp(userID, uri.CID); err != nil {
 		responseError(ctx, err)
 		return
 	}
