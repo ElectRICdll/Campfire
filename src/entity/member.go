@@ -21,7 +21,6 @@ type MemberDTO struct {
 	UserID    uint   `json:"u_id,omitempty"`
 	ProjID    uint   `json:"p_id,omitempty"`
 	CampID    uint   `json:"c_id,omitempty"`
-	Email     string `json:"email,omitempty"`
 	Name      string `json:"name,omitempty"`
 	AvatarUrl string `json:"avatar_url,omitempty"`
 	Signature string `json:"signature,omitempty"`
@@ -33,10 +32,43 @@ type MemberDTO struct {
 type ProjectMember struct {
 	ID        uint `gorm:"primaryKey"`
 	UserID    uint `gorm:"index;not null"`
-	ProjectID uint `gorm:"index;not null"`
+	ProjID    uint `gorm:"index;not null"`
 	IsCreator bool
 	Title     string
 
 	User    User    `gorm:"foreignKey:UserID"`
-	Project Project `gorm:"foreignKey:ProjectID"`
+	Project Project `gorm:"foreignKey:ProjID"`
+}
+
+func (m Member) DTO() MemberDTO {
+	return MemberDTO{
+		ID:        m.ID,
+		UserID:    m.UserID,
+		ProjID:    m.ProjID,
+		CampID:    m.CampID,
+		NickName:  m.Nickname,
+		AvatarUrl: m.User.AvatarUrl,
+		Status:    m.User.Status,
+		Title:     m.Title,
+	}
+}
+
+func (m ProjectMember) DTO() MemberDTO {
+	return MemberDTO{
+		ID:        m.ID,
+		UserID:    m.UserID,
+		ProjID:    m.ProjID,
+		AvatarUrl: m.User.AvatarUrl,
+		Status:    m.User.Status,
+		Title:     m.Title,
+	}
+}
+
+func MembersDTO(members []Member) []MemberDTO {
+	res := []MemberDTO{}
+	for _, member := range members {
+		res = append(res, member.DTO())
+	}
+
+	return res
 }

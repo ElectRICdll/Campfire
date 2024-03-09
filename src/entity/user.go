@@ -12,6 +12,15 @@ type User struct {
 	IsOnline  bool   `gorm:"-"`
 }
 
+type UserDTO struct {
+	ID        uint   `json:"id,omitempty" uri:"user_id"`
+	Email     string `json:"email,omitempty"`
+	Name      string `json:"name,omitempty"`
+	AvatarUrl string `json:"avatar_url,omitempty"`
+	Signature string `json:"signature,omitempty"`
+	Status    int    `json:"status,omitempty"`
+}
+
 func (d User) DTO() UserDTO {
 	return UserDTO{
 		Email:     d.Email,
@@ -23,11 +32,10 @@ func (d User) DTO() UserDTO {
 	}
 }
 
-type UserDTO struct {
-	ID        uint   `json:"id,omitempty" uri:"user_id"`
-	Email     string `json:"email,omitempty"`
-	Name      string `json:"name,omitempty"`
-	AvatarUrl string `json:"avatar_url,omitempty"`
-	Signature string `json:"signature,omitempty"`
-	Status    int    `json:"status,omitempty"`
+func UsersDTO(users []User) []UserDTO {
+	res := []UserDTO{}
+	for _, user := range users {
+		res = append(res, user.DTO())
+	}
+	return res
 }

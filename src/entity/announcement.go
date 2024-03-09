@@ -22,18 +22,23 @@ type AnnouncementDTO struct {
 	Content string    `json:"content"`
 }
 
-func AnnouncementsToDTO(annos []Announcement) []*AnnouncementDTO {
-	var res []*AnnouncementDTO
+func (a Announcement) DTO() AnnouncementDTO {
+	return AnnouncementDTO{
+		ID:      a.ID,
+		OwnerID: a.OwnerID,
+		ProjID:  a.ProjID,
+		CampID:  a.CampID,
+		Title:   a.Title,
+		Begin:   a.Begin,
+		Content: a.Content,
+	}
+}
 
-	for _, anno := range annos {
-		dto := &AnnouncementDTO{
-			ID:      anno.ID,
-			OwnerID: anno.OwnerID,
-			Title:   anno.Title,
-			Begin:   anno.Begin,
-			Content: anno.Content,
-		}
-		res = append(res, dto)
+func AnnouncementsDTO(anno []Announcement) []AnnouncementDTO {
+	var res []AnnouncementDTO
+
+	for _, anno := range anno {
+		res = append(res, anno.DTO())
 	}
 
 	return res

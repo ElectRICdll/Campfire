@@ -30,5 +30,37 @@ type ProjectDTO struct {
 	CampCount   int       `json:"camp_count,omitempty"`
 	TaskCount   int       `json:"task_count,omitempty"`
 	Camps       []CampDTO `json:"camps,omitempty"`
-	Tasks       []Task    `json:"tasks,omitempty"`
+	Tasks       []TaskDTO `json:"tasks,omitempty"`
+}
+
+func (p Project) BriefDTO() BriefProjectDTO {
+	return BriefProjectDTO{
+		ID:          p.ID,
+		OwnerID:     p.OwnerID,
+		Title:       p.Title,
+		Description: p.Description,
+		CampCount:   len(p.Camps),
+		TaskCount:   len(p.Tasks),
+	}
+}
+
+func (p Project) DTO() ProjectDTO {
+	return ProjectDTO{
+		ID:          p.ID,
+		OwnerID:     p.OwnerID,
+		Title:       p.Title,
+		Description: p.Description,
+		Camps:       CampsDTO(p.Camps),
+		CampCount:   len(p.Camps),
+		Tasks:       TasksDTO(p.Tasks),
+		TaskCount:   len(p.Tasks),
+	}
+}
+
+func ProjectsDTO(projects []Project) []ProjectDTO {
+	res := []ProjectDTO{}
+	for _, project := range projects {
+		res = append(res, project.DTO())
+	}
+	return res
 }
