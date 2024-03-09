@@ -73,9 +73,9 @@ path: /{project_id}/new_camp
 jwt_auth: true
 */
 func (p projectController) CreateCamp(ctx *gin.Context) {
-	userID := (entity.ID)(ctx.Keys["id"].(float64))
+	userID := (uint)(ctx.Keys["id"].(float64))
 	uri := struct {
-		PID entity.ID `uri:"p_id" binding:"required"`
+		PID uint `uri:"p_id" binding:"required"`
 	}{}
 	if err := ctx.BindUri(&uri); err != nil {
 		responseError(ctx, err)
@@ -110,9 +110,9 @@ path: /{project_id}/camps
 jwt_auth: true
 */
 func (p projectController) PublicCamps(ctx *gin.Context) {
-	userID := (entity.ID)(ctx.Keys["id"].(float64))
+	userID := (uint)(ctx.Keys["id"].(float64))
 	uri := struct {
-		PID entity.ID `uri:"p_id" binding:"required"`
+		PID uint `uri:"p_id" binding:"required"`
 	}{}
 	if err := ctx.BindUri(&uri); err != nil {
 		responseError(ctx, err)
@@ -131,10 +131,10 @@ path: /{project_id}/{camp_id}
 jwt_auth: true
 */
 func (p projectController) CampInfo(ctx *gin.Context) {
-	userID := (entity.ID)(ctx.Keys["id"].(float64))
+	userID := (uint)(ctx.Keys["id"].(float64))
 	uri := struct {
-		PID entity.ID `uri:"p_id" binding:"required"`
-		CID entity.ID `uri:"p_id" binding:"required"`
+		PID uint `uri:"p_id" binding:"required"`
+		CID uint `uri:"p_id" binding:"required"`
 	}{}
 	if err := ctx.BindUri(&uri); err != nil {
 		responseError(ctx, err)
@@ -153,10 +153,10 @@ path: /{project_id}/{camp_id}/edit
 jwt_auth: true
 */
 func (p projectController) EditCamp(ctx *gin.Context) {
-	userID := (entity.ID)(ctx.Keys["id"].(float64))
+	userID := (uint)(ctx.Keys["id"].(float64))
 	proj := entity.CampDTO{}
 	uri := struct {
-		PID entity.ID `uri:"p_id" binding:"required"`
+		PID uint `uri:"p_id" binding:"required"`
 	}{}
 	if err := ctx.BindUri(&uri); err != nil {
 		responseError(ctx, err)
@@ -184,10 +184,10 @@ path: /{project_id}/{camp_id}/del
 jwt_auth: true
 */
 func (p projectController) DisableCamp(ctx *gin.Context) {
-	userID := (entity.ID)(ctx.Keys["id"].(float64))
+	userID := (uint)(ctx.Keys["id"].(float64))
 	uri := struct {
-		PID entity.ID `uri:"p_id" binding:"required"`
-		CID entity.ID `uri:"p_id" binding:"required"`
+		PID uint `uri:"p_id" binding:"required"`
+		CID uint `uri:"p_id" binding:"required"`
 	}{}
 	if err := p.campService.DisableCamp(userID, uri.PID, uri.CID); err != nil {
 		responseError(ctx, err)
@@ -204,7 +204,7 @@ path: /user/new_proj
 jwt_auth: true
 */
 func (p projectController) CreateProject(ctx *gin.Context) {
-	userID := (entity.ID)(ctx.Keys["id"].(float64))
+	userID := (uint)(ctx.Keys["id"].(float64))
 
 	proj := entity.ProjectDTO{}
 	if err := ctx.BindJSON(&proj); err != nil {
@@ -235,9 +235,9 @@ path: /{project_id}
 jwt_auth: true
 */
 func (p projectController) ProjectInfo(ctx *gin.Context) {
-	userID := (entity.ID)(ctx.Keys["id"].(float64))
+	userID := (uint)(ctx.Keys["id"].(float64))
 	uri := struct {
-		PID entity.ID `uri:"p_id" binding:"required"`
+		PID uint `uri:"p_id" binding:"required"`
 	}{}
 
 	if err := ctx.BindUri(&uri); err != nil {
@@ -259,10 +259,10 @@ path: /{project_id}/edit
 jwt_auth: true
 */
 func (p projectController) EditProjectInfo(ctx *gin.Context) {
-	userID := (entity.ID)(ctx.Keys["id"].(float64))
+	userID := (uint)(ctx.Keys["id"].(float64))
 	proj := entity.ProjectDTO{}
 	uri := struct {
-		PID entity.ID `uri:"p_id" binding:"required"`
+		PID uint `uri:"p_id" binding:"required"`
 	}{}
 	if err := ctx.BindUri(&uri); err != nil {
 		responseError(ctx, err)
@@ -291,9 +291,9 @@ path: /{project_id}/del
 jwt_auth: true
 */
 func (p projectController) DisableProject(ctx *gin.Context) {
-	userID := (entity.ID)(ctx.Keys["id"].(float64))
+	userID := (uint)(ctx.Keys["id"].(float64))
 	uri := struct {
-		PID entity.ID `uri:"p_id" binding:"required"`
+		PID uint `uri:"p_id" binding:"required"`
 	}{}
 	if err := p.projService.DisableProject(userID, uri.PID); err != nil {
 		responseError(ctx, err)
@@ -320,9 +320,9 @@ path: /{project_id}/new
 jwt_auth: true
 */
 func (p projectController) CreateTask(ctx *gin.Context) {
-	userID := (entity.ID)(ctx.Keys["id"].(float64))
+	userID := (uint)(ctx.Keys["id"].(float64))
 	uri := struct {
-		PID entity.ID `uri:"p_id" binding:"required"`
+		PID uint `uri:"p_id" binding:"required"`
 	}{}
 	if err := ctx.BindUri(&uri); err != nil {
 		responseError(ctx, err)
@@ -338,12 +338,12 @@ func (p projectController) CreateTask(ctx *gin.Context) {
 	}
 
 	if err := p.projService.CreateTask(userID, entity.Task{
-		Title:      task.Title,
-		OwnerID:    userID,
-		ReceiverID: task.ReceiverID,
-		Content:    task.Content,
-		Begin:      task.Begin,
-		End:        task.End,
+		Title:   task.Title,
+		OwnerID: userID,
+		//ReceiverID: task.ReceiverID,
+		Content: task.Content,
+		Begin:   task.Begin,
+		End:     task.End,
 	},
 	); err != nil {
 		responseError(ctx, err)
@@ -360,9 +360,9 @@ path: /{project_id}/tasks
 jwt_auth: true
 */
 func (p projectController) Tasks(ctx *gin.Context) {
-	userID := (entity.ID)(ctx.Keys["id"].(float64))
+	userID := (uint)(ctx.Keys["id"].(float64))
 	uri := struct {
-		PID entity.ID `uri:"p_id" binding:"required"`
+		PID uint `uri:"p_id" binding:"required"`
 	}{}
 	if err := ctx.BindUri(&uri); err != nil {
 		responseError(ctx, err)
@@ -381,10 +381,10 @@ path: /{project_id}/{task_id}
 jwt_auth: true
 */
 func (p projectController) TaskInfo(ctx *gin.Context) {
-	userID := (entity.ID)(ctx.Keys["id"].(float64))
+	userID := (uint)(ctx.Keys["id"].(float64))
 	uri := struct {
-		PID entity.ID `uri:"p_id" binding:"required"`
-		TID entity.ID `uri:"t_id" binding:"required"`
+		PID uint `uri:"p_id" binding:"required"`
+		TID uint `uri:"t_id" binding:"required"`
 	}{}
 	if err := ctx.BindUri(&uri); err != nil {
 		responseError(ctx, err)
@@ -403,10 +403,10 @@ path: /{project_id}/{task_id}/edit
 jwt_auth: true
 */
 func (p projectController) EditTaskInfo(ctx *gin.Context) {
-	userID := (entity.ID)(ctx.Keys["id"].(float64))
+	userID := (uint)(ctx.Keys["id"].(float64))
 	uri := struct {
-		PID entity.ID `uri:"p_id" binding:"required"`
-		TID entity.ID `uri:"t_id" binding:"required"`
+		PID uint `uri:"p_id" binding:"required"`
+		TID uint `uri:"t_id" binding:"required"`
 	}{}
 	if err := ctx.BindUri(&uri); err != nil {
 		responseError(ctx, err)
@@ -422,13 +422,13 @@ func (p projectController) EditTaskInfo(ctx *gin.Context) {
 	}
 
 	if err := p.projService.EditTaskInfo(userID, uri.PID, entity.Task{
-		ID:         uri.TID,
-		Title:      task.Title,
-		OwnerID:    userID,
-		ReceiverID: task.ReceiverID,
-		Content:    task.Content,
-		Begin:      task.Begin,
-		End:        task.End,
+		ID:      uri.TID,
+		Title:   task.Title,
+		OwnerID: userID,
+		//ReceiverID: task.ReceiverID,
+		Content: task.Content,
+		Begin:   task.Begin,
+		End:     task.End,
 	}); err != nil {
 		responseError(ctx, err)
 		return
@@ -444,10 +444,10 @@ path: /{project_id}/{task_id}/del
 jwt_auth: true
 */
 func (p projectController) DeleteTask(ctx *gin.Context) {
-	userID := (entity.ID)(ctx.Keys["id"].(float64))
+	userID := (uint)(ctx.Keys["id"].(float64))
 	uri := struct {
-		PID entity.ID `uri:"p_id" binding:"required"`
-		TID entity.ID `uri:"t_id" binding:"required"`
+		PID uint `uri:"p_id" binding:"required"`
+		TID uint `uri:"t_id" binding:"required"`
 	}{}
 	if err := p.projService.DeleteTask(userID, uri.PID, uri.TID); err != nil {
 		responseError(ctx, err)

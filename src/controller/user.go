@@ -14,6 +14,8 @@ type UserController interface {
 	EditUserInfo(*gin.Context)
 
 	ChangePassword(*gin.Context)
+
+	EmailVerify(*gin.Context)
 }
 
 func NewUserController() UserController {
@@ -24,6 +26,11 @@ func NewUserController() UserController {
 
 type userController struct {
 	s service.UserService
+}
+
+func (c *userController) EmailVerify(context *gin.Context) {
+	//TODO implement me
+	panic("implement me")
 }
 
 /*
@@ -71,7 +78,7 @@ path: /user/change
 jwt_auth: true
 */
 func (c *userController) EditUserInfo(ctx *gin.Context) {
-	id := (entity.ID)(ctx.Keys["id"].(float64))
+	id := (uint)(ctx.Keys["id"].(float64))
 	user := entity.UserDTO{ID: id}
 	if err := ctx.BindJSON(&user); err != nil {
 		responseError(ctx, entity.ExternalError{Message: "invalid syntax"})
@@ -93,7 +100,7 @@ path: /user/change/p
 jwt_auth: true
 */
 func (c *userController) ChangePassword(ctx *gin.Context) {
-	id := (entity.ID)(ctx.Keys["id"].(float64))
+	id := (uint)(ctx.Keys["id"].(float64))
 	p := struct {
 		Password string `json:"p"`
 	}{}

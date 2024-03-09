@@ -15,6 +15,7 @@ const (
 func responseJSON(ctx *gin.Context, res interface{}, err error) {
 	if err != nil {
 		responseError(ctx, err)
+		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{
 		"res":  RES_SUCCESS,
@@ -37,6 +38,7 @@ func responseError(ctx *gin.Context, err error) {
 			"res": RES_FAILURE,
 			"e":   err.Error(),
 		})
+		return
 	}
 	ctx.AbortWithStatus(http.StatusInternalServerError)
 	Log.Error(err.Error())

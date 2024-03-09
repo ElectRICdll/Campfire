@@ -54,7 +54,7 @@ func (s securityService) AuthMiddleware() gin.HandlerFunc {
 }
 
 func (s securityService) encryptPassword(password string) string {
-	return "crypto.RegisterHash()"
+	return password
 }
 
 func (s securityService) tokenGenerate(user entity.User) (string, error) {

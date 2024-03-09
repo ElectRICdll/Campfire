@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"campfire/entity"
 	"campfire/service"
 	"github.com/gin-gonic/gin"
 )
@@ -31,7 +30,7 @@ path: /ws (WebSocket)
 	}
 */
 func (c *sessionController) NewSession(ctx *gin.Context) {
-	id := (entity.ID)(ctx.Keys["id"].(float64))
+	id := (uint)(ctx.Keys["id"].(float64))
 	if err := c.s.NewSession(ctx.Writer, ctx.Request, nil, id); err != nil {
 		responseError(ctx, err)
 		return

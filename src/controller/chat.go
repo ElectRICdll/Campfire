@@ -39,7 +39,7 @@ path: /user/private_camps
 jwt_auth: true
 */
 func (c chatController) PrivateCamps(ctx *gin.Context) {
-	userID := (entity.ID)(ctx.Keys["id"].(float64))
+	userID := (uint)(ctx.Keys["id"].(float64))
 
 	res, err := c.userService.PrivateCamps(userID)
 	responseJSON(ctx, res, err)
@@ -55,7 +55,7 @@ path: /user/public_camps
 jwt_auth: true
 */
 func (c chatController) PublicCamps(ctx *gin.Context) {
-	userID := (entity.ID)(ctx.Keys["id"].(float64))
+	userID := (uint)(ctx.Keys["id"].(float64))
 
 	res, err := c.userService.PublicCamps(userID)
 	responseJSON(ctx, res, err)
@@ -71,10 +71,10 @@ path: /{project_id}/{campsite_id}
 jwt_auth: true
 */
 func (c chatController) CampInfo(ctx *gin.Context) {
-	userID := (entity.ID)(ctx.Keys["id"].(float64))
+	userID := (uint)(ctx.Keys["id"].(float64))
 	uri := struct {
-		PID entity.ID `uri:"p_id" binding:"required"`
-		CID entity.ID `uri:"c_id" binding:"required"`
+		PID uint `uri:"p_id" binding:"required"`
+		CID uint `uri:"c_id" binding:"required"`
 	}{}
 
 	if err := ctx.BindUri(&uri); err != nil {
@@ -96,11 +96,11 @@ path: /{project_id}/{campsite_id}/edit
 jwt_auth: true
 */
 func (c chatController) EditCampInfo(ctx *gin.Context) {
-	userID := (entity.ID)(ctx.Keys["id"].(float64))
+	userID := (uint)(ctx.Keys["id"].(float64))
 	camp := entity.CampDTO{}
 	uri := struct {
-		PID entity.ID `uri:"p_id" binding:"required"`
-		CID entity.ID `uri:"c_id" binding:"required"`
+		PID uint `uri:"p_id" binding:"required"`
+		CID uint `uri:"c_id" binding:"required"`
 	}{}
 	if err := ctx.BindUri(&uri); err != nil {
 		responseError(ctx, err)
@@ -157,7 +157,7 @@ path: /user/projects
 jwt_auth: true
 */
 func (c chatController) Projects(ctx *gin.Context) {
-	userID := (entity.ID)(ctx.Keys["id"].(float64))
+	userID := (uint)(ctx.Keys["id"].(float64))
 
 	res, err := c.userService.Projects(userID)
 	responseJSON(ctx, res, err)
