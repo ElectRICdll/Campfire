@@ -27,19 +27,15 @@ const (
 )
 
 type Message struct {
-	ID      ID `json:"m_id" gorm:"primaryKey"`
-	OwnerID ID `json:"from"`
-	ProjID  ID `json:"p_id"`
-	CampID  ID `json:"c_id"`
-	ReplyID ID `json:"r_id"`
+	ID      uint `json:"m_id" gorm:"primaryKey;autoIncrement"`
+	OwnerID uint `json:"o_id" gorm:"index;not null"`
+	ProjID  uint `json:"p_id" gorm:"index;not null"`
+	CampID  uint `json:"c_id" gorm:"index;not null"`
+	ReplyID uint `json:"r_id" gorm:"index;not null"`
 
 	Timestamp time.Time `json:"timestamp"`
 	Type      int       `json:"m_type"`
 	Content   string    `json:"content"`
-
-	Owner User    `json:"-" gorm:"foreignKey:FromID"`
-	Proj  Project `json:"-" gorm:"foreignKey:ProjID"`
-	Camp  Camp    `json:"-" gorm:"foreignKey:CampID"`
 }
 
 type UnknownMessage struct {

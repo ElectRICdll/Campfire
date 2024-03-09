@@ -1,23 +1,21 @@
 package entity
 
 type Project struct {
-	ID      ID `gorm:"primaryKey"`
-	OwnerID ID
+	ID      uint `gorm:"primaryKey;autoIncrement"`
+	OwnerID uint `gorm:"not null"`
 
-	Title       string
+	Title       string `gorm:"not null"`
 	Description string
 
-	Members []*Member
-	Camps   []*Camp
-	Tasks   []*Task
+	Members []Member `gorm:"foreignKey:ProjID"`
+	Camps   []Camp   `gorm:"many2many:project_camps;"`
+	Tasks   []Task   `gorm:"foreignKey:ProjID"`
 	FUrl    string
-
-	Owner User `gorm:"foreignKey:OwnerID"`
 }
 
 type BriefProjectDTO struct {
-	ID          ID     `json:"id,omitempty"`
-	OwnerID     ID     `json:"leader,omitempty"`
+	ID          uint   `json:"id,omitempty"`
+	OwnerID     uint   `json:"leader,omitempty"`
 	Title       string `json:"title,omitempty"`
 	Description string `json:"des,omitempty"`
 	CampCount   int    `json:"camp_count,omitempty"`
@@ -25,8 +23,8 @@ type BriefProjectDTO struct {
 }
 
 type ProjectDTO struct {
-	ID          ID        `json:"id,omitempty"`
-	OwnerID     ID        `json:"leader,omitempty"`
+	ID          uint      `json:"id,omitempty"`
+	OwnerID     uint      `json:"leader,omitempty"`
 	Title       string    `json:"title,omitempty"`
 	Description string    `json:"des,omitempty"`
 	CampCount   int       `json:"camp_count,omitempty"`

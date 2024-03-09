@@ -1,16 +1,15 @@
 package entity
 
-type ID uint
-
 type User struct {
-	ID        ID `gorm:"primaryKey"`
+	ID        uint `gorm:"primaryKey;autoIncrement"`
 	Email     string
 	Name      string
+	Password  string
 	AvatarUrl string
 	Signature string
 	Status    int
-	Token     string
-	IsOnline  bool `gorm:"-"`
+	Token     string `gorm:"-"`
+	IsOnline  bool   `gorm:"-"`
 }
 
 func (d User) DTO() UserDTO {
@@ -25,7 +24,7 @@ func (d User) DTO() UserDTO {
 }
 
 type UserDTO struct {
-	ID        ID     `json:"id,omitempty" uri:"user_id" binding:"required"`
+	ID        uint   `json:"id,omitempty" uri:"user_id"`
 	Email     string `json:"email,omitempty"`
 	Name      string `json:"name,omitempty"`
 	AvatarUrl string `json:"avatar_url,omitempty"`

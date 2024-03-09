@@ -3,26 +3,23 @@ package entity
 import "time"
 
 type Task struct {
-	ID         ID `gorm:"primaryKey"`
-	OwnerID    ID
-	ProjID     ID
-	ReceiverID []ID
+	ID       uint     `gorm:"primaryKey;autoIncrement"`
+	OwnerID  uint     `gorm:"not null"`
+	ProjID   uint     `gorm:"not null"`
+	Receiver []Member `gorm:"foreignKey:ID"`
 
 	Title   string
 	Begin   time.Time
 	End     time.Time
 	Content string
 	Status  int
-
-	Owner User    `gorm:"foreignKey:OwnerID"`
-	Proj  Project `gorm:"foreignKey:ProjID"`
 }
 
 type TaskDTO struct {
-	ID         ID   `json:"id"`
-	ProjectID  ID   `json:"p_id"`
-	OwnerID    ID   `json:"o_id"`
-	ReceiverID []ID `json:"r_id"`
+	ID         uint   `json:"id"`
+	ProjectID  uint   `json:"p_id"`
+	OwnerID    uint   `json:"o_id"`
+	ReceiverID []uint `json:"r_id"`
 
 	Title   string    `json:"name"`
 	Begin   time.Time `json:"begin"`

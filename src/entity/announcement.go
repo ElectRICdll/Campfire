@@ -3,18 +3,20 @@ package entity
 import "time"
 
 type Announcement struct {
-	ID      ID
-	OwnerID int
-	CampID  int
-	Title   string
-	Begin   time.Time
-	Content string
+	ID      uint      `gorm:"primaryKey;autoIncrement"`
+	OwnerID uint      `gorm:"not null"`
+	ProjID  uint      `gorm:"not null"`
+	CampID  uint      `gorm:"not null"`
+	Title   string    `gorm:"not null"`
+	Begin   time.Time `gorm:"not null"`
+	Content string    `gorm:"not null"`
 }
 
 type AnnouncementDTO struct {
-	ID      ID        `json:"ID"`
-	CampID  int       `json:"c_id"`
-	OwnerID int       `json:"o_id"`
+	ID      uint      `json:"ID"`
+	CampID  uint      `json:"c_id"`
+	ProjID  uint      `json:"p_id"`
+	OwnerID uint      `json:"o_id"`
 	Title   string    `json:"title"`
 	Begin   time.Time `json:"begin"`
 	Content string    `json:"content"`

@@ -1,28 +1,27 @@
 package entity
 
 type Camp struct {
-	ID      ID `gorm:"primaryKey"`
-	ProjID  ID
-	OwnerID ID
+	ID      uint `gorm:"primaryKey;autoIncrement"`
+	ProjID  uint `gorm:"not null"`
+	OwnerID uint `gorm:"not null"`
 
 	Name    string
-	Members []Member
-	Anno    []Announcement
+	Members []Member `gorm:"many2many:member_camps"`
 
-	Proj  Project `gorm:"foreignKey:ProjID"`
-	Owner User    `gorm:"foreignKey:OwnerID"`
+	Announcements  []Announcement `gorm:"foreignKey:CampID;foreignKey:ProjID"`
+	MessageRecords []Message      `gorm:"foreignKey:CampID;foreignKey:ProjID"`
 }
 
 type BriefCampDTO struct {
-	ID           ID     `json:"id" uri:"id" binding:"required"`
-	OwnerID      ID     `json:"leader"`
+	ID           uint   `json:"id" uri:"id" binding:"required"`
+	OwnerID      uint   `json:"leader"`
 	Name         string `json:"name"`
 	MembersCount int    `json:"members_count"`
 }
 
 type CampDTO struct {
-	ID                  ID                `json:"id" uri:"id" binding:"required"`
-	OwnerID             ID                `json:"leader"`
+	ID                  uint              `json:"id" uri:"id" binding:"required"`
+	OwnerID             uint              `json:"leader"`
 	Name                string            `json:"name"`
 	MembersCount        int               `json:"members_count"`
 	Members             []MemberDTO       `json:"members"`
