@@ -8,27 +8,27 @@ import (
 type ProjectService interface {
 	CreateProject(project Project) error
 
-	ProjectInfo(queryID ID, projectID ID) (BriefProjectDTO, error)
+	ProjectInfo(queryID uint, projectID uint) (BriefProjectDTO, error)
 
-	EditProjectInfo(queryID ID, project Project) error
+	EditProjectInfo(queryID uint, project Project) error
 
-	DisableProject(queryID ID, projID ID) error
+	DisableProject(queryID uint, projID uint) error
 
 	// UploadProject 暂时搁置
-	UploadProject(queryID ID)
+	UploadProject(queryID uint)
 
 	// DownloadProject 暂时搁置
-	DownloadProject(queryID ID)
+	DownloadProject(queryID uint)
 
-	CreateTask(queryID ID, task Task) error
+	CreateTask(queryID uint, task Task) error
 
-	Tasks(queryID ID, projID ID) ([]TaskDTO, error)
+	Tasks(queryID uint, projID uint) ([]TaskDTO, error)
 
-	TaskInfo(queryID ID, projID ID, taskID ID) (TaskDTO, error)
+	TaskInfo(queryID uint, projID uint, taskID uint) (TaskDTO, error)
 
-	EditTaskInfo(queryID ID, projID ID, task Task) error
+	EditTaskInfo(queryID uint, projID uint, task Task) error
 
-	DeleteTask(queryID ID, projID ID, taskID ID) error
+	DeleteTask(queryID uint, projID uint, taskID uint) error
 
 	// 以下暂时搁置
 	FileCatalogue(*gin.Context)

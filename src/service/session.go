@@ -13,14 +13,14 @@ import (
 type SessionSender func(*websocket.Conn, int, []byte) error
 
 type SessionService interface {
-	NewSession(w http.ResponseWriter, r *http.Request, h http.Header, userid entity.ID) error
+	NewSession(w http.ResponseWriter, r *http.Request, h http.Header, userid uint) error
 }
 
 func NewSessionService() SessionService {
 	res := &sessionService{
 		generator: websocket.Upgrader{},
 		pool: entity.SessionPool{
-			Pool: make(map[entity.ID]*websocket.Conn),
+			Pool: make(map[uint]*websocket.Conn),
 		},
 		messageHandler: messageService{},
 	}
@@ -46,7 +46,7 @@ type sessionService struct {
 	query          dao.CampDao
 }
 
-func (s *sessionService) NewSession(w http.ResponseWriter, r *http.Request, h http.Header, senderId entity.ID) error {
+func (s *sessionService) NewSession(w http.ResponseWriter, r *http.Request, h http.Header, senderId uint) error {
 	conn, err := s.generator.Upgrade(w, r, h)
 	if err != nil {
 		return err
@@ -84,7 +84,9 @@ func (s *sessionService) handle(conn *websocket.Conn, wsType int, payload []byte
 	}
 	users := []entity.User{}
 	for _, member := range members {
-		users = append(users, member.User)
+		users = append(users, entity.User{
+			ID: member.UserID,
+		})
 	}
 	s.transmit(conn, users, message)
 	return

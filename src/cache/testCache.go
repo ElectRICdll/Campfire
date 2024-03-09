@@ -4,11 +4,11 @@ import "campfire/entity"
 
 //var TestProjects = []entity.Project{
 //	{
-//		Camps: map[entity.ID]*entity.Camp{
+//		Camps: map[uint]*entity.Camp{
 //			1: {
 //				ID:   1,
 //				Name: "老登交流群",
-//				Members: map[entity.ID]*entity.Member{
+//				Members: map[uint]*entity.Member{
 //					TestUsers[1].ID: {
 //						TestUsers[1],
 //						"刘新宇",
@@ -31,7 +31,7 @@ import "campfire/entity"
 //	},
 //}
 
-var TestUsers = map[entity.ID]*entity.User{
+var TestUsers = map[uint]*entity.User{
 	1: {
 		ID:       1,
 		Email:    "hare@email.com",

@@ -7,9 +7,9 @@ import (
 )
 
 type UserService interface {
-	UserInfo(id ID) (UserDTO, error)
+	UserInfo(id uint) (UserDTO, error)
 
-	userInfo(id ID) (User, error)
+	userInfo(id uint) (User, error)
 
 	FindUsersByName(name string) ([]UserDTO, error)
 
@@ -17,19 +17,19 @@ type UserService interface {
 
 	EditUserInfo(user UserDTO) error
 
-	ChangePassword(userID ID, password string) error
+	ChangePassword(userID uint, password string) error
 
 	online(user *User)
 
-	offline(id ID)
+	offline(id uint)
 
-	Tasks(userID ID) ([]TaskDTO, error)
+	Tasks(userID uint) ([]TaskDTO, error)
 
-	PrivateCamps(userID ID) ([]CampDTO, error)
+	PrivateCamps(userID uint) ([]CampDTO, error)
 
-	PublicCamps(userID ID) ([]BriefCampDTO, error)
+	PublicCamps(userID uint) ([]BriefCampDTO, error)
 
-	Projects(userID ID) ([]BriefProjectDTO, error)
+	Projects(userID uint) ([]BriefProjectDTO, error)
 }
 
 func NewUserService() UserService {
@@ -44,18 +44,18 @@ type userService struct {
 	projQuery dao.ProjectDao
 }
 
-func (s *userService) ChangePassword(userID ID, password string) error {
+func (s *userService) ChangePassword(userID uint, password string) error {
 	err := s.userQuery.SetPassword(userID, password)
 	return err
 }
 
-func (s *userService) UserInfo(id ID) (UserDTO, error) {
+func (s *userService) UserInfo(id uint) (UserDTO, error) {
 	user, err := s.userQuery.UserInfoByID(id)
 
 	return user.DTO(), err
 }
 
-func (s *userService) userInfo(id ID) (User, error) {
+func (s *userService) userInfo(id uint) (User, error) {
 	user, err := s.userQuery.UserInfoByID(id)
 
 	return user, err
@@ -109,25 +109,25 @@ func (s *userService) findUsersByName(name string) ([]User, error) {
 	}
 }
 
-func (s *userService) Tasks(userID ID) ([]TaskDTO, error) {
+func (s *userService) Tasks(userID uint) ([]TaskDTO, error) {
 	res, err := s.userQuery.TasksOfUser(userID)
 	tasks := []TaskDTO{}
 	for _, task := range res {
 		tasks = append(tasks, TaskDTO{
-			ID:         task.ID,
-			OwnerID:    task.OwnerID,
-			ReceiverID: task.ReceiverID,
-			Title:      task.Title,
-			Content:    task.Content,
-			Begin:      task.Begin,
-			End:        task.End,
-			Status:     task.Status,
+			ID:      task.ID,
+			OwnerID: task.OwnerID,
+			//ReceiverID: task.Receiver,
+			Title:   task.Title,
+			Content: task.Content,
+			Begin:   task.Begin,
+			End:     task.End,
+			Status:  task.Status,
 		})
 	}
 	return tasks, err
 }
 
-func (s *userService) PrivateCamps(userID ID) ([]CampDTO, error) {
+func (s *userService) PrivateCamps(userID uint) ([]CampDTO, error) {
 	res, err := s.userQuery.PrivateCampsOfUser(userID)
 	if err != nil {
 		return nil, err
@@ -143,7 +143,7 @@ func (s *userService) PrivateCamps(userID ID) ([]CampDTO, error) {
 	return camps, nil
 }
 
-func (s *userService) PublicCamps(userID ID) ([]BriefCampDTO, error) {
+func (s *userService) PublicCamps(userID uint) ([]BriefCampDTO, error) {
 	res, err := s.userQuery.PrivateCampsOfUser(userID)
 	camps := []BriefCampDTO{}
 	for _, camp := range res {
@@ -157,7 +157,7 @@ func (s *userService) PublicCamps(userID ID) ([]BriefCampDTO, error) {
 	return camps, err
 }
 
-func (s *userService) Projects(userID ID) ([]BriefProjectDTO, error) {
+func (s *userService) Projects(userID uint) ([]BriefProjectDTO, error) {
 	res, err := s.userQuery.ProjectsOfUser(userID)
 	projs := []BriefProjectDTO{}
 	for _, proj := range res {
@@ -171,9 +171,9 @@ func (s *userService) Projects(userID ID) ([]BriefProjectDTO, error) {
 }
 
 func (s *userService) online(user *User) {
-	//s.onlineUsers[user.ID] = user
+	//s.onlineUsers[user.uint] = user
 }
 
-func (s *userService) offline(id ID) {
+func (s *userService) offline(id uint) {
 	//delete(s.onlineUsers, id)
 }

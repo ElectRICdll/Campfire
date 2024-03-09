@@ -5,35 +5,35 @@ import (
 )
 
 type CampService interface {
-	PublicCamps(queryID ID, projID ID) ([]Camp, error)
+	PublicCamps(queryID uint, projID uint) ([]Camp, error)
 
-	CampInfo(queryID ID, projID ID, campID ID) (CampDTO, error)
+	CampInfo(queryID uint, projID uint, campID uint) (CampDTO, error)
 
-	CreateCamp(queryID ID, projID ID, camp Camp) error
+	CreateCamp(queryID uint, projID uint, camp Camp) error
 
-	EditCampInfo(queryID ID, projID ID, camp Camp) error
+	EditCampInfo(queryID uint, projID uint, camp Camp) error
 
-	DisableCamp(queryID ID, projID ID, campID ID) error
+	DisableCamp(queryID uint, projID uint, campID uint) error
 
-	MemberList(queryID ID, projID ID, campID ID) ([]Member, error)
+	MemberList(queryID uint, projID uint, campID uint) ([]Member, error)
 
-	MemberInfo(queryID ID, projID ID, campID ID, userID ID) (Member, error)
+	MemberInfo(queryID uint, projID uint, campID uint, userID uint) (Member, error)
 
-	InviteMember(queryID ID, projID ID, campID ID, userID ID) error
+	InviteMember(queryID uint, projID uint, campID uint, userID uint) error
 
-	KickMember(queryID ID, projID ID, campID ID, userID ID) error
+	KickMember(queryID uint, projID uint, campID uint, userID uint) error
 
-	EditNickname(projID ID, campID ID, userID ID, nickname string) error
+	EditNickname(projID uint, campID uint, userID uint, nickname string) error
 
-	EditMemberTitle(projID ID, campID ID, userID ID, title string) error
+	EditMemberTitle(projID uint, campID uint, userID uint, title string) error
 
-	AnnouncementInfo(queryID ID, projID ID, campID ID, annoID ID) (AnnouncementDTO, error)
+	AnnouncementInfo(queryID uint, projID uint, campID uint, annoID uint) (AnnouncementDTO, error)
 
-	CreateAnnouncement(queryID ID, projID ID, campID ID, anno Announcement) error
+	CreateAnnouncement(queryID uint, projID uint, campID uint, anno Announcement) error
 
-	EditAnnouncementInfo(queryID ID, projID ID, campID ID, anno Announcement) error
+	EditAnnouncementInfo(queryID uint, projID uint, campID uint, anno Announcement) error
 
-	DeleteAnnouncement(queryID ID, projID ID, campID ID, annoID ID) error
+	DeleteAnnouncement(queryID uint, projID uint, campID uint, annoID uint) error
 }
 
 type campService struct {

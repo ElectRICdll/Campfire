@@ -25,13 +25,15 @@ func registerHandlers(engine *gin.Engine) {
 func main() {
 	r := gin.Default()
 
-	err2 := dao.DBConn().AutoMigrate(
-		&entity.Announcement{},
+	db := dao.DB
+
+	err2 := db.AutoMigrate(
 		&entity.Project{},
 		&entity.Member{},
 		&entity.User{},
-		&entity.Camp{},
 		&entity.Task{},
+		&entity.Camp{},
+		&entity.Announcement{},
 		&entity.Message{},
 	)
 
