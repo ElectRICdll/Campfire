@@ -35,6 +35,7 @@ func main() {
 		&entity.Camp{},
 		&entity.Announcement{},
 		&entity.Message{},
+		&entity.ProjectMember{},
 	)
 
 	if err2 != nil {
