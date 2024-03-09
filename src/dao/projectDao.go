@@ -3,31 +3,31 @@ package dao
 import . "campfire/entity"
 
 type ProjectDao interface {
-	ProjectInfo(queryMemberID ID, projID ID) (Project, error)
+	ProjectInfo(queryMemberID uint, projID uint) (Project, error)
 
-	SetProjectName(queryOwnerID, projID ID, name string) error
+	SetProjectName(queryOwnerID, projID uint, name string) error
 
 	AddProject(queryUserID, proj Project) error
 
-	DeleteProject(queryOwnerID, projID ID) error
+	DeleteProject(queryOwnerID, projID uint) error
 
-	MemberInfo(queryMemberID ID, projID ID, userID ID) (Member, error)
+	MemberInfo(queryMemberID uint, projID uint, userID uint) (Member, error)
 
-	AddMember(queryOwnerID ID, projID ID, userID ID) error
+	AddMember(queryOwnerID uint, projID uint, userID uint) error
 
-	DeleteMember(queryOwnerID ID, projID ID, userID ID) error
+	DeleteMember(queryOwnerID uint, projID uint, userID uint) error
 
-	SetMemberInfo(campID ID, member Member) error
+	SetMemberInfo(campID uint, member Member) error
 
-	TasksOfProject(queryMemberID, projID ID) ([]Task, error)
+	TasksOfProject(queryMemberID, projID uint) ([]Task, error)
 
-	TaskInfo(queryMemberID ID, projID ID, taskID ID) (Task, error)
+	TaskInfo(queryMemberID uint, projID uint, taskID uint) (Task, error)
 
-	SetTaskInfo(queryOwnerID ID, projID ID, taskID ID) error
+	SetTaskInfo(queryOwnerID uint, projID uint, taskID uint) error
 
-	AddTask(queryProjMemberID, projID ID, task Task) error
+	AddTask(queryProjMemberID, projID uint, task Task) error
 
-	DeleteTask(queryOwnerID, projID ID, taskID ID) error
+	DeleteTask(queryOwnerID, projID uint, taskID uint) error
 
-	CampsOfProject(queryMemberID, projID ID) ([]Camp, error)
+	CampsOfProject(queryMemberID, projID uint) ([]Camp, error)
 }

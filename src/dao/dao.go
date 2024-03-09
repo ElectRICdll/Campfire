@@ -12,7 +12,7 @@ var (
 )
 
 // 需要给让db连接数据库
-var db *gorm.DB = DBConn()
+var db *gorm.DB
 
 //--------------------
 

@@ -3,31 +3,31 @@ package dao
 import . "campfire/entity"
 
 type CampDao interface {
-	CampInfo(queryMemberID ID, projID ID, campID ID) (Camp, error)
+	CampInfo(queryMemberID uint, projID uint, campID uint) (Camp, error)
 
-	AddCamp(queryMemberID ID, projID ID, camp Camp) error
+	AddCamp(queryMemberID uint, projID uint, camp Camp) error
 
-	SetCampInfo(queryOwnerID ID, projID ID, camp Camp) error
+	SetCampInfo(queryOwnerID uint, projID uint, camp Camp) error
 
-	DeleteCamp(queryOwnerID, projID ID, campID ID) error
+	DeleteCamp(queryOwnerID, projID uint, campID uint) error
 
-	MemberList(queryMemberID ID, projID ID, campID ID) ([]Member, error)
+	MemberList(queryMemberID uint, projID uint, campID uint) ([]Member, error)
 
-	MemberInfo(queryMemberID ID, projID ID, campID ID, userID ID) (Member, error)
+	MemberInfo(queryMemberID uint, projID uint, campID uint, userID uint) (Member, error)
 
-	AddMember(queryOwnerID ID, projID ID, campID ID, userID ID) error
+	AddMember(queryOwnerID uint, projID uint, campID uint, userID uint) error
 
-	DeleteMember(queryOwnerID ID, projID ID, campID ID, userID ID) error
+	DeleteMember(queryOwnerID uint, projID uint, campID uint, userID uint) error
 
-	SetMemberInfo(projID ID, campID ID, member Member) error
+	SetMemberInfo(projID uint, campID uint, member Member) error
 
-	AnnouncementInfo(queryMemberID ID, projID ID, campID ID, annoID ID) (Announcement, error)
+	AnnouncementInfo(queryMemberID uint, projID uint, campID uint, annoID uint) (Announcement, error)
 
-	Announcements(queryMemberID ID, projID ID, campID ID) ([]Announcement, error)
+	Announcements(queryMemberID uint, projID uint, campID uint) ([]Announcement, error)
 
-	EditAnnouncement(queryOwnerID ID, projID ID, campID ID, anno Announcement) error
+	EditAnnouncement(queryOwnerID uint, projID uint, campID uint, anno Announcement) error
 
-	AddAnnouncement(queryOwnerID ID, projID ID, campID ID, anno Announcement) error
+	AddAnnouncement(queryOwnerID uint, projID uint, campID uint, anno Announcement) error
 
-	DeleteAnnouncement(queryOwnerID ID, projID ID, campID ID, annoID ID) error
+	DeleteAnnouncement(queryOwnerID uint, projID uint, campID uint, annoID uint) error
 }
