@@ -29,3 +29,14 @@ type MemberDTO struct {
 	NickName  string `json:"nickname"`
 	Title     string `json:"member_title"`
 }
+
+type ProjectMember struct {
+	ID        uint `gorm:"primaryKey"`
+	UserID    uint `gorm:"index;not null"`
+	ProjectID uint `gorm:"index;not null"`
+	IsCreator bool
+	Title     string
+
+	User    User    `gorm:"foreignKey:UserID"`
+	Project Project `gorm:"foreignKey:ProjectID"`
+}

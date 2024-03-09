@@ -8,8 +8,8 @@ type Camp struct {
 	Name    string
 	Members []Member `gorm:"many2many:member_camps"`
 
-	Announcements  []Announcement `gorm:"foreignKey:CampID;foreignKey:ProjID"`
-	MessageRecords []Message      `gorm:"foreignKey:CampID;foreignKey:ProjID"`
+	Announcements  []Announcement `gorm:"foreignKey:CampID"`
+	MessageRecords []Message      `gorm:"foreignKey:CampID"`
 }
 
 type BriefCampDTO struct {

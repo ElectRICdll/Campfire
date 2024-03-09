@@ -7,9 +7,9 @@ type Project struct {
 	Title       string `gorm:"not null"`
 	Description string
 
-	Members []Member `gorm:"foreignKey:ProjID"`
-	Camps   []Camp   `gorm:"many2many:project_camps;"`
-	Tasks   []Task   `gorm:"foreignKey:ProjID"`
+	Members []ProjectMember `gorm:"foreignKey:ProjID"`
+	Camps   []Camp          `gorm:"many2many:project_camps;"`
+	Tasks   []Task          `gorm:"foreignKey:ProjID"`
 	FUrl    string
 }
 
