@@ -7,12 +7,11 @@ import (
 )
 
 var (
-	UserDaoContainer    UserDao    = nil
+	UserDaoContainer    UserDao    = NewUserDaoTest()
 	ProjectDaoContainer ProjectDao = nil
 )
 
-// 需要给让db连接数据库
-var db *gorm.DB
+var DB *gorm.DB = DBConn()
 
 //--------------------
 
