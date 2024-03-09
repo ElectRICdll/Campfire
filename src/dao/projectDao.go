@@ -11,13 +11,13 @@ type ProjectDao interface {
 
 	DeleteProject(queryOwnerID, projID uint) error
 
-	MemberInfo(queryMemberID uint, projID uint, userID uint) (Member, error)
+	MemberInfo(queryMemberID uint, projID uint, userID uint) (ProjectMember, error)
 
 	AddMember(queryOwnerID uint, projID uint, userID uint) error
 
 	DeleteMember(queryOwnerID uint, projID uint, userID uint) error
 
-	SetMemberInfo(campID uint, member Member) error
+	SetMemberInfo(campID uint, member ProjectMember) error
 
 	TasksOfProject(queryMemberID, projID uint) ([]Task, error)
 
