@@ -8,7 +8,7 @@ type Announcement struct {
 	ProjID  uint      `gorm:"not null"`
 	CampID  uint      `gorm:"not null"`
 	Title   string    `gorm:"not null"`
-	Begin   time.Time `gorm:"not null"`
+	BeginAt time.Time `gorm:"not null"`
 	Content string    `gorm:"not null"`
 }
 
@@ -18,7 +18,7 @@ type AnnouncementDTO struct {
 	ProjID  uint      `json:"p_id"`
 	OwnerID uint      `json:"o_id"`
 	Title   string    `json:"title"`
-	Begin   time.Time `json:"begin"`
+	BeginAt time.Time `json:"begin"`
 	Content string    `json:"content"`
 }
 
@@ -29,7 +29,7 @@ func (a Announcement) DTO() AnnouncementDTO {
 		ProjID:  a.ProjID,
 		CampID:  a.CampID,
 		Title:   a.Title,
-		Begin:   a.Begin,
+		BeginAt: a.BeginAt,
 		Content: a.Content,
 	}
 }

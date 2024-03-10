@@ -116,11 +116,11 @@ func (s *userService) Tasks(userID uint) ([]TaskDTO, error) {
 		tasks = append(tasks, TaskDTO{
 			ID:      task.ID,
 			OwnerID: task.OwnerID,
-			//ReceiverID: task.Receiver,
+			//ReceiversID: task.Receiver,
 			Title:   task.Title,
 			Content: task.Content,
-			Begin:   task.Begin,
-			End:     task.End,
+			BeginAt: task.BeginAt,
+			EndAt:   task.EndAt,
 			Status:  task.Status,
 		})
 	}

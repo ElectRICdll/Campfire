@@ -4,10 +4,10 @@ import (
 	"campfire/dao"
 	"campfire/entity"
 	"campfire/util"
-	"encoding/json"
+	"errors"
 )
 
-type MessageHandler func(entity.Message) (json.RawMessage, error)
+type MessageHandler func(*entity.Notification) error
 
 type MessageService interface {
 	MessageRecord(messageID uint)
@@ -22,27 +22,23 @@ type MessageService interface {
 
 	PullMessageRecord(campID uint, beginMessageID uint) ([]entity.Message, error)
 
-	unknownMessageHandler(message entity.Message) (json.RawMessage, error)
-
-	textMessageHandler(message entity.Message) (json.RawMessage, error)
-
-	binaryMessageHandler(message entity.Message) (json.RawMessage, error)
-
-	eventMessageHandler(message entity.Message) (json.RawMessage, error)
+	eventMessageHandler(msg *entity.Notification) error
 }
 
 func NewMessageService() MessageService {
 	return messageService{
-		query: nil,
+		messageQuery: nil,
 	}
 }
 
 type messageService struct {
-	query dao.MessageDao
+	messageQuery dao.MessageDao
+	campQuery    dao.CampDao
+	projQuery    dao.ProjectDao
 }
 
 func (s messageService) PullMessageRecord(campID uint, beginMessageID uint) ([]entity.Message, error) {
-	res, err := s.query.PullCampMessageRecord(campID, beginMessageID, util.CONFIG.MessageRecordCount)
+	res, err := s.messageQuery.PullCampMessageRecord(campID, beginMessageID, util.CONFIG.MessageRecordCount)
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +46,7 @@ func (s messageService) PullMessageRecord(campID uint, beginMessageID uint) ([]e
 }
 
 func (s messageService) newMessageRecord(message ...entity.Message) error {
-	err := s.query.AddMessageRecord(message...)
+	err := s.messageQuery.AddMessageRecord(message...)
 	return err
 }
 
@@ -74,60 +70,39 @@ func (s messageService) AllMessageRecord() {
 	panic("implement me")
 }
 
-func (s messageService) unknownMessageHandler(message entity.Message) (json.RawMessage, error) {
-	return nil, entity.ExternalError{Message: "unknown type message."}
-}
-
-func (s messageService) textMessageHandler(message entity.Message) (json.RawMessage, error) {
-	res, err := json.Marshal(entity.TextMessage{
-		Message: message,
-		Content: (string)(message.Content),
-	})
-	if err != nil {
-		return nil, entity.ExternalError{
-			Message: "No such private channel.",
+func (s messageService) eventMessageHandler(msg *entity.Notification) error {
+	switch entity.EventTypeIndex[msg.EType].Scope {
+	case entity.OnCamp:
+		res, err := s.campQuery.MemberList(1, msg.Event.ScopeID())
+		if err != nil {
+			return err
 		}
-	}
-
-	if err := s.newMessageRecord(message); err != nil {
-		return nil, err
-	}
-
-	return res, nil
-}
-
-func (s messageService) binaryMessageHandler(message entity.Message) (json.RawMessage, error) {
-	res, err := json.Marshal(entity.TextMessage{
-		Message: message,
-		Content: (string)(message.Content),
-	})
-	if err != nil {
-		return nil, entity.ExternalError{
-			Message: "invalid syntax",
+		msg.ReceiversID = func(members []entity.Member) []uint {
+			res := []uint{}
+			for _, member := range members {
+				res = append(res, member.UserID)
+			}
+			return res
+		}(res)
+	case entity.OnProject:
+		res, err := s.projQuery.MemberList(1, msg.Event.ScopeID())
+		if err != nil {
+			return err
 		}
+		msg.ReceiversID = func(members []entity.ProjectMember) []uint {
+			res := []uint{}
+			for _, member := range members {
+				res = append(res, member.UserID)
+			}
+			return res
+		}(res)
+	case entity.OnSomeone:
+
+	default:
+		return errors.New("unknown scope area")
 	}
-
-	if err := s.newMessageRecord(message); err != nil {
-		return nil, err
-	}
-
-	return res, nil
-}
-
-func (s messageService) eventMessageHandler(message entity.Message) (json.RawMessage, error) {
-	res, err := json.Marshal(entity.TextMessage{
-		Message: message,
-		Content: (string)(message.Content),
-	})
-	if err != nil {
-		return nil, entity.ExternalError{
-			Message: "No such private channel.",
-		}
-	}
-
-	if err := s.newMessageRecord(message); err != nil {
-		return nil, err
-	}
-
-	return res, nil
+	//if err := msg.Event.Execute(); err != nil {
+	//	return err
+	//}
+	return nil
 }

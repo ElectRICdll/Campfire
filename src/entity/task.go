@@ -9,21 +9,21 @@ type Task struct {
 	Receivers []Member `gorm:"foreignKey:ID"`
 
 	Title   string
-	Begin   time.Time
-	End     time.Time
+	BeginAt time.Time
+	EndAt   time.Time
 	Content string
 	Status  int
 }
 
 type TaskDTO struct {
-	ID         uint   `json:"id"`
-	OwnerID    uint   `json:"o_id"`
-	ProjID     uint   `json:"p_id"`
-	ReceiverID []uint `json:"r_id"`
+	ID          uint   `json:"id"`
+	OwnerID     uint   `json:"o_id"`
+	ProjID      uint   `json:"p_id"`
+	ReceiversID []uint `json:"r_id"`
 
 	Title   string    `json:"name"`
-	Begin   time.Time `json:"begin"`
-	End     time.Time `json:"end"`
+	BeginAt time.Time `json:"begin"`
+	EndAt   time.Time `json:"end"`
 	Content string    `json:"content"`
 	Status  int       `json:"status"`
 }
@@ -33,7 +33,7 @@ func (t Task) DTO() TaskDTO {
 		ID:      t.ID,
 		OwnerID: t.OwnerID,
 		ProjID:  t.ProjID,
-		ReceiverID: func(members []Member) []uint {
+		ReceiversID: func(members []Member) []uint {
 			res := []uint{}
 			for _, member := range members {
 				res = append(res, member.ID)
@@ -41,8 +41,8 @@ func (t Task) DTO() TaskDTO {
 			return res
 		}(t.Receivers),
 		Title:   t.Title,
-		Begin:   t.Begin,
-		End:     t.End,
+		BeginAt: t.BeginAt,
+		EndAt:   t.EndAt,
 		Content: t.Content,
 		Status:  t.Status,
 	}

@@ -340,7 +340,7 @@ func (p projectController) CreateTask(ctx *gin.Context) {
 	if err := p.projService.CreateTask(userID, entity.Task{
 		Title:   task.Title,
 		OwnerID: userID,
-		//ReceiverID: task.ReceiverID,
+		//ReceiversID: task.ReceiversID,
 		Content: task.Content,
 		Begin:   task.Begin,
 		End:     task.End,
@@ -425,7 +425,7 @@ func (p projectController) EditTaskInfo(ctx *gin.Context) {
 		ID:      uri.TID,
 		Title:   task.Title,
 		OwnerID: userID,
-		//ReceiverID: task.ReceiverID,
+		//ReceiversID: task.ReceiversID,
 		Content: task.Content,
 		Begin:   task.Begin,
 		End:     task.End,

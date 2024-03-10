@@ -1,10 +1,10 @@
 package service
 
 import (
-	"campfire/dao"
 	"campfire/entity"
 	. "campfire/log"
 	"encoding/json"
+	"errors"
 	"github.com/gorilla/websocket"
 	"net/http"
 	"time"
@@ -26,17 +26,6 @@ func NewSessionService() SessionService {
 		},
 		messageHandler: messageService{},
 	}
-	res.handlers = []MessageHandler{
-		res.messageHandler.unknownMessageHandler,
-		res.messageHandler.textMessageHandler,
-		res.messageHandler.binaryMessageHandler,
-		res.messageHandler.binaryMessageHandler,
-		res.messageHandler.textMessageHandler,
-		res.messageHandler.textMessageHandler,
-		res.messageHandler.textMessageHandler,
-		res.messageHandler.binaryMessageHandler,
-		res.messageHandler.eventMessageHandler,
-	}
 	return res
 }
 
@@ -44,8 +33,6 @@ type sessionService struct {
 	generator      websocket.Upgrader
 	pool           entity.SessionPool
 	messageHandler MessageService
-	handlers       []MessageHandler
-	query          dao.CampDao
 }
 
 func (s *sessionService) NewSession(w http.ResponseWriter, r *http.Request, h http.Header, senderId uint) error {
@@ -59,7 +46,16 @@ func (s *sessionService) NewSession(w http.ResponseWriter, r *http.Request, h ht
 }
 
 func (s *sessionService) notify(n entity.Notification) {
-
+	for _, value := range n.ReceiversID {
+		if connRes, ok := s.pool.Pool[value]; ok {
+			s.sendJSON(
+				connRes,
+				websocket.TextMessage,
+				n,
+			)
+		}
+		s.inQueue()
+	}
 }
 
 func (s *sessionService) handle(conn *websocket.Conn, wsType int, payload []byte) {
@@ -77,70 +73,73 @@ func (s *sessionService) handle(conn *websocket.Conn, wsType int, payload []byte
 		)
 	}
 
-	var message entity.Message
-	err := json.Unmarshal(payload, &message)
-	if err != nil {
-		s.badData(conn, err)
-	}
-
-	members, err := s.query.MemberList(10, message.CampID)
-	if err != nil {
-		Log.Error(err.Error())
+	msg := entity.Notification{}
+	var tempMsg = struct {
+		Timestamp   time.Time `json:"timestamp"`
+		EType       int       `json:"e_type"`
+		ReceiversID []uint    `json:"-"`
+		Event       []byte    `json:"event_info"`
+	}{}
+	if err := json.Unmarshal(payload, &tempMsg); err != nil {
+		s.importError(conn, err)
 		return
 	}
-	users := []entity.User{}
-	for _, member := range members {
-		users = append(users, entity.User{
-			ID: member.UserID,
-		})
+	event, err := s.eventSelector(tempMsg.EType)
+	if err != nil {
+		s.importError(conn, err)
+		return
 	}
-	s.transmit(conn, users, message)
+	msg.EType = tempMsg.EType
+	msg.Event = event
+	if err := json.Unmarshal(payload, &msg); err != nil {
+		s.importError(conn, err)
+		return
+	}
+
+	if err := s.messageHandler.eventMessageHandler(&msg); err != nil {
+		s.importError(conn, err)
+	}
+	s.notify(msg)
 	return
 }
 
-func (s *sessionService) transmit(conn *websocket.Conn, users []entity.User, message entity.Message) {
-	res, err := s.handlers[message.Type](message)
-	if err != nil {
-		if _, ok := err.(entity.ExternalError); ok {
-			Log.Errorf("External error: %s", err.Error())
-			s.badData(conn, err)
-			return
-		}
-		Log.Errorf(err.Error())
-		return
+func (s *sessionService) eventSelector(eType int) (entity.Event, error) {
+	var res entity.Event
+	if eType >= 0 && eType < len(entity.EventTypeIndex) {
+		return nil, entity.NewExternalError("invalid message type.")
 	}
-	for _, value := range users {
-		if connRes, ok := s.pool.Pool[value.ID]; ok {
-			s.sendText(
-				conn,
-				websocket.TextMessage,
-				"["+time.Now().String()+"]Received new message.",
-			)
-			s.send(
-				connRes,
-				websocket.TextMessage,
-				res,
-			)
-		}
-		s.inQueue()
+	if eventInstance, ok := entity.EventTypeIndex[eType-1].InnerType.(entity.Event); ok {
+		res = eventInstance
+	} else {
+		return nil, errors.New("event type assertion failed")
 	}
-
-	Log.Infof("Message has transmitted to the other.")
+	return res, nil
 }
 
-func (s *sessionService) sendText(conn *websocket.Conn, wsType int, message string) {
-	s.send(conn, wsType, []byte(message))
-}
-
-func (s *sessionService) send(conn *websocket.Conn, wsType int, data []byte) {
-	err := conn.WriteMessage(wsType, data)
+func (s *sessionService) sendText(conn *websocket.Conn, wsType int, msg string) {
+	err := conn.WriteMessage(wsType, ([]byte)(msg))
 	if err != nil {
 		Log.Errorf("Error replying to client: %s", err)
 	}
 }
 
-func (s *sessionService) badData(conn *websocket.Conn, err error) {
-	s.send(conn, websocket.TextMessage, []byte(err.Error()))
+func (s *sessionService) sendJSON(conn *websocket.Conn, wsType int, data any) {
+	msg, err := json.Marshal(data)
+	if err != nil {
+		Log.Errorf("Illegal transmit!")
+	}
+
+	if err := conn.WriteMessage(wsType, msg); err != nil {
+		Log.Errorf("Error replying to client: %s", err)
+	}
+}
+
+func (s *sessionService) importError(conn *websocket.Conn, err error) {
+	if _, ok := err.(entity.ExternalError); ok {
+		s.sendText(conn, websocket.TextMessage, err.Error())
+	} else {
+		Log.Error(err.Error())
+	}
 }
 
 func (s *sessionService) inQueue() {
