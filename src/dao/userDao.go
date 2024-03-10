@@ -3,6 +3,7 @@ package dao
 import (
 	"campfire/cache"
 	. "campfire/entity"
+
 	"gorm.io/gorm"
 )
 
@@ -156,18 +157,37 @@ func (s userDaoTest) UserInfoByID(userID uint) (User, error) {
 }
 
 func (s userDaoTest) FindUsersByName(name string) ([]User, error) {
-	//TODO implement me
-	panic("implement me")
+	var user []User
+	result := DB.Raw("SELECT * FROM user_info WHERE name = %s", name).Scan(&user)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	if result != nil {
+		return user, nil
+	}
+	return nil, ExternalError{}
 }
 
 func (s userDaoTest) SetUserInfo(user User) error {
-	//TODO implement me
-	panic("implement me")
+	result := DB.Exec("UPDATE user_info SET email = % s , name = %s , password = %s , signature = %s , avatar_url = %s WHERE user_id = %d", user.Email, user.Name, user.Password, user.Signature, user.AvatarUrl, user.ID)
+	if result.Error != nil {
+		return result.Error
+	}
+	if result != nil {
+		return nil
+	}
+	return ExternalError{}
 }
 
 func (s userDaoTest) SetPassword(userID uint, password string) error {
-	//TODO implement me
-	panic("implement me")
+	result := DB.Exec("UPDATE user_info SET password = %s WHERE user_id = %d", password, userID)
+	if result.Error != nil {
+		return result.Error
+	}
+	if result != nil {
+		return nil
+	}
+	return ExternalError{}
 }
 
 func (s userDaoTest) CreateUser(user User) error {
@@ -176,21 +196,49 @@ func (s userDaoTest) CreateUser(user User) error {
 }
 
 func (s userDaoTest) TasksOfUser(userID uint) ([]Task, error) {
-	//TODO implement me
-	panic("implement me")
+	var task []Task
+	result := DB.Raw("SELECT * FROM task WHERE launch_id = %d", userID).Scan(&task)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	if result != nil {
+		return task, nil
+	}
+	return nil, ExternalError{}
 }
 
 func (s userDaoTest) CampsOfUser(userID uint) ([]Camp, error) {
-	//TODO implement me
-	panic("implement me")
+	var camp []Camp
+	result := DB.Raw("SELECT * FROM camp WHERE leader = %d and isprivate = 0", userID).Scan(&camp)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	if result != nil {
+		return camp, nil
+	}
+	return nil, ExternalError{}
 }
 
 func (s userDaoTest) PrivateCampsOfUser(userID uint) ([]Camp, error) {
-	//TODO implement me
-	panic("implement me")
+	var camp []Camp
+	result := DB.Raw("SELECT * FROM camp WHERE leader = %d and isprivate = 1", userID).Scan(&camp)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	if result != nil {
+		return camp, nil
+	}
+	return nil, ExternalError{}
 }
 
 func (s userDaoTest) ProjectsOfUser(userID uint) ([]Project, error) {
-	//TODO implement me
-	panic("implement me")
+	var project []Project
+	result := DB.Raw("SELECT * FROM projects WHERE leader = %d", userID).Scan(&project)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	if result != nil {
+		return project, nil
+	}
+	return nil, ExternalError{}
 }
