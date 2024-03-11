@@ -5,13 +5,14 @@ import (
 	"campfire/util"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 	"net/http"
 )
 
 type SecurityService interface {
 	AuthMiddleware() gin.HandlerFunc
 
-	encryptPassword(password string) string
+	encryptPassword(password string) (string, error)
 
 	tokenGenerate(entity.User) (string, error)
 }
@@ -53,8 +54,12 @@ func (s securityService) AuthMiddleware() gin.HandlerFunc {
 	}
 }
 
-func (s securityService) encryptPassword(password string) string {
-	return password
+func (s securityService) encryptPassword(password string) (string, error) {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return "", err
+	}
+	return (string)(hashedPassword), nil
 }
 
 func (s securityService) tokenGenerate(user entity.User) (string, error) {

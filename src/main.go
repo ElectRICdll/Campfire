@@ -16,7 +16,8 @@ func registerHandlers(engine *gin.Engine) {
 
 	user := controller.NewUserController()
 	engine.GET("/user/:id", auth.AuthMiddleware(), user.UserInfo)
-	engine.GET("/search", auth.AuthMiddleware(), user.FindUsersByName)
+	engine.GET("/user/search", user.FindUsersByName)
+	engine.POST("/user/edit", user.EditUserInfo)
 
 	session := controller.NewSessionController()
 	engine.GET("/ws", auth.AuthMiddleware(), session.NewSession)

@@ -17,6 +17,8 @@ type UserService interface {
 
 	EditUserInfo(user UserDTO) error
 
+	ChangeEmail(userID uint, email string) error
+
 	ChangePassword(userID uint, password string) error
 
 	online(user *User)
@@ -42,6 +44,12 @@ func NewUserService() UserService {
 type userService struct {
 	userQuery dao.UserDao
 	projQuery dao.ProjectDao
+}
+
+func (s *userService) ChangeEmail(userID uint, email string) error {
+	err := s.userQuery.SetEmail(userID, email)
+	// TODO
+	return err
 }
 
 func (s *userService) ChangePassword(userID uint, password string) error {
