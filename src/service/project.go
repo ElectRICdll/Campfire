@@ -50,7 +50,10 @@ type ProjectService interface {
 }
 
 func NewProjectService() ProjectService {
-	return projectService{}
+	return projectService{
+		query:   dao.ProjectDaoContainer,
+		mention: SessionServiceContainer,
+	}
 }
 
 type projectService struct {

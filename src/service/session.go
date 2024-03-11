@@ -24,7 +24,7 @@ func NewSessionService() SessionService {
 		pool: entity.SessionPool{
 			Pool: make(map[uint]*websocket.Conn),
 		},
-		messageHandler: messageService{},
+		messageHandler: NewMessageService(),
 	}
 	return res
 }

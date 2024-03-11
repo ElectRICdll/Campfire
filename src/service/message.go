@@ -27,7 +27,9 @@ type MessageService interface {
 
 func NewMessageService() MessageService {
 	return messageService{
-		messageQuery: nil,
+		messageQuery: dao.MessageDaoContainer,
+		campQuery:    dao.CampDaoContainer,
+		projQuery:    dao.ProjectDaoContainer,
 	}
 }
 

@@ -40,7 +40,11 @@ type CampService interface {
 }
 
 func NewCampService() CampService {
-	return campService{}
+	return campService{
+		mention:   SessionServiceContainer,
+		campQuery: dao.CampDaoContainer,
+		projQuery: dao.ProjectDaoContainer,
+	}
 }
 
 type campService struct {

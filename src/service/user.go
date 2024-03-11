@@ -73,7 +73,6 @@ func (s *userService) EditUserInfo(dto UserDTO) error {
 	if err := s.userQuery.SetUserInfo(User{
 		ID:        dto.ID,
 		Name:      dto.Name,
-		Email:     dto.Email,
 		Signature: dto.Signature,
 		AvatarUrl: dto.AvatarUrl,
 	}); err != nil {

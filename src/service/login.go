@@ -16,8 +16,8 @@ type LoginService interface {
 func NewLoginService() LoginService {
 	return &loginService{
 		dao.UserDaoContainer,
-		UserServiceContainer,
-		SecurityServiceContainer,
+		NewUserService(),
+		NewSecurityService(),
 	}
 }
 
