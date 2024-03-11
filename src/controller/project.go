@@ -342,8 +342,8 @@ func (p projectController) CreateTask(ctx *gin.Context) {
 		OwnerID: userID,
 		//ReceiversID: task.ReceiversID,
 		Content: task.Content,
-		Begin:   task.Begin,
-		End:     task.End,
+		BeginAt: task.BeginAt,
+		EndAt:   task.EndAt,
 	},
 	); err != nil {
 		responseError(ctx, err)
@@ -427,8 +427,8 @@ func (p projectController) EditTaskInfo(ctx *gin.Context) {
 		OwnerID: userID,
 		//ReceiversID: task.ReceiversID,
 		Content: task.Content,
-		Begin:   task.Begin,
-		End:     task.End,
+		BeginAt: task.BeginAt,
+		EndAt:   task.EndAt,
 	}); err != nil {
 		responseError(ctx, err)
 		return

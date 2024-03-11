@@ -13,6 +13,8 @@ type UserController interface {
 
 	EditUserInfo(*gin.Context)
 
+	ChangeEmail(*gin.Context)
+
 	ChangePassword(*gin.Context)
 
 	EmailVerify(*gin.Context)
@@ -31,6 +33,10 @@ type userController struct {
 func (c *userController) EmailVerify(context *gin.Context) {
 	//TODO implement me
 	panic("implement me")
+}
+
+func (c *userController) ChangeEmail(ctx *gin.Context) {
+
 }
 
 /*
@@ -58,12 +64,12 @@ func (c *userController) UserInfo(ctx *gin.Context) {
 FindUsersByName
 查找用户
 method: GET
-path: /search
+path: /user/search
 jwt_auth: false
-query: name
+query: username
 */
 func (c *userController) FindUsersByName(ctx *gin.Context) {
-	name := ctx.Query("name")
+	name := ctx.Query("username")
 	users, err := c.s.FindUsersByName(name)
 
 	responseJSON(ctx, users, err)
@@ -74,7 +80,7 @@ func (c *userController) FindUsersByName(ctx *gin.Context) {
 EditUserInfo
 用于更改用户信息（除密码外）
 method: POST
-path: /user/change
+path: /user/edit
 jwt_auth: true
 */
 func (c *userController) EditUserInfo(ctx *gin.Context) {

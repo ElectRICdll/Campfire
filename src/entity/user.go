@@ -1,8 +1,8 @@
 package entity
 
 type User struct {
-	ID        uint `gorm:"primaryKey;autoIncrement"`
-	Email     string
+	ID        uint   `gorm:"primaryKey;autoIncrement"`
+	Email     string `gorm:"unique"`
 	Name      string
 	Password  string
 	AvatarUrl string
@@ -13,9 +13,9 @@ type User struct {
 }
 
 type UserDTO struct {
-	ID        uint   `json:"id,omitempty" uri:"user_id"`
+	ID        uint   `json:"u_id,omitempty" uri:"user_id"`
 	Email     string `json:"email,omitempty"`
-	Name      string `json:"name,omitempty"`
+	Name      string `json:"username,omitempty"`
 	AvatarUrl string `json:"avatar_url,omitempty"`
 	Signature string `json:"signature,omitempty"`
 	Status    int    `json:"status,omitempty"`

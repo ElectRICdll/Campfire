@@ -34,8 +34,9 @@ path: /login
 
 	response_body: {
 		"res": string,
-		"id": string,
-		"avatar": url
+		"id": int,
+		"token": string,
+		"avatar_url": string
 	}
 */
 func (c *loginController) Login(ctx *gin.Context) {
@@ -58,7 +59,7 @@ path: /reg
 
 	request_body: {
 		"email": string,
-		"name": string,
+		"username": string,
 		"p": string
 	}
 */
@@ -75,5 +76,6 @@ func (c *loginController) Register(ctx *gin.Context) {
 		responseError(ctx, err)
 		return
 	}
+	responseSuccess(ctx)
 	return
 }

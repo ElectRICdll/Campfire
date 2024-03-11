@@ -4,6 +4,7 @@ import "time"
 
 const (
 	OnUnknown = iota
+	OnNobody
 	OnProject
 	OnCamp
 	OnSomeone
@@ -20,6 +21,7 @@ var EventTypeIndex = []struct {
 	{AnnouncementEvent{}, OnCamp},
 	{CodeGraphMessageEvent{}, OnCamp},
 	{BinaryMessageEvent{}, OnCamp},
+	{RequestMessageRecordEvent{}, OnNobody},
 }
 
 type Event interface {
@@ -104,7 +106,21 @@ func (a AnnouncementEvent) ScopeID() uint {
 	return a.AnnouncementDTO.CampID
 }
 
-type FileUrlMessage struct {
+type FileUrlMessageEvent struct {
 	Message
 	Url string `json:"file_url"`
+}
+
+type RequestMessageRecordEvent struct {
+	CampID  uint `json:"c_id"`
+	BeginAt uint `json:"begin_at"`
+}
+
+func (a RequestMessageRecordEvent) Execute() func() error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (a RequestMessageRecordEvent) ScopeID() uint {
+	return 0
 }

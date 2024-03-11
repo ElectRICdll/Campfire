@@ -1,7 +1,8 @@
 package entity
 
 type LoginDTO struct {
-	ID    uint   `json:"id"`
-	Token string `json:"token"`
-	WS    string `json:"ws"`
+	ID        uint   `json:"id"`
+	Name      string `json:"username"`
+	Token     string `json:"token"`
+	AvatarUrl string `json:"avatar_url"`
 }
