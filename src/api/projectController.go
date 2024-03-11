@@ -1,4 +1,4 @@
-package controller
+package api
 
 import (
 	"campfire/entity"
@@ -15,19 +15,9 @@ type ProjectController interface {
 
 	DisableProject(*gin.Context)
 
-	UploadProject(*gin.Context)
-
-	DownloadProject(*gin.Context)
-
 	CreateCamp(*gin.Context)
 
 	PublicCamps(*gin.Context)
-
-	CampInfo(*gin.Context)
-
-	EditCamp(*gin.Context)
-
-	DisableCamp(*gin.Context)
 
 	CreateTask(*gin.Context)
 
@@ -38,22 +28,6 @@ type ProjectController interface {
 	EditTaskInfo(*gin.Context)
 
 	DeleteTask(*gin.Context)
-
-	FileCatalogue(*gin.Context)
-
-	FileDetail(*gin.Context)
-
-	UploadFile(*gin.Context)
-
-	DownloadFile(*gin.Context)
-
-	DeleteFile(*gin.Context)
-
-	DirectoryDetail(*gin.Context)
-
-	CreateDirectory(*gin.Context)
-
-	DeleteDirectory(*gin.Context)
 }
 
 func NewProjectController() ProjectController {
@@ -69,7 +43,7 @@ type projectController struct {
 CreateCamp
 创建新群聊接口
 method: POST
-path: /{project_id}/new_camp
+path: /user/{project_id}/new_camp
 jwt_auth: true
 */
 func (p projectController) CreateCamp(ctx *gin.Context) {
@@ -81,19 +55,16 @@ func (p projectController) CreateCamp(ctx *gin.Context) {
 		responseError(ctx, err)
 		return
 	}
-	if err := p.projService.DisableProject(userID, uri.PID); err != nil {
-		responseError(ctx, err)
-		return
-	}
-	task := entity.CampDTO{}
-	if err := ctx.BindJSON(&task); err != nil {
+	camp := entity.CampDTO{}
+	if err := ctx.BindJSON(&camp); err != nil {
 		responseError(ctx, entity.ExternalError{Message: "invalid syntax."})
 		return
 	}
 
 	if err := p.campService.CreateCamp(userID, entity.Camp{
-		Name:    task.Name,
+		Name:    camp.Name,
 		OwnerID: userID,
+		ProjID:  uri.PID,
 	},
 	); err != nil {
 		responseError(ctx, err)
@@ -106,7 +77,7 @@ func (p projectController) CreateCamp(ctx *gin.Context) {
 PublicCamps
 项目中群聊列表接口
 method: GET
-path: /{project_id}/camps
+path: /user/{project_id}/camps
 jwt_auth: true
 */
 func (p projectController) PublicCamps(ctx *gin.Context) {
@@ -120,79 +91,6 @@ func (p projectController) PublicCamps(ctx *gin.Context) {
 	}
 	res, err := p.campService.PublicCamps(userID, uri.PID)
 	responseJSON(ctx, res, err)
-	return
-}
-
-/*
-CampInfo
-群聊信息
-method: GET
-path: /{project_id}/{camp_id}
-jwt_auth: true
-*/
-func (p projectController) CampInfo(ctx *gin.Context) {
-	userID := (uint)(ctx.Keys["id"].(float64))
-	uri := struct {
-		PID uint `uri:"p_id" binding:"required"`
-		CID uint `uri:"p_id" binding:"required"`
-	}{}
-	if err := ctx.BindUri(&uri); err != nil {
-		responseError(ctx, err)
-		return
-	}
-	res, err := p.campService.CampInfo(userID, uri.CID)
-	responseJSON(ctx, res, err)
-	return
-}
-
-/*
-EditCamp
-群聊编辑接口
-method: GET
-path: /{project_id}/{camp_id}/edit
-jwt_auth: true
-*/
-func (p projectController) EditCamp(ctx *gin.Context) {
-	userID := (uint)(ctx.Keys["id"].(float64))
-	proj := entity.CampDTO{}
-	uri := struct {
-		PID uint `uri:"p_id" binding:"required"`
-	}{}
-	if err := ctx.BindUri(&uri); err != nil {
-		responseError(ctx, err)
-		return
-	}
-	if err := ctx.BindJSON(&proj); err != nil {
-		responseError(ctx, entity.ExternalError{Message: "invalid syntax"})
-	}
-	if err := p.campService.EditCampInfo(userID, entity.Camp{
-		ID:      uri.PID,
-		Name:    proj.Name,
-		OwnerID: proj.OwnerID,
-	}); err != nil {
-		responseError(ctx, err)
-		return
-	}
-	return
-}
-
-/*
-DisableCamp
-群聊编辑接口
-method: GET
-path: /{project_id}/{camp_id}/del
-jwt_auth: true
-*/
-func (p projectController) DisableCamp(ctx *gin.Context) {
-	userID := (uint)(ctx.Keys["id"].(float64))
-	uri := struct {
-		PID uint `uri:"p_id" binding:"required"`
-		CID uint `uri:"p_id" binding:"required"`
-	}{}
-	if err := p.campService.DisableCamp(userID, uri.CID); err != nil {
-		responseError(ctx, err)
-		return
-	}
 	return
 }
 
@@ -255,7 +153,7 @@ func (p projectController) ProjectInfo(ctx *gin.Context) {
 EditProjectInfo
 编辑项目接口
 method: POST
-path: /{project_id}/edit
+path: /user/{project_id}/edit
 jwt_auth: true
 */
 func (p projectController) EditProjectInfo(ctx *gin.Context) {
@@ -287,7 +185,7 @@ func (p projectController) EditProjectInfo(ctx *gin.Context) {
 DisableProject
 删除项目接口
 method: POST
-path: /{project_id}/del
+path: /user/{project_id}/del
 jwt_auth: true
 */
 func (p projectController) DisableProject(ctx *gin.Context) {
@@ -302,21 +200,11 @@ func (p projectController) DisableProject(ctx *gin.Context) {
 	return
 }
 
-func (p projectController) UploadProject(context *gin.Context) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (p projectController) DownloadProject(context *gin.Context) {
-	//TODO implement me
-	panic("implement me")
-}
-
 /*
 CreateTask
 创建新任务接口
 method: POST
-path: /{project_id}/new
+path: /{project_id}/new_task
 jwt_auth: true
 */
 func (p projectController) CreateTask(ctx *gin.Context) {
@@ -454,44 +342,4 @@ func (p projectController) DeleteTask(ctx *gin.Context) {
 		return
 	}
 	return
-}
-
-func (p projectController) FileCatalogue(context *gin.Context) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (p projectController) FileDetail(context *gin.Context) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (p projectController) UploadFile(context *gin.Context) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (p projectController) DownloadFile(context *gin.Context) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (p projectController) DeleteFile(context *gin.Context) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (p projectController) DirectoryDetail(context *gin.Context) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (p projectController) CreateDirectory(context *gin.Context) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (p projectController) DeleteDirectory(context *gin.Context) {
-	//TODO implement me
-	panic("implement me")
 }
