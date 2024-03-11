@@ -14,18 +14,18 @@ type Project struct {
 }
 
 type BriefProjectDTO struct {
-	ID          uint   `json:"id,omitempty"`
-	OwnerID     uint   `json:"leader,omitempty"`
-	Title       string `json:"title,omitempty"`
+	ID          uint   `json:"p_id,omitempty"`
+	OwnerID     uint   `json:"o_id,omitempty"`
+	Title       string `json:"project_title,omitempty"`
 	Description string `json:"des,omitempty"`
 	CampCount   int    `json:"camp_count,omitempty"`
 	TaskCount   int    `json:"task_count,omitempty"`
 }
 
 type ProjectDTO struct {
-	ID          uint      `json:"id,omitempty"`
-	OwnerID     uint      `json:"leader,omitempty"`
-	Title       string    `json:"title,omitempty"`
+	ID          uint      `json:"p_id,omitempty"`
+	OwnerID     uint      `json:"o_id,omitempty"`
+	Title       string    `json:"project_title,omitempty"`
 	Description string    `json:"des,omitempty"`
 	CampCount   int       `json:"camp_count,omitempty"`
 	TaskCount   int       `json:"task_count,omitempty"`

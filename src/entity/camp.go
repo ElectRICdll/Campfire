@@ -13,18 +13,18 @@ type Camp struct {
 }
 
 type BriefCampDTO struct {
-	ID           uint   `json:"id" uri:"id" binding:"required"`
-	OwnerID      uint   `json:"leader"`
+	ID           uint   `json:"c_id" uri:"c_id" binding:"required"`
+	OwnerID      uint   `json:"o_id"`
 	ProjID       uint   `json:"p_id"`
-	Name         string `json:"name"`
+	Name         string `json:"camp_name"`
 	MembersCount int    `json:"members_count"`
 }
 
 type CampDTO struct {
-	ID                  uint              `json:"id" uri:"id" binding:"required"`
-	OwnerID             uint              `json:"leader"`
+	ID                  uint              `json:"c_id" uri:"c_id" binding:"required"`
+	OwnerID             uint              `json:"o_id"`
 	ProjID              uint              `json:"p_id"`
-	Name                string            `json:"name"`
+	Name                string            `json:"camp_name"`
 	MembersCount        int               `json:"members_count"`
 	Members             []MemberDTO       `json:"members"`
 	Announcements       []AnnouncementDTO `json:"announcements"`

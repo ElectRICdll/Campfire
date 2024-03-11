@@ -21,9 +21,9 @@ type TaskDTO struct {
 	ProjID      uint   `json:"p_id"`
 	ReceiversID []uint `json:"r_id"`
 
-	Title   string    `json:"name"`
-	BeginAt time.Time `json:"begin"`
-	EndAt   time.Time `json:"end"`
+	Title   string    `json:"task_title"`
+	BeginAt time.Time `json:"begin_at"`
+	EndAt   time.Time `json:"end_at"`
 	Content string    `json:"content"`
 	Status  int       `json:"status"`
 }
