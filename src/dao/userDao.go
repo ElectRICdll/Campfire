@@ -19,6 +19,8 @@ type UserDao interface {
 
 	SetPassword(userID uint, password string) error
 
+	SetEmail(userID uint, email string) error
+
 	CreateUser(user User) error
 
 	TasksOfUser(userID uint) ([]Task, error)
@@ -124,6 +126,11 @@ func (d userDao) SetAvatar(id uint, url string) error {
 }
 
 type userDaoTest struct{}
+
+func (s userDaoTest) SetEmail(userID uint, email string) error {
+	//TODO implement me
+	panic("implement me")
+}
 
 func NewUserDaoTest() UserDao {
 	return userDaoTest{}
