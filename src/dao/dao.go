@@ -9,6 +9,8 @@ import (
 var (
 	UserDaoContainer    UserDao    = NewUserDaoTest()
 	ProjectDaoContainer ProjectDao = nil
+	CampDaoContainer    CampDao    = nil
+	MessageDaoContainer MessageDao = nil
 )
 
 var DB *gorm.DB = DBConn()
