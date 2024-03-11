@@ -4,7 +4,6 @@ import (
 	"campfire/entity"
 	"campfire/service"
 	"github.com/gin-gonic/gin"
-	"strconv"
 )
 
 type ChatController interface {
@@ -13,8 +12,6 @@ type ChatController interface {
 	PublicCamps(*gin.Context)
 
 	CampInfo(*gin.Context)
-
-	MessageRecord(*gin.Context)
 
 	EditCampInfo(*gin.Context)
 
@@ -114,35 +111,6 @@ func (c chatController) EditCampInfo(ctx *gin.Context) {
 		responseError(ctx, err)
 		return
 	}
-	return
-}
-
-/*
-MessageRecord
-更新Campsite的消息记录，数量由配置文件决定
-method: GET
-path: /{project_id}/{campsite_id}/record
-jwt_auth: true
-*/
-func (c chatController) MessageRecord(ctx *gin.Context) {
-	userID := (int)(ctx.Keys["id"].(float64))
-
-	begin, err := strconv.Atoi(ctx.Query("begin_at"))
-	if err != nil {
-		responseError(ctx, err)
-		return
-	}
-
-	uri := struct {
-		CID int `uri:"c_id" binding:"required"`
-	}{}
-	if err := ctx.BindUri(&uri); err != nil {
-		responseError(ctx, err)
-	}
-
-	res, err := c.messageService.PullMessageRecord(userID, uri.CID, begin)
-	responseJSON(ctx, res, err)
-
 	return
 }
 

@@ -33,7 +33,10 @@ func (s *loginService) EmailVerify(vefiryCode string) error {
 }
 
 func (s *loginService) Login(email string, password string) (entity.LoginDTO, error) {
-	password = s.sec.encryptPassword(password)
+	password, err := s.sec.encryptPassword(password)
+	if err != nil {
+		return entity.LoginDTO{}, err
+	}
 
 	id, err := s.query.CheckIdentity(email, password)
 	if err != nil {
@@ -50,6 +53,7 @@ func (s *loginService) Login(email string, password string) (entity.LoginDTO, er
 		s.user.online(&user)
 		return entity.LoginDTO{
 			ID:    id,
+			Name:  user.Name,
 			Token: token,
 		}, err
 	}
@@ -57,10 +61,14 @@ func (s *loginService) Login(email string, password string) (entity.LoginDTO, er
 }
 
 func (s *loginService) Register(dto entity.UserDTO, password string) error {
+	password, err := s.sec.encryptPassword(password)
+	if err != nil {
+		return err
+	}
 	if err := s.query.CreateUser(entity.User{
 		Email:    dto.Email,
 		Name:     dto.Name,
-		Password: s.sec.encryptPassword(password),
+		Password: password,
 	}); err != nil {
 		return err
 	}
