@@ -19,8 +19,6 @@ type UserDao interface {
 
 	SetPassword(userID uint, password string) error
 
-	SetEmail(userID uint, email string) error
-
 	CreateUser(user User) error
 
 	TasksOfUser(userID uint) ([]Task, error)
@@ -39,59 +37,111 @@ type UserDao interface {
 type userDao struct{}
 
 func (d userDao) SetUserSign(userID uint, signature string) error {
-	result := DB.Exec("UPDATE user_info SET signature = %s WHERE user_id = %d", signature, userID)
+	//result := DB.Exec("UPDATE user_info SET signature = %s WHERE ID = %d", signature, userID)
+	var user User
+	var result = DB.First(&user, userID)
+
 	if result.Error != nil {
 		return result.Error
 	}
-	if result != nil {
-		return nil
+
+	user.Signature = signature
+	result = DB.Save(&user)
+
+	if result.Error != nil {
+		return result.Error
 	}
-	return ExternalError{}
+
+	if result == nil {
+		return ExternalError{}
+	}
+
+	return nil
 }
 
 func (d userDao) ChangePassword(userID uint, p string) error {
-	result := DB.Exec("UPDATE user_info SET password = %s WHERE user_id = %d", p, userID)
+	//result := DB.Exec("UPDATE user_info SET password = %s WHERE ID = %d", p, userID)
+	var user User
+	var result = DB.First(&user, userID)
+
 	if result.Error != nil {
 		return result.Error
 	}
-	if result != nil {
-		return nil
+
+	user.Password = p
+	result = DB.Save(&user)
+
+	if result.Error != nil {
+		return result.Error
 	}
-	return ExternalError{}
+
+	if result == nil {
+		return ExternalError{}
+	}
+
+	return nil
 }
 
 func (d userDao) ChangeEmail(userID uint, email string) error {
-	result := DB.Exec("UPDATE user_info SET email = %s WHERE user_id = %d", email, userID)
+	//result := DB.Exec("UPDATE user_info SET email = %s WHERE ID = %d", email, userID)
+	var user User
+	var result = DB.First(&user, userID)
+
 	if result.Error != nil {
 		return result.Error
 	}
-	if result != nil {
-		return nil
+
+	user.Email = email
+	result = DB.Save(&user)
+
+	if result.Error != nil {
+		return result.Error
 	}
-	return ExternalError{}
+
+	if result == nil {
+		return ExternalError{}
+	}
+
+	return nil
 }
 
 func (d userDao) SetUserName(userID uint, name string) error {
-	result := DB.Exec("UPDATE user_info SET name = %s WHERE user_id = %d", name, userID)
+	//result := DB.Exec("UPDATE user_info SET name = %s WHERE ID = %d", name, userID)
+	var user User
+	var result = DB.First(&user, userID)
+
 	if result.Error != nil {
 		return result.Error
 	}
-	if result != nil {
-		return nil
+
+	user.Name = name
+	result = DB.Save(&user)
+
+	if result.Error != nil {
+		return result.Error
 	}
-	return ExternalError{}
+
+	if result == nil {
+		return ExternalError{}
+	}
+
+	return nil
 }
 
 func (d userDao) CheckIdentity(email string, password string) (uint, error) {
 	var id uint
-	result := DB.Raw("SELECT user_id FROM user_info WHERE email = %s AND password = %s", email, password).Scan(&id)
+	//result := DB.Raw("SELECT ID FROM user_info WHERE email = %s AND password = %s", email, password).Scan(&id)
+	var result = DB.Where("email = ? and password = ?", email, password).Find(&id)
+
 	if result.Error != nil {
-		return 0, result.Error
+		return id, result.Error
 	}
-	if result != nil {
-		return id, nil
+
+	if result == nil {
+		return id, ExternalError{}
 	}
-	return 0, ExternalError{}
+
+	return id, nil
 }
 
 func (d userDao) UserInfoByID(id uint) (User, error) {
@@ -127,11 +177,6 @@ func (d userDao) SetAvatar(id uint, url string) error {
 
 type userDaoTest struct{}
 
-func (s userDaoTest) SetEmail(userID uint, email string) error {
-	//TODO implement me
-	panic("implement me")
-}
-
 func NewUserDaoTest() UserDao {
 	return userDaoTest{}
 }
@@ -165,18 +210,22 @@ func (s userDaoTest) UserInfoByID(userID uint) (User, error) {
 
 func (s userDaoTest) FindUsersByName(name string) ([]User, error) {
 	var user []User
-	result := DB.Raw("SELECT * FROM user_info WHERE name = %s", name).Scan(&user)
+	var result = DB.Where("name = ?", name).Find(&user)
+
 	if result.Error != nil {
-		return nil, result.Error
+		return user, result.Error
 	}
-	if result != nil {
-		return user, nil
+
+	if result == nil {
+		return user, ExternalError{}
 	}
-	return nil, ExternalError{}
+
+	return user, nil
 }
 
 func (s userDaoTest) SetUserInfo(user User) error {
-	result := DB.Exec("UPDATE user_info SET email = % s , name = %s , password = %s , signature = %s , avatar_url = %s WHERE user_id = %d", user.Email, user.Name, user.Password, user.Signature, user.AvatarUrl, user.ID)
+	//result := DB.Exec("UPDATE user_info SET email = % s , name = %s , password = %s , signature = %s , avatar_url = %s WHERE user_id = %d", user.Email, user.Name, user.Password, user.Signature, user.AvatarUrl, user.ID)
+	var result = DB.Save(&user)
 	if result.Error != nil {
 		return result.Error
 	}
@@ -187,14 +236,25 @@ func (s userDaoTest) SetUserInfo(user User) error {
 }
 
 func (s userDaoTest) SetPassword(userID uint, password string) error {
-	result := DB.Exec("UPDATE user_info SET password = %s WHERE user_id = %d", password, userID)
+	var user User
+	var result = DB.First(&user, userID)
+
 	if result.Error != nil {
 		return result.Error
 	}
-	if result != nil {
-		return nil
+
+	user.Password = password
+	result = DB.Save(&user)
+
+	if result.Error != nil {
+		return result.Error
 	}
-	return ExternalError{}
+
+	if result == nil {
+		return ExternalError{}
+	}
+
+	return nil
 }
 
 func (s userDaoTest) CreateUser(user User) error {
@@ -204,48 +264,59 @@ func (s userDaoTest) CreateUser(user User) error {
 
 func (s userDaoTest) TasksOfUser(userID uint) ([]Task, error) {
 	var task []Task
-	result := DB.Raw("SELECT * FROM task WHERE launch_id = %d", userID).Scan(&task)
+	var result = DB.Where("OwnerID = ?", userID).Find(&task)
+
 	if result.Error != nil {
-		return nil, result.Error
+		return task, result.Error
 	}
-	if result != nil {
-		return task, nil
+
+	if result == nil {
+		return task, ExternalError{}
 	}
-	return nil, ExternalError{}
+
+	return task, nil
 }
 
 func (s userDaoTest) CampsOfUser(userID uint) ([]Camp, error) {
 	var camp []Camp
-	result := DB.Raw("SELECT * FROM camp WHERE leader = %d and isprivate = 0", userID).Scan(&camp)
+	var result = DB.Where("OwnerID = ?", userID).Find(&camp)
+
 	if result.Error != nil {
-		return nil, result.Error
+		return camp, result.Error
 	}
-	if result != nil {
-		return camp, nil
+
+	if result == nil {
+		return camp, ExternalError{}
 	}
-	return nil, ExternalError{}
+
+	return camp, nil
 }
 
 func (s userDaoTest) PrivateCampsOfUser(userID uint) ([]Camp, error) {
-	var camp []Camp
-	result := DB.Raw("SELECT * FROM camp WHERE leader = %d and isprivate = 1", userID).Scan(&camp)
-	if result.Error != nil {
-		return nil, result.Error
-	}
-	if result != nil {
-		return camp, nil
-	}
-	return nil, ExternalError{}
+	//待改表
+	return nil, nil
+	// var camp []Camp
+	// result := DB.Raw("SELECT * FROM camp WHERE leader = %d and isprivate = 1", userID).Scan(&camp)
+	// if result.Error != nil {
+	// 	return nil, result.Error
+	// }
+	// if result != nil {
+	// 	return camp, nil
+	// }
+	// return nil, ExternalError{}
 }
 
 func (s userDaoTest) ProjectsOfUser(userID uint) ([]Project, error) {
 	var project []Project
-	result := DB.Raw("SELECT * FROM projects WHERE leader = %d", userID).Scan(&project)
+	var result = DB.Where("OwnerID = ?", userID).Find(&project)
+
 	if result.Error != nil {
-		return nil, result.Error
+		return project, result.Error
 	}
-	if result != nil {
-		return project, nil
+
+	if result == nil {
+		return project, ExternalError{}
 	}
-	return nil, ExternalError{}
+
+	return project, nil
 }
