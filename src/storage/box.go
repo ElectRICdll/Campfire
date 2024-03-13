@@ -1,12 +1,11 @@
 package storage
 
-import (
-	"github.com/aliyun/aliyun-oss-go-sdk/oss"
-)
+import "fmt"
 
 type Box struct {
-	ProjID uint
-	oss.Bucket
+	Name     string
+	ProjID   uint
+	RootPath string
 }
 
 func NewBox() {
@@ -14,4 +13,24 @@ func NewBox() {
 	//if err != nil {
 	//	log.Error(err.Error())
 	//}
+}
+
+func (b Box) BoxName() string {
+	return fmt.Sprintf("%s-%x", b.Name, b.ProjID)
+}
+
+func (b Box) Push() {
+
+}
+
+func (b Box) Pull() {
+
+}
+
+func (b Box) Clone() {
+
+}
+
+func (b Box) Merge() {
+
 }
