@@ -2,6 +2,7 @@ package api
 
 import (
 	"campfire/service"
+	"campfire/service/ws-service"
 	"github.com/gin-gonic/gin"
 )
 
@@ -11,12 +12,12 @@ type SessionController interface {
 
 func NewSessionController() SessionController {
 	return &sessionController{
-		s: service.NewSessionService(),
+		s: service.SessionServiceContainer,
 	}
 }
 
 type sessionController struct {
-	s service.SessionService
+	s *ws_service.SessionService
 }
 
 /*

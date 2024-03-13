@@ -3,7 +3,7 @@ package service
 import (
 	"campfire/dao"
 	. "campfire/entity"
-	. "campfire/service/event"
+	"campfire/service/ws-service"
 	"github.com/gin-gonic/gin"
 )
 
@@ -59,7 +59,7 @@ func NewProjectService() ProjectService {
 
 type projectService struct {
 	query   dao.ProjectDao
-	mention SessionService
+	mention *ws_service.SessionService
 }
 
 func (p projectService) CreateProject(project Project) error {
@@ -78,7 +78,7 @@ func (p projectService) EditProjectInfo(queryID uint, project Project) error {
 		return err
 	}
 	// TODO
-	p.mention.notify(Notification{})
+	p.mention.Notify(ws_service.Notification{})
 	return nil
 }
 
@@ -103,7 +103,7 @@ func (p projectService) CreateTask(queryID uint, task Task) error {
 		return err
 	}
 	// TODO
-	p.mention.notify(Notification{})
+	p.mention.Notify(ws_service.Notification{})
 	return nil
 }
 
@@ -129,7 +129,7 @@ func (p projectService) EditTaskInfo(queryID uint, projID uint, task Task) error
 		return err
 	}
 	// TODO
-	p.mention.notify(Notification{})
+	p.mention.Notify(ws_service.Notification{})
 	return nil
 }
 

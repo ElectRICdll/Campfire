@@ -3,7 +3,7 @@ package service
 import (
 	"campfire/dao"
 	. "campfire/entity"
-	. "campfire/service/event"
+	"campfire/service/ws-service"
 )
 
 type CampService interface {
@@ -49,7 +49,7 @@ func NewCampService() CampService {
 }
 
 type campService struct {
-	mention   SessionService
+	mention   *ws_service.SessionService
 	campQuery dao.CampDao
 	projQuery dao.ProjectDao
 }
@@ -97,7 +97,7 @@ func (c campService) EditCampInfo(queryID uint, camp Camp) error {
 		return err
 	}
 	// TODO
-	c.mention.notify(Notification{})
+	c.mention.Notify(ws_service.Notification{})
 	return nil
 }
 
@@ -106,7 +106,7 @@ func (c campService) DisableCamp(queryID uint, campID uint) error {
 		return err
 	}
 	// TODO
-	c.mention.notify(Notification{})
+	c.mention.Notify(ws_service.Notification{})
 	return nil
 }
 
@@ -115,7 +115,7 @@ func (c campService) InviteMember(queryID uint, campID uint, userID uint) error 
 		return err
 	}
 	// TODO
-	c.mention.notify(Notification{})
+	c.mention.Notify(ws_service.Notification{})
 	return nil
 }
 
@@ -124,7 +124,7 @@ func (c campService) KickMember(queryID uint, campID uint, userID uint) error {
 		return err
 	}
 	// TODO
-	c.mention.notify(Notification{})
+	c.mention.Notify(ws_service.Notification{})
 	return nil
 }
 
@@ -136,7 +136,7 @@ func (c campService) EditNickname(campID uint, userID uint, nickname string) err
 		return err
 	}
 	// TODO
-	c.mention.notify(Notification{})
+	c.mention.Notify(ws_service.Notification{})
 	return nil
 }
 
@@ -148,7 +148,7 @@ func (c campService) EditMemberTitle(campID uint, userID uint, title string) err
 		return err
 	}
 	// TODO
-	c.mention.notify(Notification{})
+	c.mention.Notify(ws_service.Notification{})
 	return nil
 }
 
@@ -174,7 +174,7 @@ func (c campService) CreateAnnouncement(queryID uint, campID uint, anno Announce
 		return err
 	}
 	// TODO
-	c.mention.notify(Notification{})
+	c.mention.Notify(ws_service.Notification{})
 	return nil
 }
 

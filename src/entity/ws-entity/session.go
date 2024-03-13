@@ -1,4 +1,4 @@
-package entity
+package wsentity
 
 import (
 	"campfire/log"

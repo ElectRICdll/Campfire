@@ -2,6 +2,7 @@ package dao
 
 import (
 	. "campfire/entity"
+	"campfire/util"
 
 	"gorm.io/gorm"
 )
@@ -18,9 +19,6 @@ type messageDao struct{}
 
 func (d messageDao) AddMessageRecord(msg ...Message) error {
 	result := DB.Create(&msg)
-	if result.Error == gorm.ErrRecordNotFound {
-		return ExternalError{}
-	}
 	if result.Error != nil {
 		return result.Error
 	}
@@ -30,7 +28,7 @@ func (d messageDao) PullCampMessageRecord(campID uint, beginMessageID uint, msgC
 	var message []Message
 	result := DB.Where("campID = ? and ID >= ? and ID <= ?", campID, beginMessageID, beginMessageID-msgCount+1).Find(&message)
 	if result.Error == gorm.ErrRecordNotFound {
-		return message, ExternalError{}
+		return message, util.NewExternalError("no record found")
 	}
 	if result.Error != nil {
 		return message, result.Error
@@ -41,7 +39,7 @@ func (d messageDao) MessageRecord(campID uint, msgID uint) (Message, error) {
 	var message Message
 	result := DB.Where("campID = ? and ID = ?", campID, msgID).Find(&message)
 	if result.Error == gorm.ErrRecordNotFound {
-		return message, ExternalError{}
+		return message, util.NewExternalError("no record found")
 	}
 	if result.Error != nil {
 		return message, result.Error

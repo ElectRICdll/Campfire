@@ -1,15 +1,20 @@
-package event
+package wsentity
 
-import "campfire/entity"
+import (
+	"campfire/entity"
+)
+
+type MessageEvent interface {
+	ToMessage() entity.Message
+}
 
 type TextMessageEvent struct {
 	entity.Message
 	Content string `json:"content"`
 }
 
-func (t TextMessageEvent) Process() func() error {
-	//TODO implement me
-	panic("implement me")
+func (t TextMessageEvent) ToMessage() entity.Message {
+	return t.Message
 }
 
 func (t TextMessageEvent) ScopeID() uint {
@@ -24,9 +29,8 @@ type BinaryMessageEvent struct {
 	Type        string `json:"type"`
 }
 
-func (b BinaryMessageEvent) Process() func() error {
-	//TODO implement me
-	panic("implement me")
+func (b BinaryMessageEvent) ToMessage() entity.Message {
+	return b.Message
 }
 
 func (b BinaryMessageEvent) ScopeID() uint {
@@ -42,9 +46,8 @@ type CodeGraphMessageEvent struct {
 	EndAtAt   int    `json:"end_at"`
 }
 
-func (c CodeGraphMessageEvent) Process() func() error {
-	//TODO implement me
-	panic("implement me")
+func (c CodeGraphMessageEvent) ToMessage() entity.Message {
+	return c.Message
 }
 
 func (c CodeGraphMessageEvent) ScopeID() uint {
