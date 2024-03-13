@@ -3,6 +3,7 @@ package service
 import (
 	"campfire/entity"
 	"campfire/log"
+	notify2 "campfire/service/event"
 	"campfire/util"
 	"encoding/json"
 	"errors"
@@ -16,7 +17,7 @@ type SessionSender func(*websocket.Conn, int, []byte) error
 type SessionService interface {
 	NewSession(w http.ResponseWriter, r *http.Request, h http.Header, userid uint) error
 
-	notify(n entity.Notification)
+	notify(n notify2.Notification)
 }
 
 func NewSessionService() SessionService {
@@ -46,7 +47,7 @@ func (s *sessionService) NewSession(w http.ResponseWriter, r *http.Request, h ht
 	return nil
 }
 
-func (s *sessionService) notify(n entity.Notification) {
+func (s *sessionService) notify(n notify2.Notification) {
 	for _, value := range n.ReceiversID {
 		if connRes, ok := s.pool.Pool[value]; ok {
 			s.sendJSON(
@@ -74,7 +75,7 @@ func (s *sessionService) handle(conn *websocket.Conn, wsType int, payload []byte
 		)
 	}
 
-	msg := entity.Notification{}
+	msg := notify2.Notification{}
 	var tempMsg = struct {
 		Timestamp   time.Time `json:"timestamp"`
 		EType       int       `json:"e_type"`
@@ -104,12 +105,12 @@ func (s *sessionService) handle(conn *websocket.Conn, wsType int, payload []byte
 	return
 }
 
-func (s *sessionService) eventSelector(eType int) (entity.Event, error) {
-	var res entity.Event
-	if eType >= 0 && eType < len(entity.EventTypeIndex) {
+func (s *sessionService) eventSelector(eType int) (notify2.Event, error) {
+	var res notify2.Event
+	if eType >= 0 && eType < len(notify2.EventTypeIndex) {
 		return nil, util.NewExternalError("invalid message type.")
 	}
-	if eventInstance, ok := entity.EventTypeIndex[eType-1].InnerType.(entity.Event); ok {
+	if eventInstance, ok := notify2.EventTypeIndex[eType-1].InnerType.(notify2.Event); ok {
 		res = eventInstance
 	} else {
 		return nil, errors.New("event type assertion failed")

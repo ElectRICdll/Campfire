@@ -3,11 +3,12 @@ package service
 import (
 	"campfire/dao"
 	"campfire/entity"
+	notify2 "campfire/service/event"
 	"campfire/util"
 	"errors"
 )
 
-type MessageHandler func(*entity.Notification) error
+type MessageHandler func(*notify2.Notification) error
 
 type MessageService interface {
 	MessageRecord(messageID uint)
@@ -22,7 +23,7 @@ type MessageService interface {
 
 	PullMessageRecord(campID uint, beginMessageID uint) ([]entity.Message, error)
 
-	eventMessageHandler(msg *entity.Notification) error
+	eventMessageHandler(msg *notify2.Notification) error
 }
 
 func NewMessageService() MessageService {
@@ -72,9 +73,9 @@ func (s messageService) AllMessageRecord() {
 	panic("implement me")
 }
 
-func (s messageService) eventMessageHandler(msg *entity.Notification) error {
-	switch entity.EventTypeIndex[msg.EType].Scope {
-	case entity.OnCamp:
+func (s messageService) eventMessageHandler(msg *notify2.Notification) error {
+	switch notify2.EventTypeIndex[msg.EType].Scope {
+	case notify2.OnCamp:
 		res, err := s.campQuery.MemberList(1, msg.Event.ScopeID())
 		if err != nil {
 			return err
@@ -86,7 +87,7 @@ func (s messageService) eventMessageHandler(msg *entity.Notification) error {
 			}
 			return res
 		}(res)
-	case entity.OnProject:
+	case notify2.OnProject:
 		res, err := s.projQuery.MemberList(1, msg.Event.ScopeID())
 		if err != nil {
 			return err
@@ -98,12 +99,12 @@ func (s messageService) eventMessageHandler(msg *entity.Notification) error {
 			}
 			return res
 		}(res)
-	case entity.OnSomeone:
+	case notify2.OnSomeone:
 
 	default:
 		return errors.New("unknown scope area")
 	}
-	//if err := msg.Event.Execute(); err != nil {
+	//if err := msg.Event.Process(); err != nil {
 	//	return err
 	//}
 	return nil

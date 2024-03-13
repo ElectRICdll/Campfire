@@ -1,6 +1,8 @@
-package entity
+package event
 
-import "time"
+import (
+	"time"
+)
 
 type Notification struct {
 	Timestamp   time.Time `json:"timestamp"`

@@ -3,6 +3,7 @@ package service
 import (
 	"campfire/dao"
 	. "campfire/entity"
+	. "campfire/service/event"
 )
 
 type CampService interface {

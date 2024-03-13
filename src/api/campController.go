@@ -14,7 +14,7 @@ type CampController interface {
 
 	DisableCamp(*gin.Context)
 
-	AddMember(*gin.Context)
+	InviteMember(*gin.Context)
 
 	KickMember(*gin.Context)
 
@@ -64,24 +64,85 @@ func (p campController) EditCampInfo(ctx *gin.Context) {
 	return
 }
 
-func (p campController) DisableCamp(context *gin.Context) {
-	//TODO implement me
-	panic("implement me")
+func (p campController) DisableCamp(ctx *gin.Context) {
+	userID := (uint)(ctx.Keys["id"].(float64))
+	uri := struct {
+		CID uint `json:"c_id"`
+	}{}
+	if err := ctx.BindUri(&uri); err != nil {
+		responseError(ctx, err)
+		return
+	}
+	if err := p.campService.DisableCamp(userID, uri.CID); err != nil {
+		responseError(ctx, err)
+		return
+	}
+	responseSuccess(ctx)
+	return
 }
 
-func (p campController) AddMember(context *gin.Context) {
-	//TODO implement me
-	panic("implement me")
+func (p campController) InviteMember(ctx *gin.Context) {
+	userID := (uint)(ctx.Keys["id"].(float64))
+	uri := struct {
+		CID uint `json:"c_id"`
+	}{}
+	if err := ctx.BindUri(&uri); err != nil {
+		responseError(ctx, err)
+		return
+	}
+	user := entity.UserDTO{}
+	if err := ctx.BindJSON(&user); err != nil {
+		responseError(ctx, err)
+		return
+	}
+	if err := p.campService.InviteMember(userID, uri.CID, user.ID); err != nil {
+		responseError(ctx, err)
+		return
+	}
+	responseSuccess(ctx)
+	return
 }
 
-func (p campController) KickMember(context *gin.Context) {
-	//TODO implement me
-	panic("implement me")
+func (p campController) KickMember(ctx *gin.Context) {
+	userID := (uint)(ctx.Keys["id"].(float64))
+	uri := struct {
+		CID uint `json:"c_id"`
+	}{}
+	if err := ctx.BindUri(&uri); err != nil {
+		responseError(ctx, err)
+		return
+	}
+	user := entity.UserDTO{}
+	if err := ctx.BindJSON(&user); err != nil {
+		responseError(ctx, err)
+		return
+	}
+	if err := p.campService.KickMember(userID, uri.CID, user.ID); err != nil {
+		responseError(ctx, err)
+		return
+	}
+	responseSuccess(ctx)
+	return
 }
 
-func (p campController) EditMemberInfo(context *gin.Context) {
-	//TODO implement me
-	panic("implement me")
+func (p campController) EditMemberInfo(ctx *gin.Context) {
+	userID := (uint)(ctx.Keys["id"].(float64))
+	member := entity.MemberDTO{}
+	uri := struct {
+		CID uint `uri:"p_id" binding:"required"`
+	}{}
+	if err := ctx.BindUri(&uri); err != nil {
+		responseError(ctx, err)
+		return
+	}
+	if err := ctx.BindJSON(&member); err != nil {
+		responseError(ctx, util.ExternalError{Message: "invalid syntax"})
+	}
+	if err := p.campService.EditMemberTitle(uri.CID, userID, member.Title); err != nil {
+		responseError(ctx, err)
+		return
+	}
+	return
 }
 
 /*

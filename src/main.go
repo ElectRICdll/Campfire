@@ -44,6 +44,7 @@ func registerDependencies(engine *gin.Engine) {
 	engine.GET("/camp/:camp_id", camp.CampInfo)
 	engine.POST("/camp/:camp_id/edit", camp.EditCampInfo)
 	engine.POST("/camp/:camp_id/del", camp.DisableCamp)
+	engine.POST("/camp/:camp_id/add", camp.AddMember)
 }
 
 func main() {
