@@ -43,6 +43,9 @@ func (d userDao) SetUserSign(userID uint, signature string) error {
 	var user User
 	var result = DB.First(&user, userID)
 
+	if result.Error == gorm.ErrRecordNotFound {
+		return ExternalError{}
+	}
 	if result.Error != nil {
 		return result.Error
 	}
@@ -50,12 +53,11 @@ func (d userDao) SetUserSign(userID uint, signature string) error {
 	user.Signature = signature
 	result = DB.Save(&user)
 
+	if result.Error == gorm.ErrRecordNotFound {
+		return ExternalError{}
+	}
 	if result.Error != nil {
 		return result.Error
-	}
-
-	if result == nil {
-		return ExternalError{}
 	}
 
 	return nil
@@ -66,6 +68,9 @@ func (d userDao) ChangePassword(userID uint, p string) error {
 	var user User
 	var result = DB.First(&user, userID)
 
+	if result.Error == gorm.ErrRecordNotFound {
+		return ExternalError{}
+	}
 	if result.Error != nil {
 		return result.Error
 	}
@@ -73,12 +78,11 @@ func (d userDao) ChangePassword(userID uint, p string) error {
 	user.Password = p
 	result = DB.Save(&user)
 
+	if result.Error == gorm.ErrRecordNotFound {
+		return ExternalError{}
+	}
 	if result.Error != nil {
 		return result.Error
-	}
-
-	if result == nil {
-		return ExternalError{}
 	}
 
 	return nil
@@ -89,6 +93,9 @@ func (d userDao) ChangeEmail(userID uint, email string) error {
 	var user User
 	var result = DB.First(&user, userID)
 
+	if result.Error == gorm.ErrRecordNotFound {
+		return ExternalError{}
+	}
 	if result.Error != nil {
 		return result.Error
 	}
@@ -96,12 +103,11 @@ func (d userDao) ChangeEmail(userID uint, email string) error {
 	user.Email = email
 	result = DB.Save(&user)
 
+	if result.Error == gorm.ErrRecordNotFound {
+		return ExternalError{}
+	}
 	if result.Error != nil {
 		return result.Error
-	}
-
-	if result == nil {
-		return ExternalError{}
 	}
 
 	return nil
@@ -112,6 +118,9 @@ func (d userDao) SetUserName(userID uint, name string) error {
 	var user User
 	var result = DB.First(&user, userID)
 
+	if result.Error == gorm.ErrRecordNotFound {
+		return ExternalError{}
+	}
 	if result.Error != nil {
 		return result.Error
 	}
@@ -119,12 +128,11 @@ func (d userDao) SetUserName(userID uint, name string) error {
 	user.Name = name
 	result = DB.Save(&user)
 
+	if result.Error == gorm.ErrRecordNotFound {
+		return ExternalError{}
+	}
 	if result.Error != nil {
 		return result.Error
-	}
-
-	if result == nil {
-		return ExternalError{}
 	}
 
 	return nil
@@ -135,12 +143,11 @@ func (d userDao) CheckIdentity(email string, password string) (uint, error) {
 	//result := DB.Raw("SELECT ID FROM user_info WHERE email = %s AND password = %s", email, password).Scan(&id)
 	var result = DB.Where("email = ? and password = ?", email, password).Find(&id)
 
+	if result.Error == gorm.ErrRecordNotFound {
+		return id, ExternalError{}
+	}
 	if result.Error != nil {
 		return id, result.Error
-	}
-
-	if result == nil {
-		return id, ExternalError{}
 	}
 
 	return id, nil
@@ -211,12 +218,11 @@ func (s userDaoTest) FindUsersByName(name string) ([]User, error) {
 	var user []User
 	var result = DB.Where("name = ?", name).Find(&user)
 
+	if result.Error == gorm.ErrRecordNotFound {
+		return user, ExternalError{}
+	}
 	if result.Error != nil {
 		return user, result.Error
-	}
-
-	if result == nil {
-		return user, ExternalError{}
 	}
 
 	return user, nil
@@ -225,19 +231,22 @@ func (s userDaoTest) FindUsersByName(name string) ([]User, error) {
 func (s userDaoTest) SetUserInfo(user User) error {
 	//result := DB.Exec("UPDATE user_info SET email = % s , name = %s , password = %s , signature = %s , avatar_url = %s WHERE user_id = %d", user.Email, user.Name, user.Password, user.Signature, user.AvatarUrl, user.ID)
 	var result = DB.Save(&user)
+	if result.Error == gorm.ErrRecordNotFound {
+		return ExternalError{}
+	}
 	if result.Error != nil {
 		return result.Error
 	}
-	if result != nil {
-		return nil
-	}
-	return ExternalError{}
+	return nil
 }
 
 func (s userDaoTest) SetPassword(userID uint, password string) error {
 	var user User
 	var result = DB.First(&user, userID)
 
+	if result.Error == gorm.ErrRecordNotFound {
+		return ExternalError{}
+	}
 	if result.Error != nil {
 		return result.Error
 	}
@@ -245,12 +254,11 @@ func (s userDaoTest) SetPassword(userID uint, password string) error {
 	user.Password = password
 	result = DB.Save(&user)
 
+	if result.Error == gorm.ErrRecordNotFound {
+		return ExternalError{}
+	}
 	if result.Error != nil {
 		return result.Error
-	}
-
-	if result == nil {
-		return ExternalError{}
 	}
 
 	return nil
@@ -265,12 +273,11 @@ func (s userDaoTest) TasksOfUser(userID uint) ([]Task, error) {
 	var task []Task
 	var result = DB.Where("OwnerID = ?", userID).Find(&task)
 
+	if result.Error == gorm.ErrRecordNotFound {
+		return task, ExternalError{}
+	}
 	if result.Error != nil {
 		return task, result.Error
-	}
-
-	if result == nil {
-		return task, ExternalError{}
 	}
 
 	return task, nil
@@ -280,12 +287,11 @@ func (s userDaoTest) CampsOfUser(userID uint) ([]Camp, error) {
 	var camp []Camp
 	var result = DB.Where("OwnerID = ?", userID).Find(&camp)
 
+	if result.Error == gorm.ErrRecordNotFound {
+		return camp, ExternalError{}
+	}
 	if result.Error != nil {
 		return camp, result.Error
-	}
-
-	if result == nil {
-		return camp, ExternalError{}
 	}
 
 	return camp, nil
@@ -309,12 +315,11 @@ func (s userDaoTest) ProjectsOfUser(userID uint) ([]Project, error) {
 	var project []Project
 	var result = DB.Where("OwnerID = ?", userID).Find(&project)
 
+	if result.Error == gorm.ErrRecordNotFound {
+		return project, ExternalError{}
+	}
 	if result.Error != nil {
 		return project, result.Error
-	}
-
-	if result == nil {
-		return project, ExternalError{}
 	}
 
 	return project, nil
