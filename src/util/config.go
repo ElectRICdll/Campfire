@@ -5,6 +5,10 @@ import "time"
 var CONFIG = struct {
 	SQLConn string `yaml:"sql_conn"`
 
+	OSSEndPoint    string `yaml:"oss_end_point"`
+	OSSAccessKeyID string `yaml:"oss_access_key_id"`
+	OSSSecretKey   string `yaml:"oss_secret_key"`
+
 	AuthDuration time.Time `yaml:"auth_duration"`
 	SecretKey    []byte    `yaml:"secret_key"`
 

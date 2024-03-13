@@ -2,7 +2,8 @@ package service
 
 import (
 	"campfire/entity"
-	. "campfire/log"
+	"campfire/log"
+	"campfire/util"
 	"encoding/json"
 	"errors"
 	"github.com/gorilla/websocket"
@@ -59,13 +60,13 @@ func (s *sessionService) notify(n entity.Notification) {
 }
 
 func (s *sessionService) handle(conn *websocket.Conn, wsType int, payload []byte) {
-	Log.Info("Received new message")
+	log.Info("Received new message")
 
 	if wsType != websocket.TextMessage {
-		Log.Infof("Other type message received: %s", payload)
+		log.Infof("Other type message received: %s", payload)
 		return
 	} else {
-		Log.Infof("Received text message: %s\n", payload)
+		log.Infof("Received text message: %s\n", payload)
 		s.sendText(
 			conn,
 			websocket.TextMessage,
@@ -106,7 +107,7 @@ func (s *sessionService) handle(conn *websocket.Conn, wsType int, payload []byte
 func (s *sessionService) eventSelector(eType int) (entity.Event, error) {
 	var res entity.Event
 	if eType >= 0 && eType < len(entity.EventTypeIndex) {
-		return nil, entity.NewExternalError("invalid message type.")
+		return nil, util.NewExternalError("invalid message type.")
 	}
 	if eventInstance, ok := entity.EventTypeIndex[eType-1].InnerType.(entity.Event); ok {
 		res = eventInstance
@@ -119,26 +120,26 @@ func (s *sessionService) eventSelector(eType int) (entity.Event, error) {
 func (s *sessionService) sendText(conn *websocket.Conn, wsType int, msg string) {
 	err := conn.WriteMessage(wsType, ([]byte)(msg))
 	if err != nil {
-		Log.Errorf("Error replying to client: %s", err)
+		log.Errorf("Error replying to client: %s", err)
 	}
 }
 
 func (s *sessionService) sendJSON(conn *websocket.Conn, wsType int, data any) {
 	msg, err := json.Marshal(data)
 	if err != nil {
-		Log.Errorf("Illegal transmit!")
+		log.Errorf("Illegal transmit!")
 	}
 
 	if err := conn.WriteMessage(wsType, msg); err != nil {
-		Log.Errorf("Error replying to client: %s", err)
+		log.Errorf("Error replying to client: %s", err)
 	}
 }
 
 func (s *sessionService) importError(conn *websocket.Conn, err error) {
-	if _, ok := err.(entity.ExternalError); ok {
+	if _, ok := err.(util.ExternalError); ok {
 		s.sendText(conn, websocket.TextMessage, err.Error())
 	} else {
-		Log.Error(err.Error())
+		log.Error(err.Error())
 	}
 }
 

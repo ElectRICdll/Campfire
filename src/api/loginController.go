@@ -3,6 +3,7 @@ package api
 import (
 	"campfire/entity"
 	"campfire/service"
+	"campfire/util"
 	"github.com/gin-gonic/gin"
 )
 
@@ -42,10 +43,10 @@ path: /login
 func (c *loginController) Login(ctx *gin.Context) {
 	body := struct {
 		Email    string `json:"email"`
-		Password string `json:"password"`
+		Password string `json:"p"`
 	}{}
 	if err := ctx.BindJSON(&body); err != nil {
-		responseError(ctx, entity.ExternalError{Message: "invalid syntax"})
+		responseError(ctx, util.ExternalError{Message: "invalid syntax"})
 	}
 	res, err := c.loginService.Login(body.Email, body.Password)
 	responseJSON(ctx, res, err)
@@ -66,7 +67,7 @@ path: /reg
 func (c *loginController) Register(ctx *gin.Context) {
 	newUser := struct {
 		entity.UserDTO
-		Password string `json:"password"`
+		Password string `json:"p"`
 	}{}
 	if err := ctx.BindJSON(&newUser); err != nil {
 		responseError(ctx, err)

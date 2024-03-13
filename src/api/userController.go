@@ -3,6 +3,7 @@ package api
 import (
 	"campfire/entity"
 	"campfire/service"
+	"campfire/util"
 	"github.com/gin-gonic/gin"
 )
 
@@ -60,7 +61,7 @@ func (c userController) UserInfo(ctx *gin.Context) {
 	user := entity.UserDTO{}
 	err := ctx.ShouldBindUri(&user)
 	if err != nil {
-		responseError(ctx, entity.ExternalError{Message: "invalid syntax"})
+		responseError(ctx, util.ExternalError{Message: "invalid syntax"})
 		return
 	}
 
@@ -97,7 +98,7 @@ func (c userController) EditUserInfo(ctx *gin.Context) {
 	id := (uint)(ctx.Keys["id"].(float64))
 	user := entity.UserDTO{ID: id}
 	if err := ctx.BindJSON(&user); err != nil {
-		responseError(ctx, entity.ExternalError{Message: "invalid syntax"})
+		responseError(ctx, util.ExternalError{Message: "invalid syntax"})
 		return
 	}
 	if err := c.userService.EditUserInfo(user); err != nil {
@@ -121,7 +122,7 @@ func (c userController) ChangePassword(ctx *gin.Context) {
 		Password string `json:"p"`
 	}{}
 	if err := ctx.BindJSON(&p); err != nil {
-		responseError(ctx, entity.ExternalError{Message: "invalid syntax"})
+		responseError(ctx, util.ExternalError{Message: "invalid syntax"})
 		return
 	}
 	if err := c.userService.ChangePassword(id, p.Password); err != nil {
@@ -220,7 +221,7 @@ func (c userController) EditCampInfo(ctx *gin.Context) {
 		responseError(ctx, err)
 	}
 	if err := ctx.BindJSON(&camp); err != nil {
-		responseError(ctx, entity.ExternalError{Message: "invalid syntax"})
+		responseError(ctx, util.ExternalError{Message: "invalid syntax"})
 	}
 	if err := c.campService.EditCampInfo(userID, entity.Camp{
 		ID:      uri.CID,

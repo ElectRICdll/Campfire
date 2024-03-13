@@ -3,6 +3,7 @@ package api
 import (
 	"campfire/entity"
 	"campfire/service"
+	"campfire/util"
 	"github.com/gin-gonic/gin"
 )
 
@@ -57,7 +58,7 @@ func (p projectController) CreateCamp(ctx *gin.Context) {
 	}
 	camp := entity.CampDTO{}
 	if err := ctx.BindJSON(&camp); err != nil {
-		responseError(ctx, entity.ExternalError{Message: "invalid syntax."})
+		responseError(ctx, util.ExternalError{Message: "invalid syntax."})
 		return
 	}
 
@@ -106,7 +107,7 @@ func (p projectController) CreateProject(ctx *gin.Context) {
 
 	proj := entity.ProjectDTO{}
 	if err := ctx.BindJSON(&proj); err != nil {
-		responseError(ctx, entity.ExternalError{Message: "invalid syntax."})
+		responseError(ctx, util.ExternalError{Message: "invalid syntax."})
 		return
 	}
 
@@ -167,7 +168,7 @@ func (p projectController) EditProjectInfo(ctx *gin.Context) {
 		return
 	}
 	if err := ctx.BindJSON(&proj); err != nil {
-		responseError(ctx, entity.ExternalError{Message: "invalid syntax"})
+		responseError(ctx, util.ExternalError{Message: "invalid syntax"})
 	}
 	if err := p.projService.EditProjectInfo(userID, entity.Project{
 		ID:          uri.PID,
@@ -222,7 +223,7 @@ func (p projectController) CreateTask(ctx *gin.Context) {
 	}
 	task := entity.TaskDTO{}
 	if err := ctx.BindJSON(&task); err != nil {
-		responseError(ctx, entity.ExternalError{Message: "invalid syntax."})
+		responseError(ctx, util.ExternalError{Message: "invalid syntax."})
 	}
 
 	if err := p.projService.CreateTask(userID, entity.Task{
@@ -306,7 +307,7 @@ func (p projectController) EditTaskInfo(ctx *gin.Context) {
 	}
 	task := entity.TaskDTO{}
 	if err := ctx.BindJSON(&task); err != nil {
-		responseError(ctx, entity.ExternalError{Message: "invalid syntax."})
+		responseError(ctx, util.ExternalError{Message: "invalid syntax."})
 	}
 
 	if err := p.projService.EditTaskInfo(userID, uri.PID, entity.Task{

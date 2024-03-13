@@ -3,6 +3,8 @@ package dao
 import (
 	"campfire/cache"
 	. "campfire/entity"
+	. "campfire/util"
+	"golang.org/x/crypto/bcrypt"
 
 	"gorm.io/gorm"
 )
@@ -182,14 +184,11 @@ func NewUserDaoTest() UserDao {
 }
 
 func (s userDaoTest) CheckIdentity(email string, password string) (uint, error) {
-	user := User{
-		Email:    email,
-		Password: password,
-	}
+	user := User{}
 	res := DB.Where("email = ?", email).First(&user)
 	if res.Error == gorm.ErrRecordNotFound {
 		return 0, NewExternalError("No such user.")
-	} else if user.Password != password {
+	} else if err := bcrypt.CompareHashAndPassword(([]byte)(user.Password), ([]byte)(password)); err != nil {
 		return 0, NewExternalError("Wrong password or account.")
 	} else if res.Error != nil {
 		return 0, res.Error

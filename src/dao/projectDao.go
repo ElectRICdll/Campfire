@@ -1,6 +1,9 @@
 package dao
 
-import . "campfire/entity"
+import (
+	. "campfire/entity"
+	. "campfire/util"
+)
 
 type ProjectDao interface {
 	ProjectInfo(queryMemberID uint, projID uint) (Project, error)

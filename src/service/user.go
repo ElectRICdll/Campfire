@@ -4,6 +4,7 @@ import (
 	"campfire/cache"
 	"campfire/dao"
 	. "campfire/entity"
+	. "campfire/util"
 )
 
 type UserService interface {
@@ -47,7 +48,10 @@ type userService struct {
 }
 
 func (s *userService) ChangeEmail(userID uint, email string) error {
-	err := s.userQuery.SetEmail(userID, email)
+	err := s.userQuery.SetUserInfo(User{
+		ID:    userID,
+		Email: email,
+	})
 	// TODO
 	return err
 }

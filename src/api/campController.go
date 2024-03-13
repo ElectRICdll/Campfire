@@ -3,6 +3,7 @@ package api
 import (
 	"campfire/entity"
 	"campfire/service"
+	"campfire/util"
 	"github.com/gin-gonic/gin"
 )
 
@@ -30,9 +31,37 @@ type campController struct {
 	campService service.CampService
 }
 
-func (p campController) EditCampInfo(context *gin.Context) {
-	//TODO implement me
-	panic("implement me")
+/*
+EditCampInfo
+method: POST
+path: /camp/:camp_id/edit
+jwt_auth: true
+*/
+func (p campController) EditCampInfo(ctx *gin.Context) {
+	userID := (uint)(ctx.Keys["id"].(float64))
+	uri := struct {
+		CID uint `json:"c_id"`
+	}{}
+	if err := ctx.BindUri(&uri); err != nil {
+		responseError(ctx, err)
+		return
+	}
+	camp := entity.BriefCampDTO{}
+	if err := ctx.BindJSON(&camp); err != nil {
+		responseError(ctx, err)
+		return
+	}
+	if err := p.campService.EditCampInfo(userID, entity.Camp{
+		ID:      camp.ID,
+		OwnerID: camp.OwnerID,
+		ProjID:  camp.ProjID,
+		Name:    camp.Name,
+	}); err != nil {
+		responseError(ctx, err)
+		return
+	}
+	responseSuccess(ctx)
+	return
 }
 
 func (p campController) DisableCamp(context *gin.Context) {
@@ -95,7 +124,7 @@ func (p campController) EditCamp(ctx *gin.Context) {
 		return
 	}
 	if err := ctx.BindJSON(&proj); err != nil {
-		responseError(ctx, entity.ExternalError{Message: "invalid syntax"})
+		responseError(ctx, util.ExternalError{Message: "invalid syntax"})
 	}
 	if err := p.campService.EditCampInfo(userID, entity.Camp{
 		ID:      uri.PID,

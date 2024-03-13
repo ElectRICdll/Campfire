@@ -1,7 +1,7 @@
 package entity
 
 import (
-	. "campfire/log"
+	"campfire/log"
 	"github.com/gorilla/websocket"
 	"sync"
 )
@@ -21,13 +21,13 @@ func (p *SessionPool) SessionExecution(senderId uint, conn *websocket.Conn) Sess
 		defer func() {
 			err := conn.Close()
 			if err != nil {
-				Log.Error(err.Error())
+				log.Error(err.Error())
 			}
 		}()
 		for {
 			messageType, p, err := conn.ReadMessage()
 			if err != nil {
-				Log.Error(err.Error())
+				log.Error(err.Error())
 				return
 			}
 

@@ -1,8 +1,8 @@
 package api
 
 import (
-	"campfire/entity"
-	. "campfire/log"
+	"campfire/log"
+	"campfire/util"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -33,7 +33,7 @@ func responseError(ctx *gin.Context, err error) {
 	if err == nil {
 		return
 	}
-	if _, ok := err.(entity.ExternalError); ok {
+	if _, ok := err.(util.ExternalError); ok {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"res": RES_FAILURE,
 			"e":   err.Error(),
@@ -41,6 +41,6 @@ func responseError(ctx *gin.Context, err error) {
 		return
 	}
 	ctx.AbortWithStatus(http.StatusInternalServerError)
-	Log.Error(err.Error())
+	log.Error(err.Error())
 	return
 }
