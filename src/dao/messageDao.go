@@ -26,7 +26,7 @@ func (d messageDao) AddMessageRecord(msg ...Message) error {
 }
 func (d messageDao) PullCampMessageRecord(campID uint, beginMessageID uint, msgCount uint) ([]Message, error) {
 	var message []Message
-	result := DB.Where("campID = ? and ID >= ? and ID <= ?", campID, beginMessageID, beginMessageID-msgCount+1).Find(&message)
+	result := DB.Where("campID = ? AND ID >= ? AND ID <= ?", campID, beginMessageID, beginMessageID-msgCount+1).Find(&message)
 	if result.Error == gorm.ErrRecordNotFound {
 		return message, util.NewExternalError("no record found")
 	}
@@ -37,7 +37,7 @@ func (d messageDao) PullCampMessageRecord(campID uint, beginMessageID uint, msgC
 }
 func (d messageDao) MessageRecord(campID uint, msgID uint) (Message, error) {
 	var message Message
-	result := DB.Where("campID = ? and ID = ?", campID, msgID).Find(&message)
+	result := DB.Where("campID = ? AND ID = ?", campID, msgID).Find(&message)
 	if result.Error == gorm.ErrRecordNotFound {
 		return message, util.NewExternalError("no record found")
 	}

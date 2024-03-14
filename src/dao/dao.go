@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	UserDaoContainer    UserDao    = NewUserDaoTest()
+	UserDaoContainer    UserDao    = NewUserDao()
 	ProjectDaoContainer ProjectDao = nil
 	CampDaoContainer    CampDao    = nil
 	MessageDaoContainer MessageDao = nil

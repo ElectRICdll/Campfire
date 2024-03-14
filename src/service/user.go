@@ -57,7 +57,7 @@ func (s *userService) ChangeEmail(userID uint, email string) error {
 }
 
 func (s *userService) ChangePassword(userID uint, password string) error {
-	err := s.userQuery.SetPassword(userID, password)
+	err := s.userQuery.SetUserInfo(User{ID: userID, Password: password})
 	return err
 }
 

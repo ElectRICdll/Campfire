@@ -42,24 +42,19 @@ type ProjectDao interface {
 type projectDao struct{}
 
 func (d projectDao) ProjectInfo(queryMemberID uint, projID uint) (Project, error) {
-	var projmember ProjectMember
 	var project Project
-	var result = DB.Where("UserID = ? and ProjID = ?", queryMemberID, projID).Find(&projmember)
+	var result = DB.Preload("Tasks").Preload("Camps").Preload("Members.User").
+		Joins("JOIN project_members ON project_members.project_id = projects.id").
+		Joins("JOIN users ON users.id = project_members.user_id").
+		Where("projects.id = ? AND users.id = ?", projID, queryMemberID).
+		First(&project)
 	if result.Error == gorm.ErrRecordNotFound {
-		return project, ExternalError{}
+		return project, NewExternalError("Access denied.")
 	}
 	if result.Error != nil {
 		return project, result.Error
 	}
 
-	result = DB.Where("ID = ?", projID).Find(&project)
-
-	if result.Error == gorm.ErrRecordNotFound {
-		return project, ExternalError{}
-	}
-	if result.Error != nil {
-		return project, result.Error
-	}
 	return project, nil
 }
 
@@ -86,7 +81,7 @@ func (d projectDao) AddProject(proj Project) error {
 }
 
 func (d projectDao) DeleteProject(queryOwnerID, projID uint) error {
-	result := DB.Where("OwnerID = ? and ID = ?", queryOwnerID, projID).Delete(&Project{})
+	result := DB.Where("OwnerID = ? AND ID = ?", queryOwnerID, projID).Delete(&Project{})
 	if result.Error == gorm.ErrRecordNotFound {
 		return ExternalError{}
 	}
@@ -98,7 +93,7 @@ func (d projectDao) DeleteProject(queryOwnerID, projID uint) error {
 
 func (d projectDao) MemberList(queryMemberID uint, projID uint) ([]ProjectMember, error) {
 	var projmember []ProjectMember
-	var result = DB.Where("UserID = ? and ProjID = ?", queryMemberID, projID).Find(&projmember)
+	var result = DB.Where("UserID = ? AND ProjID = ?", queryMemberID, projID).Find(&projmember)
 	if result.Error == gorm.ErrRecordNotFound {
 		return projmember, ExternalError{}
 	}
@@ -118,14 +113,14 @@ func (d projectDao) MemberList(queryMemberID uint, projID uint) ([]ProjectMember
 
 func (d projectDao) MemberInfo(queryMemberID uint, projID uint, userID uint) (ProjectMember, error) {
 	var projmember ProjectMember
-	var result = DB.Where("UserID = ? and ProjID = ?", queryMemberID, projID).Find(&projmember)
+	var result = DB.Where("UserID = ? AND ProjID = ?", queryMemberID, projID).Find(&projmember)
 	if result.Error == gorm.ErrRecordNotFound {
 		return projmember, ExternalError{}
 	}
 	if result.Error != nil {
 		return projmember, result.Error
 	}
-	result = DB.Where("ProjID = ? and UserID = ?", projID, userID).Find(&projmember)
+	result = DB.Where("ProjID = ? AND UserID = ?", projID, userID).Find(&projmember)
 	if result.Error == gorm.ErrRecordNotFound {
 		return projmember, ExternalError{}
 	}
@@ -136,7 +131,7 @@ func (d projectDao) MemberInfo(queryMemberID uint, projID uint, userID uint) (Pr
 }
 
 func (d projectDao) AddMember(queryOwnerID uint, projID uint, userID uint) error {
-	var result = DB.Where("OwnerID = ? and ID = ?", queryOwnerID, projID).Find(&Project{})
+	var result = DB.Where("OwnerID = ? AND ID = ?", queryOwnerID, projID).Find(&Project{})
 	if result.Error == gorm.ErrRecordNotFound {
 		return ExternalError{}
 	}
@@ -155,14 +150,14 @@ func (d projectDao) AddMember(queryOwnerID uint, projID uint, userID uint) error
 }
 
 func (d projectDao) DeleteMember(queryOwnerID uint, projID uint, userID uint) error {
-	var result = DB.Where("OwnerID = ? and ID = ?", queryOwnerID, projID).Find(&Project{})
+	var result = DB.Where("OwnerID = ? AND ID = ?", queryOwnerID, projID).Find(&Project{})
 	if result.Error == gorm.ErrRecordNotFound {
 		return ExternalError{}
 	}
 	if result.Error != nil {
 		return result.Error
 	}
-	result = DB.Where("projID = ? and userID = ?", projID, userID).Delete(&ProjectMember{})
+	result = DB.Where("projID = ? AND userID = ?", projID, userID).Delete(&ProjectMember{})
 	if result.Error == gorm.ErrRecordNotFound {
 		return ExternalError{}
 	}
@@ -186,7 +181,7 @@ func (d projectDao) SetMemberInfo(projID uint, member ProjectMember) error {
 func (d projectDao) TasksOfProject(queryMemberID, projID uint) ([]Task, error) {
 	var projmember ProjectMember
 	var task []Task
-	var result = DB.Where("UserID = ? and ProjID = ?", queryMemberID, projID).Find(&projmember)
+	var result = DB.Where("UserID = ? AND ProjID = ?", queryMemberID, projID).Find(&projmember)
 	if result.Error == gorm.ErrRecordNotFound {
 		return task, ExternalError{}
 	}
@@ -205,7 +200,7 @@ func (d projectDao) TasksOfProject(queryMemberID, projID uint) ([]Task, error) {
 
 func (d projectDao) TaskInfo(queryMemberID uint, projID uint, taskID uint) (Task, error) {
 	var task Task
-	var result = DB.Where("UserID = ? and ProjID = ?", queryMemberID, projID).Find(&ProjectMember{})
+	var result = DB.Where("UserID = ? AND ProjID = ?", queryMemberID, projID).Find(&ProjectMember{})
 	if result.Error == gorm.ErrRecordNotFound {
 		return task, ExternalError{}
 	}
@@ -223,7 +218,7 @@ func (d projectDao) TaskInfo(queryMemberID uint, projID uint, taskID uint) (Task
 }
 
 func (d projectDao) SetTaskInfo(queryOwnerID uint, projID uint, task Task) error {
-	var result = DB.Where("OwnerID = ? and ID = ?", queryOwnerID, projID).Find(&Project{})
+	var result = DB.Where("OwnerID = ? AND ID = ?", queryOwnerID, projID).Find(&Project{})
 	if result.Error == gorm.ErrRecordNotFound {
 		return ExternalError{}
 	}
@@ -241,7 +236,7 @@ func (d projectDao) SetTaskInfo(queryOwnerID uint, projID uint, task Task) error
 }
 
 func (d projectDao) AddTask(queryProjMemberID uint, task Task) error {
-	var result = DB.Where("OwnerID = ? and ID = ?", queryProjMemberID, task.ProjID).Find(&Project{})
+	var result = DB.Where("OwnerID = ? AND ID = ?", queryProjMemberID, task.ProjID).Find(&Project{})
 	if result.Error == gorm.ErrRecordNotFound {
 		return ExternalError{}
 	}
@@ -259,7 +254,7 @@ func (d projectDao) AddTask(queryProjMemberID uint, task Task) error {
 }
 
 func (d projectDao) DeleteTask(queryOwnerID, projID uint, taskID uint) error {
-	var result = DB.Where("OwnerID = ? and ID = ?", queryOwnerID, projID).Find(&Project{})
+	var result = DB.Where("OwnerID = ? AND ID = ?", queryOwnerID, projID).Find(&Project{})
 	if result.Error == gorm.ErrRecordNotFound {
 		return ExternalError{}
 	}
@@ -279,7 +274,7 @@ func (d projectDao) DeleteTask(queryOwnerID, projID uint, taskID uint) error {
 func (d projectDao) CampsOfProject(queryMemberID, projID uint) ([]Camp, error) {
 	var projmember ProjectMember
 	var camp []Camp
-	var result = DB.Where("UserID = ? and ProjID = ?", queryMemberID, projID).Find(&projmember)
+	var result = DB.Where("UserID = ? AND ProjID = ?", queryMemberID, projID).Find(&projmember)
 	if result.Error == gorm.ErrRecordNotFound {
 		return camp, ExternalError{}
 	}
