@@ -3,6 +3,7 @@ package service
 import (
 	"campfire/dao"
 	. "campfire/entity"
+	wsentity "campfire/entity/ws-entity"
 	"campfire/service/ws-service"
 )
 
@@ -63,8 +64,11 @@ func (c campService) MemberList(queryID uint, campID uint) ([]MemberDTO, error) 
 }
 
 func (c campService) MemberInfo(queryID uint, campID uint, userID uint) (MemberDTO, error) {
-	//TODO implement me
-	panic("implement me")
+	member, err := c.campQuery.MemberInfo(queryID, campID, userID)
+	if err != nil {
+		return MemberDTO{}, err
+	}
+	return member.DTO(), err
 }
 
 func (c campService) PublicCamps(queryID uint, projID uint) ([]BriefCampDTO, error) {
@@ -72,7 +76,7 @@ func (c campService) PublicCamps(queryID uint, projID uint) ([]BriefCampDTO, err
 	if err != nil {
 		return nil, err
 	}
-	camps := []BriefCampDTO{}
+	camps := make([]BriefCampDTO, 0)
 	for _, camp := range res {
 		camps = append(camps, camp.BriefDTO())
 	}
@@ -96,8 +100,12 @@ func (c campService) EditCampInfo(queryID uint, camp Camp) error {
 	if err := c.campQuery.SetCampInfo(queryID, camp); err != nil {
 		return err
 	}
-	// TODO
-	c.mention.Notify(ws_service.Notification{})
+	event, eType := wsentity.GetEventByType(wsentity.CampInfoChangedEventType)
+	not, err := c.mention.NewNotification(event, eType)
+	if err != nil {
+		return err
+	}
+	c.mention.Notify(not)
 	return nil
 }
 
@@ -105,8 +113,12 @@ func (c campService) DisableCamp(queryID uint, campID uint) error {
 	if err := c.campQuery.DeleteCamp(queryID, campID); err != nil {
 		return err
 	}
-	// TODO
-	c.mention.Notify(ws_service.Notification{})
+	event, eType := wsentity.GetEventByType(wsentity.CampDisableEventType)
+	not, err := c.mention.NewNotification(event, eType)
+	if err != nil {
+		return err
+	}
+	c.mention.Notify(not)
 	return nil
 }
 
@@ -114,8 +126,12 @@ func (c campService) InviteMember(queryID uint, campID uint, userID uint) error 
 	if err := c.campQuery.AddMember(queryID, campID, userID); err != nil {
 		return err
 	}
-	// TODO
-	c.mention.Notify(ws_service.Notification{})
+	event, eType := wsentity.GetEventByType(wsentity.CampInvitationEventType)
+	not, err := c.mention.NewNotification(event, eType)
+	if err != nil {
+		return err
+	}
+	c.mention.Notify(not)
 	return nil
 }
 
@@ -123,8 +139,12 @@ func (c campService) KickMember(queryID uint, campID uint, userID uint) error {
 	if err := c.campQuery.DeleteMember(queryID, campID, userID); err != nil {
 		return err
 	}
-	// TODO
-	c.mention.Notify(ws_service.Notification{})
+	event, eType := wsentity.GetEventByType(wsentity.MemberExitedEventType)
+	not, err := c.mention.NewNotification(event, eType)
+	if err != nil {
+		return err
+	}
+	c.mention.Notify(not)
 	return nil
 }
 
@@ -135,8 +155,12 @@ func (c campService) EditNickname(campID uint, userID uint, nickname string) err
 	}); err != nil {
 		return err
 	}
-	// TODO
-	c.mention.Notify(ws_service.Notification{})
+	event, eType := wsentity.GetEventByType(wsentity.MemberInfoChangedEventType)
+	not, err := c.mention.NewNotification(event, eType)
+	if err != nil {
+		return err
+	}
+	c.mention.Notify(not)
 	return nil
 }
 
@@ -147,8 +171,12 @@ func (c campService) EditMemberTitle(campID uint, userID uint, title string) err
 	}); err != nil {
 		return err
 	}
-	// TODO
-	c.mention.Notify(ws_service.Notification{})
+	event, eType := wsentity.GetEventByType(wsentity.MemberInfoChangedEventType)
+	not, err := c.mention.NewNotification(event, eType)
+	if err != nil {
+		return err
+	}
+	c.mention.Notify(not)
 	return nil
 }
 

@@ -14,7 +14,7 @@ type EventService struct {
 }
 
 func (s EventService) HandleEvent(msg *Notification) error {
-	_, scope := NewEventByType((EventType)(msg.EType))
+	_, scope := GetEventByType((EventType)(msg.EType))
 	switch scope {
 	case OnCamp:
 		res, err := s.campQuery.MemberList(1, msg.Event.ScopeID())

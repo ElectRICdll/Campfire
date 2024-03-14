@@ -4,7 +4,7 @@ type EventScope int
 type EventType int
 
 const (
-	OnNobody EventScope = iota
+	OnNobody int = iota
 	OnProject
 	OnCamp
 	OnSomeone
@@ -16,13 +16,17 @@ const (
 	BinaryMessageEventType
 	NewTaskEventType
 	NewAnnouncementEventType
+	CampInfoChangedEventType
+	CampDisableEventType
+	MemberInfoChangedEventType
+	MemberExitedEventType
 	CodeGraphMessageEventType
 	RequestMessageRecordEventType
 	ProjectInvitationEventType
 	CampInvitationEventType
 )
 
-func NewEventByType(eventType EventType) (Event, EventScope) {
+func GetEventByType(eventType EventType) (Event, int) {
 	switch eventType {
 	case TextMessageEventType:
 		return &TextMessageEvent{}, OnCamp
@@ -40,6 +44,10 @@ func NewEventByType(eventType EventType) (Event, EventScope) {
 		return &ProjectInvitationEvent{}, OnSomeone
 	case CampInvitationEventType:
 		return &CampInvitationEvent{}, OnSomeone
+	case CampDisableEventType:
+		return &CampDisableEvent{}, OnCamp
+	case MemberInfoChangedEventType:
+		return &MemberInfoChangedEvent{}, OnCamp
 	default:
 		return nil, OnNobody
 	}

@@ -39,6 +39,18 @@ func (s *SessionService) NewSession(w http.ResponseWriter, r *http.Request, h ht
 	return nil
 }
 
+func (s *SessionService) NewNotification(event wsentity.Event, eType int) (Notification, error) {
+	res := Notification{
+		Timestamp: time.Now(),
+		EType:     eType,
+		Event:     event,
+	}
+	if err := s.eventHandler.HandleEvent(&res); err != nil {
+		return Notification{}, err
+	}
+	return res, nil
+}
+
 func (s *SessionService) Notify(n Notification) {
 	for _, value := range n.ReceiversID {
 		if connRes, ok := s.pool.Pool[value]; ok {
@@ -98,7 +110,7 @@ func (s *SessionService) handle(conn *websocket.Conn, wsType int, payload []byte
 }
 
 func (s *SessionService) eventSelector(eType int) (wsentity.Event, error) {
-	res, _ := wsentity.NewEventByType((wsentity.EventType)(eType))
+	res, _ := wsentity.GetEventByType((wsentity.EventType)(eType))
 	return res, nil
 }
 
