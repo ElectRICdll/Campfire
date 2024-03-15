@@ -5,7 +5,7 @@ import (
 	. "campfire/entity"
 	wsentity "campfire/entity/ws-entity"
 	"campfire/service/ws-service"
-	"github.com/gin-gonic/gin"
+	"campfire/storage"
 )
 
 type ProjectService interface {
@@ -33,22 +33,19 @@ type ProjectService interface {
 
 	DeleteTask(queryID uint, projID uint, taskID uint) error
 
-	// TODO
-	FileCatalogue(*gin.Context)
+	FileDetail(queryID uint, projID uint, dirPath string) (storage.File, error)
 
-	FileDetail(*gin.Context)
+	UploadFile(queryID uint, projID uint, files ...storage.File)
 
-	UploadFile(*gin.Context)
+	DownloadFile(queryID uint, projID uint) ([]storage.File, error)
 
-	DownloadFile(*gin.Context)
+	DeleteFile(queryID uint, projID uint, filePaths ...string) error
 
-	DeleteFile(*gin.Context)
+	DirectoryDetail(queryID uint, projID uint, dirPath string) (storage.Dir, error)
 
-	DirectoryDetail(*gin.Context)
+	CreateDirectory(queryID uint, projID uint, dirPath string) error
 
-	CreateDirectory(*gin.Context)
-
-	DeleteDirectory(*gin.Context)
+	DeleteDirectory(queryID uint, projID uint, dirPath string) error
 }
 
 func NewProjectService() ProjectService {
@@ -61,6 +58,41 @@ func NewProjectService() ProjectService {
 type projectService struct {
 	query   dao.ProjectDao
 	mention *ws_service.SessionService
+}
+
+func (p projectService) FileDetail(queryID uint, projID uint, dirPath string) (storage.File, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (p projectService) UploadFile(queryID uint, projID uint, files ...storage.File) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (p projectService) DownloadFile(queryID uint, projID uint) ([]storage.File, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (p projectService) DeleteFile(queryID uint, projID uint, filePaths ...string) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (p projectService) DirectoryDetail(queryID uint, projID uint, dirPath string) (storage.Dir, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (p projectService) CreateDirectory(queryID uint, projID uint, dirPath string) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (p projectService) DeleteDirectory(queryID uint, projID uint, dirPath string) error {
+	//TODO implement me
+	panic("implement me")
 }
 
 func (p projectService) CreateProject(project Project) error {
@@ -141,44 +173,4 @@ func (p projectService) EditTaskInfo(queryID uint, projID uint, task Task) error
 func (p projectService) DeleteTask(queryID uint, projID uint, taskID uint) error {
 	err := p.query.DeleteTask(queryID, projID, taskID)
 	return err
-}
-
-func (p projectService) FileCatalogue(context *gin.Context) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (p projectService) FileDetail(context *gin.Context) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (p projectService) UploadFile(context *gin.Context) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (p projectService) DownloadFile(context *gin.Context) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (p projectService) DeleteFile(context *gin.Context) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (p projectService) DirectoryDetail(context *gin.Context) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (p projectService) CreateDirectory(context *gin.Context) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (p projectService) DeleteDirectory(context *gin.Context) {
-	//TODO implement me
-	panic("implement me")
 }

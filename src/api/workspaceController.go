@@ -1,6 +1,9 @@
 package api
 
-import "github.com/gin-gonic/gin"
+import (
+	"campfire/service"
+	"github.com/gin-gonic/gin"
+)
 
 type WorkspaceController interface {
 	UploadProject(*gin.Context)
@@ -22,4 +25,62 @@ type WorkspaceController interface {
 	CreateDirectory(*gin.Context)
 
 	DeleteDirectory(*gin.Context)
+}
+
+func NewWorkSpaceController() WorkspaceController {
+	return workSpaceController{}
+}
+
+type workSpaceController struct {
+	workService service.ProjectService
+}
+
+func (w workSpaceController) UploadProject(context *gin.Context) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (w workSpaceController) DownloadProject(context *gin.Context) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (w workSpaceController) FileCatalogue(context *gin.Context) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (w workSpaceController) FileDetail(context *gin.Context) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (w workSpaceController) UploadFile(context *gin.Context) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (w workSpaceController) DownloadFile(context *gin.Context) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (w workSpaceController) DeleteFile(context *gin.Context) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (w workSpaceController) DirectoryDetail(context *gin.Context) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (w workSpaceController) CreateDirectory(context *gin.Context) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (w workSpaceController) DeleteDirectory(context *gin.Context) {
+	//TODO implement me
+	panic("implement me")
 }

@@ -35,8 +35,14 @@ type CampDao interface {
 	AddAnnouncement(queryOwnerID uint, campID uint, anno Announcement) error
 
 	DeleteAnnouncement(queryOwnerID uint, campID uint, annoID uint) error
+
+	IsUserACampMember(campID uint, userID uint) (bool, error)
 }
 type campDao struct{}
+
+func (d campDao) IsUserACampMember(campID uint, userID uint) (bool, error) {
+	panic("wait for implement")
+}
 
 func (d campDao) CampInfo(queryMemberID uint, campID uint) (Camp, error) {
 	var member Member

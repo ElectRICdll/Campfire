@@ -22,4 +22,6 @@ var CONFIG = struct {
 	AuthDuration:       time.Now().Add(time.Hour * 24 * 7),
 	SecretKey:          []byte("Clover"),
 	MessageRecordCount: 50,
+
+	NativeStorageRootPath: "./",
 }

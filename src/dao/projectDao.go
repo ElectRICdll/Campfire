@@ -37,9 +37,15 @@ type ProjectDao interface {
 	DeleteTask(queryOwnerID, projID uint, taskID uint) error
 
 	CampsOfProject(queryMemberID, projID uint) ([]Camp, error)
+
+	IsUserAProjectMember(projID uint, userID uint) (bool, error)
 }
 
 type projectDao struct{}
+
+func (d projectDao) IsUserAProjectMember(projID uint, userID uint) (bool, error) {
+	panic("wait for implement")
+}
 
 func (d projectDao) ProjectInfo(queryMemberID uint, projID uint) (Project, error) {
 	var project Project

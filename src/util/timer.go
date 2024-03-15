@@ -9,13 +9,13 @@ type Timer struct {
 	isRunning bool
 }
 
-func (t *Timer) Start(callback func()) {
+func (t *Timer) Start(callback func(int), code int) {
 	if !t.isRunning {
 		t.timer = time.NewTimer(t.remaining)
 		go func() {
 			<-t.timer.C
 			t.isRunning = false
-			callback()
+			callback(code)
 		}()
 		t.isRunning = true
 	}

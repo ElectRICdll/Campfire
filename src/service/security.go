@@ -15,6 +15,10 @@ type SecurityService interface {
 	encryptPassword(password string) (string, error)
 
 	tokenGenerate(entity.User) (string, error)
+
+	IsUserACampMember(campID, userID uint) (bool, error)
+
+	IsUserAProjMember(projID, userID uint) (bool, error)
 }
 
 func NewSecurityService() SecurityService {
@@ -22,6 +26,16 @@ func NewSecurityService() SecurityService {
 }
 
 type securityService struct{}
+
+func (s securityService) IsUserACampMember(campID, userID uint) (bool, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (s securityService) IsUserAProjMember(projID, userID uint) (bool, error) {
+	//TODO implement me
+	panic("implement me")
+}
 
 func (s securityService) AuthMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
