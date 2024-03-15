@@ -3,6 +3,7 @@ package service
 import (
 	"campfire/dao"
 	. "campfire/entity"
+	wsentity "campfire/entity/ws-entity"
 	"campfire/service/ws-service"
 	"github.com/gin-gonic/gin"
 )
@@ -77,8 +78,11 @@ func (p projectService) EditProjectInfo(queryID uint, project Project) error {
 	if err != nil {
 		return err
 	}
-	// TODO
-	p.mention.Notify(ws_service.Notification{})
+	if err := p.mention.NotifyByEvent(&wsentity.ProjectInfoChangedEvent{
+		ProjectDTO: project.DTO(),
+	}, wsentity.ProjectInfoChangedEventType); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -102,8 +106,11 @@ func (p projectService) CreateTask(queryID uint, task Task) error {
 	if err != nil {
 		return err
 	}
-	// TODO
-	p.mention.Notify(ws_service.Notification{})
+	if err := p.mention.NotifyByEvent(&wsentity.NewTaskEvent{
+		TaskDTO: task.DTO(),
+	}, wsentity.NewTaskEventType); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -128,8 +135,6 @@ func (p projectService) EditTaskInfo(queryID uint, projID uint, task Task) error
 	if err != nil {
 		return err
 	}
-	// TODO
-	p.mention.Notify(ws_service.Notification{})
 	return nil
 }
 

@@ -5,8 +5,14 @@ import (
 	"time"
 )
 
+const (
+	UnHandle = iota
+	Accepted
+	Refused
+)
+
 type InviteEvent interface {
-	Activate()
+	Activate(int)
 }
 
 type ProjectInvitationEvent struct {
@@ -17,8 +23,8 @@ type ProjectInvitationEvent struct {
 	entity.BriefProjectDTO
 }
 
-func (a *ProjectInvitationEvent) Activate() {
-
+func (a *ProjectInvitationEvent) Activate(newStatus int) {
+	a.IsAccepted = newStatus
 }
 
 func (a *ProjectInvitationEvent) ScopeID() uint {
@@ -26,15 +32,16 @@ func (a *ProjectInvitationEvent) ScopeID() uint {
 }
 
 type CampInvitationEvent struct {
-	Timestamp  time.Time     `json:"timestamp"`
-	TargetID   uint          `json:"target_id"`
-	IsAccepted int           `json:"is_accepted"`
-	KeepTime   time.Duration `json:"keep_time"`
+	Timestamp    time.Time     `json:"timestamp"`
+	SourceID     uint          `json:"source_id"`
+	TargetID     uint          `json:"target_id"`
+	IsAccepted   int           `json:"is_accepted"`
+	KeepDuration time.Duration `json:"keep_time"`
 	entity.BriefCampDTO
 }
 
-func (a *CampInvitationEvent) Activate() {
-
+func (a *CampInvitationEvent) Activate(newStatus int) {
+	a.IsAccepted = newStatus
 }
 
 func (a *CampInvitationEvent) ScopeID() uint {
