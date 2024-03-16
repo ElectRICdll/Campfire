@@ -1,6 +1,82 @@
 package cache
 
-import "campfire/entity"
+import (
+	"campfire/entity"
+	. "campfire/entity"
+	"fmt"
+	"time"
+
+	"github.com/patrickmn/go-cache"
+)
+
+var (
+	userCache *cache.Cache
+)
+
+func CacheInit() {
+	userCache = cache.New(30*time.Minute, 60*time.Minute) // 设置缓存，过期时间为 30 分钟，清理间隔为 60 分钟
+}
+
+func StoreUserInCache(user User) {
+	userCache.Set(fmt.Sprintf("user:%d", user.ID), user, cache.DefaultExpiration)
+}
+
+func GetUserFromCache(userID int) (bool, User) {
+	if user, found := userCache.Get(fmt.Sprintf("user:%d", userID)); found {
+		return true, user.(User)
+	}
+	return false, User{}
+}
+
+func GetLastReadMsgIDFromCache(userID int) int {
+	if found, user := GetUserFromCache(userID); found {
+		return user.LastMsgID
+	}
+	return -1 // 返回 -1 表示未找到用户或用户信息中未包含最后已读消息 ID
+}
+
+var (
+	messageCache *cache.Cache
+)
+
+func MsgInit() {
+	messageCache = cache.New(30*time.Minute, 60*time.Minute) // 设置缓存，过期时间为 30 分钟，清理间隔为 60 分钟
+}
+
+func StoreMessageInCache(userID int, message Message) {
+	messages, found := messageCache.Get(fmt.Sprintf("user:%d", userID))
+	if !found {
+		messages = make([]Message, 0)
+	}
+	messages = append(messages.([]Message), message)
+	messageCache.Set(fmt.Sprintf("user:%d", userID), messages, cache.DefaultExpiration)
+}
+
+func GetMessagesFromCache(userID int) []Message {
+	if messages, found := messageCache.Get(fmt.Sprintf("user:%d", userID)); found {
+		return messages.([]Message)
+	}
+	return nil
+}
+
+var (
+	taskCache *cache.Cache
+)
+
+func TaskInit() {
+	taskCache = cache.New(30*time.Minute, 60*time.Minute) // 设置缓存，过期时间为 30 分钟，清理间隔为 60 分钟
+}
+
+func StoreTaskInCache(user []User, task Task) {
+	taskCache.Set(fmt.Sprintf("task:%d", task.ID), user, cache.DefaultExpiration)
+}
+
+func GetUnfinishedUsersFromCache(taskID int) []User {
+	if users, found := taskCache.Get(fmt.Sprintf("task:%d", taskID)); found {
+		return users.([]User)
+	}
+	return nil
+}
 
 //var TestProjects = []entity.Project{
 //	{
