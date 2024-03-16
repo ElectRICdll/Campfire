@@ -1,15 +1,17 @@
 package entity
 
+
 type User struct {
-	ID        uint   `gorm:"primaryKey;autoIncrement"`
-	Email     string `gorm:"unique"`
-	Name      string
-	Password  string `gorm:"size:60"`
-	AvatarUrl string
-	Signature string
-	Status    int
-	Token     string `gorm:"-"`
-	IsOnline  bool   `gorm:"-"`
+	ID         uint   `gorm:"primaryKey;autoIncrement"`
+	Email      string `gorm:"unique"`
+	Name       string
+	Password   string `gorm:"size:60"`
+	AvatarUrl  string
+	Signature  string
+	Status     int
+	Token      string `gorm:"-"`
+	IsOnline   bool   `gorm:"-"`
+	LastMsgID  int
 }
 
 type UserDTO struct {
