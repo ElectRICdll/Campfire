@@ -233,8 +233,7 @@ func (p projectController) CreateTask(ctx *gin.Context) {
 		Content: task.Content,
 		BeginAt: task.BeginAt,
 		EndAt:   task.EndAt,
-	},
-	); err != nil {
+	}); err != nil {
 		responseError(ctx, err)
 		return
 	}

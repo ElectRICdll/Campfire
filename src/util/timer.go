@@ -3,7 +3,7 @@ package util
 import "time"
 
 type Timer struct {
-	duration  time.Duration
+	Duration  time.Duration
 	remaining time.Duration
 	timer     *time.Timer
 	isRunning bool
@@ -30,7 +30,7 @@ func (t *Timer) Stop() {
 
 func (t *Timer) Reset() {
 	t.Stop()
-	t.remaining = t.duration
+	t.remaining = t.Duration
 }
 
 func (t *Timer) String() string {

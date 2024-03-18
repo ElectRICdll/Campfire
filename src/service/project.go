@@ -134,6 +134,9 @@ func (p projectService) DownloadProject(queryID uint) {
 }
 
 func (p projectService) CreateTask(queryID uint, task Task) error {
+	task.StartATimer()
+	// TODO
+	//cache.StoreTaskInCache()
 	err := p.query.AddTask(queryID, task)
 	if err != nil {
 		return err

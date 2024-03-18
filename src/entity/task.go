@@ -1,6 +1,15 @@
 package entity
 
-import "time"
+import (
+	"campfire/util"
+	"time"
+)
+
+const (
+	Unknown = iota
+	Activated
+	Deactivated
+)
 
 type Task struct {
 	ID        uint     `gorm:"primaryKey;autoIncrement"`
@@ -8,11 +17,23 @@ type Task struct {
 	ProjID    uint     `gorm:"not null"`
 	Receivers []Member `gorm:"foreignKey:ID"`
 
-	Title   string
-	BeginAt time.Time
-	EndAt   time.Time
-	Content string
-	Status  int
+	Title       string
+	BeginAt     time.Time
+	EndAt       time.Time
+	Content     string
+	Status      int
+	*util.Timer `gorm:"-"`
+}
+
+func (t *Task) StartATimer() {
+	t.Timer = &util.Timer{
+		Duration: t.EndAt.Sub(t.BeginAt),
+	}
+	t.Start(t.SetStatus, Deactivated)
+}
+
+func (t *Task) SetStatus(code int) {
+	t.Status = code
 }
 
 type TaskDTO struct {
@@ -28,7 +49,7 @@ type TaskDTO struct {
 	Status  int       `json:"status"`
 }
 
-func (t Task) DTO() TaskDTO {
+func (t *Task) DTO() TaskDTO {
 	return TaskDTO{
 		ID:      t.ID,
 		OwnerID: t.OwnerID,

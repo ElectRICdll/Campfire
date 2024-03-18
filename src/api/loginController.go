@@ -77,6 +77,7 @@ func (c *loginController) Register(ctx *gin.Context) {
 		responseError(ctx, err)
 		return
 	}
+
 	responseSuccess(ctx)
 	return
 }

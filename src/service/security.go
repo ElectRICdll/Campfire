@@ -1,6 +1,7 @@
 package service
 
 import (
+	"campfire/dao"
 	"campfire/entity"
 	"campfire/util"
 	"github.com/dgrijalva/jwt-go"
@@ -25,11 +26,20 @@ func NewSecurityService() SecurityService {
 	return securityService{}
 }
 
-type securityService struct{}
+type securityService struct {
+	campQuery dao.CampDao
+	query     dao.ProjectDao
+}
 
 func (s securityService) IsUserACampMember(campID, userID uint) (bool, error) {
-	//TODO implement me
-	panic("implement me")
+	// TODO
+
+	res, err := s.campQuery.IsUserACampMember(campID, userID)
+	if err != nil {
+		return false, err
+	}
+
+	return res, nil
 }
 
 func (s securityService) IsUserAProjMember(projID, userID uint) (bool, error) {

@@ -1,6 +1,7 @@
 package service
 
 import (
+	"campfire/cache"
 	"campfire/dao"
 	"campfire/entity"
 )
@@ -43,16 +44,17 @@ func (s *loginService) Login(email string, password string) (entity.LoginDTO, er
 	}
 
 	token, err := s.sec.tokenGenerate(user)
-	if err == nil {
-		user.Token = token
-		s.user.online(&user)
-		return entity.LoginDTO{
-			ID:    id,
-			Name:  user.Name,
-			Token: token,
-		}, err
+	if err != nil {
+		return entity.LoginDTO{}, err
 	}
-	return entity.LoginDTO{}, err
+	user.Token = token
+	s.user.online(&user)
+	cache.StoreUserInCache(user)
+	return entity.LoginDTO{
+		ID:    id,
+		Name:  user.Name,
+		Token: token,
+	}, nil
 }
 
 func (s *loginService) Register(dto entity.UserDTO, password string) error {
