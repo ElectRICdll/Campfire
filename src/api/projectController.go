@@ -22,7 +22,10 @@ type ProjectController interface {
 }
 
 func NewProjectController() ProjectController {
-	return projectController{}
+	return projectController{
+		projService: service.ProjectServiceContainer,
+		campService: service.CampServiceContainer,
+	}
 }
 
 type projectController struct {
@@ -40,7 +43,7 @@ jwt_auth: true
 func (p projectController) CreateCamp(ctx *gin.Context) {
 	userID := (uint)(ctx.Keys["id"].(float64))
 	uri := struct {
-		PID uint `uri:"p_id" binding:"required"`
+		PID uint `uri:"project_id" binding:"required"`
 	}{}
 	if err := ctx.BindUri(&uri); err != nil {
 		responseError(ctx, err)
@@ -114,6 +117,7 @@ func (p projectController) CreateProject(ctx *gin.Context) {
 	); err != nil {
 		responseError(ctx, err)
 	}
+	responseSuccess(ctx)
 }
 
 /*

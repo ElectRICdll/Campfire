@@ -21,7 +21,7 @@ type BriefCampDTO struct {
 }
 
 type CampDTO struct {
-	ID                  uint              `json:"campID" uri:"camp_id" binding:"required"`
+	ID                  uint              `json:"campID" uri:"camp_id"`
 	OwnerID             uint              `json:"ownerID"`
 	ProjID              uint              `json:"projectID"`
 	Name                string            `json:"name"`

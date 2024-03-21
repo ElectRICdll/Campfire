@@ -15,6 +15,10 @@ type MessageDao interface {
 	MessageRecord(campID uint, msgID uint) (Message, error)
 }
 
+func NewMessageDao() MessageDao {
+	return messageDao{}
+}
+
 type messageDao struct{}
 
 func (d messageDao) AddMessageRecord(msg ...Message) error {

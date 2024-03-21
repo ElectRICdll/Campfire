@@ -35,7 +35,6 @@ func registerDependencies(engine *gin.Engine) {
 	engine.GET("/project/:project_id/camps", auth.AuthMiddleware(), proj.PublicCamps)
 	engine.POST("/project/new_proj", auth.AuthMiddleware(), proj.CreateProject)
 	engine.POST("/project/:project_id/edit", auth.AuthMiddleware(), proj.EditProjectInfo)
-
 	engine.POST("/project/:project_id/new_camp", auth.AuthMiddleware(), proj.CreateCamp)
 
 	task := api.NewTaskController()

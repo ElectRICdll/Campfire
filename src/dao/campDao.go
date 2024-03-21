@@ -38,6 +38,11 @@ type CampDao interface {
 
 	IsUserACampMember(campID uint, userID uint) (bool, error)
 }
+
+func NewCampDao() CampDao {
+	return campDao{}
+}
+
 type campDao struct{}
 
 func (d campDao) IsUserACampMember(campID uint, userID uint) (bool, error) {
@@ -78,7 +83,7 @@ func (d campDao) SetCampInfo(queryOwnerID uint, camp Camp) error {
 }
 
 func (d campDao) AddCamp(queryMemberID uint, camp Camp) error {
-	var result = DB.Where("UserID = ? AND ID = ?", queryMemberID, camp.ProjID).Find(&Project{})
+	var result = DB.Where("user_id = ? AND id = ?", queryMemberID, camp.ProjID).Find(&Project{})
 	if result.Error != nil {
 		return result.Error
 	}

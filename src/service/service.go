@@ -9,4 +9,6 @@ var (
 	SessionServiceContainer  = ws_service.NewSessionService()
 	UserServiceContainer     = NewUserService()
 	TaskServiceContainer     = NewTaskService()
+	ProjectServiceContainer  = NewProjectService()
+	CampServiceContainer     = NewCampService()
 )

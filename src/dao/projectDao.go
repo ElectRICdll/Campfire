@@ -41,6 +41,10 @@ type ProjectDao interface {
 	IsUserAProjectMember(projID uint, userID uint) (bool, error)
 }
 
+func NewProjectDao() ProjectDao {
+	return projectDao{}
+}
+
 type projectDao struct{}
 
 func (d projectDao) IsUserAProjectMember(projID uint, userID uint) (bool, error) {

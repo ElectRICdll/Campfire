@@ -91,6 +91,10 @@ func (c campService) CampInfo(queryID uint, campID uint) (CampDTO, error) {
 }
 
 func (c campService) CreateCamp(queryID uint, camp Camp) error {
+	camp.Members = append(camp.Members, Member{
+		UserID:   camp.OwnerID,
+		IsLeader: true,
+	})
 	err := c.campQuery.AddCamp(queryID, camp)
 	return err
 }

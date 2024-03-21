@@ -5,6 +5,7 @@ import (
 	. "campfire/entity"
 	wsentity "campfire/entity/ws-entity"
 	"campfire/service/ws-service"
+	"time"
 )
 
 type ProjectService interface {
@@ -25,17 +26,24 @@ type ProjectService interface {
 
 func NewProjectService() ProjectService {
 	return projectService{
-		query:   dao.ProjectDaoContainer,
-		mention: SessionServiceContainer,
+		query:     dao.ProjectDaoContainer,
+		userQuery: dao.UserDaoContainer,
+		mention:   SessionServiceContainer,
 	}
 }
 
 type projectService struct {
-	query   dao.ProjectDao
-	mention *ws_service.SessionService
+	query     dao.ProjectDao
+	userQuery dao.UserDao
+	mention   *ws_service.SessionService
 }
 
 func (p projectService) CreateProject(project Project) error {
+	project.Members = append(project.Members, ProjectMember{
+		UserID:    project.OwnerID,
+		IsCreator: true,
+	})
+	project.BeginAt = time.Now()
 	err := p.query.AddProject(project)
 	return err
 }
