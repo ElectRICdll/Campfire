@@ -3,6 +3,7 @@ package dao
 import (
 	. "campfire/entity"
 	. "campfire/util"
+
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )

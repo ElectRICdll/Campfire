@@ -49,18 +49,9 @@ func (d campDao) IsUserACampMember(campID uint, userID uint) (bool, error) {
 	panic("wait for implement")
 }
 
-func (d campDao) CampInfo(queryMemberID uint, campID uint) (Camp, error) {
-	var member Member
+func (d campDao) CampInfo(campID uint) (Camp, error) {
 	var camp Camp
-	var result = DB.Where("UserID = ? AND CampID = ?", queryMemberID, campID).Find(&member)
-	if result.Error == gorm.ErrRecordNotFound {
-		return camp, ExternalError{}
-	}
-	if result.Error != nil {
-		return camp, result.Error
-	}
-
-	result = DB.Where("ID = ?", campID).Find(&camp)
+	var result = DB.Where("id = ?", campID).Find(&camp)
 
 	if result.Error == gorm.ErrRecordNotFound {
 		return camp, ExternalError{}
@@ -71,8 +62,8 @@ func (d campDao) CampInfo(queryMemberID uint, campID uint) (Camp, error) {
 	return camp, nil
 }
 
-func (d campDao) SetCampInfo(queryOwnerID uint, camp Camp) error {
-	result := DB.Where("OwnerID = ?", queryOwnerID).Save(&camp)
+func (d campDao) SetCampInfo(camp Camp) error {
+	result := DB.Updates(&camp)
 	if result.Error == gorm.ErrRecordNotFound {
 		return ExternalError{}
 	}
@@ -82,15 +73,8 @@ func (d campDao) SetCampInfo(queryOwnerID uint, camp Camp) error {
 	return nil
 }
 
-func (d campDao) AddCamp(queryMemberID uint, camp Camp) error {
-	var result = DB.Where("user_id = ? AND id = ?", queryMemberID, camp.ProjID).Find(&Project{})
-	if result.Error != nil {
-		return result.Error
-	}
-	if result == nil {
-		return ExternalError{}
-	}
-	result = DB.Save(&camp)
+func (d campDao) AddCamp(camp Camp) error {
+	var result = DB.Save(&camp)
 	if result.Error != nil {
 		return result.Error
 	}
@@ -100,8 +84,8 @@ func (d campDao) AddCamp(queryMemberID uint, camp Camp) error {
 	return nil
 }
 
-func (d campDao) DeleteCamp(queryOwnerID, campID uint) error {
-	result := DB.Where("OwnerID = ? AND ID = ?", queryOwnerID, campID).Delete(&Camp{})
+func (d campDao) DeleteCamp(campID uint) error {
+	result := DB.Where("id = ?", campID).Delete(&Camp{})
 	if result.Error == gorm.ErrRecordNotFound {
 		return ExternalError{}
 	}
@@ -111,17 +95,10 @@ func (d campDao) DeleteCamp(queryOwnerID, campID uint) error {
 	return nil
 }
 
-func (d campDao) MemberList(queryMemberID uint, campID uint) ([]Member, error) {
+func (d campDao) MemberList(campID uint) ([]Member, error) {
 	var member []Member
-	var result = DB.Where("UserID = ? AND CampID = ?", queryMemberID, campID).Find(&member)
-	if result.Error == gorm.ErrRecordNotFound {
-		return member, ExternalError{}
-	}
-	if result.Error != nil {
-		return member, result.Error
-	}
 
-	result = DB.Where("CampID = ?", campID).Find(&member)
+	var result = DB.Where("camp_id = ?", campID).Find(&member)
 	if result.Error == gorm.ErrRecordNotFound {
 		return member, ExternalError{}
 	}
@@ -131,16 +108,9 @@ func (d campDao) MemberList(queryMemberID uint, campID uint) ([]Member, error) {
 	return member, nil
 }
 
-func (d campDao) MemberInfo(queryMemberID uint, campID uint, userID uint) (Member, error) {
+func (d campDao) MemberInfo(campID uint, userID uint) (Member, error) {
 	var member Member
-	var result = DB.Where("UserID = ? AND CampID = ?", queryMemberID, campID).Find(&member)
-	if result.Error == gorm.ErrRecordNotFound {
-		return member, ExternalError{}
-	}
-	if result.Error != nil {
-		return member, result.Error
-	}
-	result = DB.Where("CampID = ? AND UserID = ?", campID, userID).Find(&member)
+	var result = DB.Where("camp_id = ? AND user_id = ?", campID, userID).Find(&member)
 	if result.Error == gorm.ErrRecordNotFound {
 		return member, ExternalError{}
 	}
@@ -150,16 +120,9 @@ func (d campDao) MemberInfo(queryMemberID uint, campID uint, userID uint) (Membe
 	return member, nil
 }
 
-func (d campDao) AddMember(queryOwnerID uint, campID uint, userID uint) error {
-	var result = DB.Where("OwnerID = ? AND ID = ?", queryOwnerID, campID).Find(&Camp{})
-	if result.Error == gorm.ErrRecordNotFound {
-		return ExternalError{}
-	}
-	if result.Error != nil {
-		return result.Error
-	}
+func (d campDao) AddMember(campID uint, userID uint) error {
 	var member = Member{CampID: campID, UserID: userID}
-	result = DB.Save(&member)
+	var result = DB.Save(&member)
 	if result.Error == gorm.ErrRecordNotFound {
 		return ExternalError{}
 	}
@@ -169,15 +132,8 @@ func (d campDao) AddMember(queryOwnerID uint, campID uint, userID uint) error {
 	return nil
 }
 
-func (d campDao) DeleteMember(queryOwnerID uint, campID uint, userID uint) error {
-	var result = DB.Where("OwnerID = ? AND ID = ?", queryOwnerID, campID).Find(&Camp{})
-	if result.Error == gorm.ErrRecordNotFound {
-		return ExternalError{}
-	}
-	if result.Error != nil {
-		return result.Error
-	}
-	result = DB.Where("CampID = ? AND userID = ?", campID, userID).Delete(&Member{})
+func (d campDao) DeleteMember(campID uint, userID uint) error {
+	var result = DB.Where("camp_id = ? AND user_id = ?", campID, userID).Delete(&Member{})
 	if result.Error == gorm.ErrRecordNotFound {
 		return ExternalError{}
 	}
@@ -188,7 +144,7 @@ func (d campDao) DeleteMember(queryOwnerID uint, campID uint, userID uint) error
 }
 
 func (d campDao) SetMemberInfo(campID uint, member Member) error {
-	var result = DB.Where("campID = ?", campID).Save(&member)
+	var result = DB.Where("camp_id = ?", campID).Updates(&member)
 	if result.Error == gorm.ErrRecordNotFound {
 		return ExternalError{}
 	}
@@ -198,16 +154,9 @@ func (d campDao) SetMemberInfo(campID uint, member Member) error {
 	return nil
 }
 
-func (d campDao) AnnouncementInfo(queryMemberID uint, campID uint, annoID uint) (Announcement, error) {
+func (d campDao) AnnouncementInfo(campID uint, annoID uint) (Announcement, error) {
 	var announcement Announcement
-	var result = DB.Where("UserID = ? AND CampID = ?", queryMemberID, campID).Find(&Member{})
-	if result.Error == gorm.ErrRecordNotFound {
-		return announcement, ExternalError{}
-	}
-	if result.Error != nil {
-		return announcement, result.Error
-	}
-	result = DB.Where("campID = ? AND ID = ?", campID, annoID).Save(&announcement)
+	var result = DB.Where("camp_id = ? AND id = ?", campID, annoID).Save(&announcement)
 	if result.Error == gorm.ErrRecordNotFound {
 		return announcement, ExternalError{}
 	}
@@ -217,16 +166,9 @@ func (d campDao) AnnouncementInfo(queryMemberID uint, campID uint, annoID uint) 
 	return announcement, nil
 }
 
-func (d campDao) Announcements(queryMemberID uint, campID uint) ([]Announcement, error) {
+func (d campDao) Announcements(campID uint) ([]Announcement, error) {
 	var announcement []Announcement
-	var result = DB.Where("UserID = ? AND CampID = ?", queryMemberID, campID).Find(&Member{})
-	if result.Error == gorm.ErrRecordNotFound {
-		return announcement, ExternalError{}
-	}
-	if result.Error != nil {
-		return announcement, result.Error
-	}
-	result = DB.Where("campID = ?", campID).Save(&announcement)
+	var result = DB.Where("camp_id = ?", campID).Save(&announcement)
 	if result.Error == gorm.ErrRecordNotFound {
 		return announcement, ExternalError{}
 	}
@@ -235,15 +177,8 @@ func (d campDao) Announcements(queryMemberID uint, campID uint) ([]Announcement,
 	}
 	return announcement, nil
 }
-func (d campDao) EditAnnouncement(queryOwnerID uint, campID uint, anno Announcement) error {
-	var result = DB.Where("OwnerID = ? AND ID = ?", queryOwnerID, campID).Find(&Camp{})
-	if result.Error == gorm.ErrRecordNotFound {
-		return ExternalError{}
-	}
-	if result.Error != nil {
-		return result.Error
-	}
-	result = DB.Save(&anno)
+func (d campDao) EditAnnouncement(anno Announcement) error {
+	var result = DB.Updates(&anno)
 	if result.Error == gorm.ErrRecordNotFound {
 		return ExternalError{}
 	}
@@ -252,15 +187,8 @@ func (d campDao) EditAnnouncement(queryOwnerID uint, campID uint, anno Announcem
 	}
 	return nil
 }
-func (d campDao) AddAnnouncement(queryOwnerID uint, campID uint, anno Announcement) error {
-	var result = DB.Where("OwnerID = ? AND ID = ?", queryOwnerID, campID).Find(&Camp{})
-	if result.Error == gorm.ErrRecordNotFound {
-		return ExternalError{}
-	}
-	if result.Error != nil {
-		return result.Error
-	}
-	result = DB.Save(&anno)
+func (d campDao) AddAnnouncement(anno Announcement) error {
+	var result = DB.Save(&anno)
 	if result.Error == gorm.ErrRecordNotFound {
 		return ExternalError{}
 	}
@@ -269,15 +197,8 @@ func (d campDao) AddAnnouncement(queryOwnerID uint, campID uint, anno Announceme
 	}
 	return nil
 }
-func (d campDao) DeleteAnnouncement(queryOwnerID uint, campID uint, annoID uint) error {
-	var result = DB.Where("OwnerID = ? AND ID = ?", queryOwnerID, campID).Find(&Camp{})
-	if result.Error == gorm.ErrRecordNotFound {
-		return ExternalError{}
-	}
-	if result.Error != nil {
-		return result.Error
-	}
-	result = DB.Where("campID = ? AND ID = ?", campID, annoID).Delete(&Announcement{})
+func (d campDao) DeleteAnnouncement(campID uint, annoID uint) error {
+	var result = DB.Where("camp_id = ? AND id = ?", campID, annoID).Delete(&Announcement{})
 	if result.Error == gorm.ErrRecordNotFound {
 		return ExternalError{}
 	}
