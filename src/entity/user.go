@@ -1,24 +1,23 @@
 package entity
 
-
 type User struct {
-	ID         uint   `gorm:"primaryKey;autoIncrement"`
-	Email      string `gorm:"unique"`
-	Name       string
-	Password   string `gorm:"size:60"`
-	AvatarUrl  string
-	Signature  string
-	Status     int
-	Token      string `gorm:"-"`
-	IsOnline   bool   `gorm:"-"`
-	LastMsgID  int
+	ID        uint   `gorm:"primaryKey;autoIncrement"`
+	Email     string `gorm:"unique"`
+	Name      string
+	Password  string `gorm:"size:60"`
+	AvatarUrl string
+	Signature string
+	Status    int
+	Token     string `gorm:"-"`
+	IsOnline  bool   `gorm:"-"`
+	LastMsgID int
 }
 
 type UserDTO struct {
-	ID        uint   `json:"u_id,omitempty" uri:"user_id"`
+	ID        uint   `json:"userID,omitempty" uri:"user_id"`
 	Email     string `json:"email,omitempty"`
 	Name      string `json:"username,omitempty"`
-	AvatarUrl string `json:"avatar_url,omitempty"`
+	AvatarUrl string `json:"avatarUrl,omitempty"`
 	Signature string `json:"signature,omitempty"`
 	Status    int    `json:"status,omitempty"`
 }

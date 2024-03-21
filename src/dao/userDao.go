@@ -3,11 +3,12 @@ package dao
 import (
 	. "campfire/entity"
 	. "campfire/util"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
 type UserDao interface {
-	CheckIdentity(email string, password string) (uint, error)
+	CheckIdentity(email string, password string) (User, error)
 
 	UserInfoByID(userID uint) (User, error)
 
@@ -34,7 +35,7 @@ type userDao struct{}
 
 func (d userDao) SetUserInfo(user User) error {
 	//result := DB.Exec("UPDATE user_info SET email = % s , name = %s , password = %s , signature = %s , avatar_url = %s WHERE user_id = %d", user.Email, user.Name, user.Password, user.Signature, user.AvatarUrl, user.ID)
-	var result = DB.Save(&user)
+	var result = DB.Updates(&user)
 	return result.Error
 }
 
@@ -94,19 +95,23 @@ func (d userDao) ProjectsOfUser(userID uint) ([]Project, error) {
 	return projects, nil
 }
 
-func (d userDao) CheckIdentity(email string, password string) (uint, error) {
-	var id uint
+func (d userDao) CheckIdentity(email string, password string) (User, error) {
+	user := User{}
 	//result := DB.Raw("SELECT ID FROM user_info WHERE email = %s AND password = %s", email, password).Scan(&id)
-	var result = DB.Where("email = ? AND password = ?", email, password).Find(&id)
+	var result = DB.Where("email = ?", email).Find(&user)
+
+	if err := bcrypt.CompareHashAndPassword(([]byte)(user.Password), ([]byte)(password)); err != nil {
+		return User{}, err
+	}
 
 	if result.Error == gorm.ErrRecordNotFound {
-		return id, ExternalError{}
+		return User{}, NewExternalError("No such user.")
 	}
 	if result.Error != nil {
-		return id, result.Error
+		return User{}, result.Error
 	}
 
-	return id, nil
+	return user, nil
 }
 
 func (d userDao) UserInfoByID(userID uint) (User, error) {

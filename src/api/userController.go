@@ -47,7 +47,8 @@ func (c userController) EmailVerify(context *gin.Context) {
 }
 
 func (c userController) ChangeEmail(ctx *gin.Context) {
-
+	//TODO implement me
+	panic("implement me")
 }
 
 /*

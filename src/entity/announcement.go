@@ -13,10 +13,10 @@ type Announcement struct {
 }
 
 type AnnouncementDTO struct {
-	ID      uint      `json:"ID"`
-	CampID  uint      `json:"c_id"`
-	ProjID  uint      `json:"p_id"`
-	OwnerID uint      `json:"o_id"`
+	ID      uint      `json:"id"`
+	CampID  uint      `json:"campID"`
+	ProjID  uint      `json:"projectID"`
+	OwnerID uint      `json:"ownerID"`
 	Title   string    `json:"title"`
 	BeginAt time.Time `json:"begin"`
 	Content string    `json:"content"`

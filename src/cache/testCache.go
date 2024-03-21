@@ -13,7 +13,7 @@ var (
 	userCache *cache.Cache
 )
 
-func CacheInit() {
+func InitCache() {
 	userCache = cache.New(30*time.Minute, 60*time.Minute) // 设置缓存，过期时间为 30 分钟，清理间隔为 60 分钟
 }
 

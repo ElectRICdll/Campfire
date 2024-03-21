@@ -21,9 +21,9 @@ type InviteEvent interface {
 
 type ProjectInvitationEvent struct {
 	Timestamp  time.Time     `json:"timestamp"`
-	TargetID   uint          `json:"target_id"`
-	IsAccepted int           `json:"is_accepted"`
-	KeepTime   time.Duration `json:"keep_time"`
+	TargetID   uint          `json:"targetID"`
+	IsAccepted int           `json:"isAccepted"`
+	KeepTime   time.Duration `json:"keepTime"`
 	util.Timer `json:"-"`
 	entity.BriefProjectDTO
 }
@@ -43,10 +43,10 @@ func (a *ProjectInvitationEvent) ScopeID() uint {
 
 type CampInvitationEvent struct {
 	Timestamp    time.Time     `json:"timestamp"`
-	SourceID     uint          `json:"source_id"`
-	TargetID     uint          `json:"target_id"`
-	IsAccepted   int           `json:"is_accepted"`
-	KeepDuration time.Duration `json:"keep_time"`
+	SourceID     uint          `json:"sourceID"`
+	TargetID     uint          `json:"targetID"`
+	IsAccepted   int           `json:"isAccepted"`
+	KeepDuration time.Duration `json:"keepDuration"`
 	util.Timer   `json:"-"`
 	entity.BriefCampDTO
 }

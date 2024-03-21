@@ -18,14 +18,14 @@ type Member struct {
 
 type MemberDTO struct {
 	ID        uint   `json:"id,omitempty" uri:"user_id" binding:"required"`
-	UserID    uint   `json:"u_id,omitempty"`
-	ProjID    uint   `json:"p_id,omitempty"`
-	CampID    uint   `json:"c_id,omitempty"`
-	Name      string `json:"name,omitempty"`
-	AvatarUrl string `json:"avatar_url,omitempty"`
+	UserID    uint   `json:"userID,omitempty"`
+	ProjID    uint   `json:"projectID,omitempty"`
+	CampID    uint   `json:"campID,omitempty"`
+	IsLeader  bool   `json:"isLeader"`
+	AvatarUrl string `json:"avatarUrl,omitempty"`
 	Signature string `json:"signature,omitempty"`
 	Status    int    `json:"status,omitempty"`
-	NickName  string `json:"nickname"`
+	Nickname  string `json:"nickname"`
 	Title     string `json:"member_title"`
 }
 
@@ -46,7 +46,7 @@ func (m Member) DTO() MemberDTO {
 		UserID:    m.UserID,
 		ProjID:    m.ProjID,
 		CampID:    m.CampID,
-		NickName:  m.Nickname,
+		Nickname:  m.Nickname,
 		AvatarUrl: m.User.AvatarUrl,
 		Status:    m.User.Status,
 		Title:     m.Title,

@@ -34,11 +34,7 @@ func (s *loginService) EmailVerify(vefiryCode string) error {
 }
 
 func (s *loginService) Login(email string, password string) (entity.LoginDTO, error) {
-	id, err := s.query.CheckIdentity(email, password)
-	if err != nil {
-		return entity.LoginDTO{}, err
-	}
-	user, err := s.user.userInfo(id)
+	user, err := s.query.CheckIdentity(email, password)
 	if err != nil {
 		return entity.LoginDTO{}, err
 	}
@@ -51,7 +47,7 @@ func (s *loginService) Login(email string, password string) (entity.LoginDTO, er
 	s.user.online(&user)
 	cache.StoreUserInCache(user)
 	return entity.LoginDTO{
-		ID:    id,
+		ID:    user.ID,
 		Name:  user.Name,
 		Token: token,
 	}, nil

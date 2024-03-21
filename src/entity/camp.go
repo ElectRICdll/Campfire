@@ -13,22 +13,22 @@ type Camp struct {
 }
 
 type BriefCampDTO struct {
-	ID           uint   `json:"c_id" uri:"c_id" binding:"required"`
-	OwnerID      uint   `json:"o_id"`
-	ProjID       uint   `json:"p_id"`
-	Name         string `json:"camp_name"`
-	MembersCount int    `json:"members_count"`
+	ID           uint   `json:"campID" uri:"camp_id" binding:"required"`
+	OwnerID      uint   `json:"ownerID"`
+	ProjID       uint   `json:"projectID"`
+	Name         string `json:"name"`
+	MembersCount int    `json:"memberCount"`
 }
 
 type CampDTO struct {
-	ID                  uint              `json:"c_id" uri:"c_id" binding:"required"`
-	OwnerID             uint              `json:"o_id"`
-	ProjID              uint              `json:"p_id"`
-	Name                string            `json:"camp_name"`
-	MembersCount        int               `json:"members_count"`
+	ID                  uint              `json:"campID" uri:"camp_id" binding:"required"`
+	OwnerID             uint              `json:"ownerID"`
+	ProjID              uint              `json:"projectID"`
+	Name                string            `json:"name"`
+	MembersCount        int               `json:"memberCount"`
 	Members             []MemberDTO       `json:"members"`
 	Announcements       []AnnouncementDTO `json:"announcements"`
-	RecentMessageRecord []Message         `json:"recent_message_record"`
+	RecentMessageRecord []Message         `json:"recentMessageRecord"`
 }
 
 func (c Camp) BriefDTO() BriefCampDTO {

@@ -33,8 +33,8 @@ func (a NewAnnouncementEvent) ScopeID() uint {
 }
 
 type RequestMessageRecordEvent struct {
-	CampID  uint `json:"c_id"`
-	BeginAt uint `json:"begin_at"`
+	CampID  uint `json:"campID"`
+	BeginAt uint `json:"begin"`
 }
 
 func (a RequestMessageRecordEvent) ScopeID() uint {
@@ -70,8 +70,8 @@ func (e MemberInfoChangedEvent) ScopeID() uint {
 
 type MemberExitedEvent struct {
 	Timestamp time.Time `json:"timestamp"`
-	UserID    uint      `json:"user_id"`
-	CampID    uint      `json:"camp_id"`
+	UserID    uint      `json:"userID"`
+	CampID    uint      `json:"campID"`
 }
 
 func (e MemberExitedEvent) ScopeID() uint {

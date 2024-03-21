@@ -27,9 +27,7 @@ type CampService interface {
 
 	KickMember(queryID uint, campID uint, userID uint) error
 
-	EditNickname(campID uint, userID uint, nickname string) error
-
-	EditMemberTitle(campID uint, userID uint, title string) error
+	EditMemberInfo(campID uint, userID uint, member Member) error
 
 	Announcements(queryID uint, campID uint) ([]AnnouncementDTO, error)
 
@@ -161,7 +159,7 @@ func (c campService) EditNickname(campID uint, userID uint, nickname string) err
 	if err := c.mention.NotifyByEvent(&wsentity.MemberInfoChangedEvent{
 		MemberDTO: MemberDTO{
 			UserID:   userID,
-			NickName: nickname,
+			Nickname: nickname,
 		},
 	}, wsentity.MemberInfoChangedEventType); err != nil {
 		return err
@@ -169,17 +167,14 @@ func (c campService) EditNickname(campID uint, userID uint, nickname string) err
 	return nil
 }
 
-func (c campService) EditMemberTitle(campID uint, userID uint, title string) error {
-	if err := c.campQuery.SetMemberInfo(campID, Member{
-		UserID: userID,
-		Title:  title,
-	}); err != nil {
+func (c campService) EditMemberInfo(campID uint, userID uint, member Member) error {
+	if err := c.campQuery.SetMemberInfo(campID, member); err != nil {
 		return err
 	}
 	if err := c.mention.NotifyByEvent(&wsentity.MemberInfoChangedEvent{
 		MemberDTO: MemberDTO{
-			UserID: userID,
-			Title:  title,
+			UserID: member.UserID,
+			Title:  member.Title,
 		},
 	}, wsentity.MemberInfoChangedEventType); err != nil {
 		return err

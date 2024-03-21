@@ -8,4 +8,5 @@ var (
 	SecurityServiceContainer = NewSecurityService()
 	SessionServiceContainer  = ws_service.NewSessionService()
 	UserServiceContainer     = NewUserService()
+	TaskServiceContainer     = NewTaskService()
 )

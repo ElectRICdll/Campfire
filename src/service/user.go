@@ -107,9 +107,7 @@ func (s *userService) FindUsersByName(name string) ([]UserDTO, error) {
 		userDTOs = append(userDTOs, user.DTO())
 	}
 
-	return userDTOs, ExternalError{
-		Message: err.Error(),
-	}
+	return userDTOs, err
 }
 
 func (s *userService) findUsersByName(name string) ([]User, error) {

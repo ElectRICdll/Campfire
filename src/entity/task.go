@@ -11,6 +11,13 @@ const (
 	Deactivated
 )
 
+const (
+	NotStart = iota
+	Processing
+	Completed
+	Expired
+)
+
 type Task struct {
 	ID        uint     `gorm:"primaryKey;autoIncrement"`
 	OwnerID   uint     `gorm:"not null"`
@@ -38,13 +45,14 @@ func (t *Task) SetStatus(code int) {
 
 type TaskDTO struct {
 	ID          uint   `json:"id"`
-	OwnerID     uint   `json:"o_id"`
-	ProjID      uint   `json:"p_id"`
-	ReceiversID []uint `json:"r_id"`
+	OwnerID     uint   `json:"ownerID"`
+	ProjID      uint   `json:"projectID"`
+	ReceiversID []uint `json:"receiversID"`
 
-	Title   string    `json:"task_title"`
-	BeginAt time.Time `json:"begin_at"`
-	EndAt   time.Time `json:"end_at"`
+	IsFree  bool      `json:"isFree"`
+	Title   string    `json:"taskTitle"`
+	BeginAt time.Time `json:"begin"`
+	EndAt   time.Time `json:"deadline"`
 	Content string    `json:"content"`
 	Status  int       `json:"status"`
 }

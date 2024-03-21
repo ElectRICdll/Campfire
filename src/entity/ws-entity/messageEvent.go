@@ -23,8 +23,8 @@ func (t TextMessageEvent) ScopeID() uint {
 
 type BinaryMessageEvent struct {
 	entity.Message
-	IsChunk     bool   `json:"is_chunk,omitempty"`
-	IsLastChunk bool   `json:"is_last_chunk,omitempty"`
+	IsChunk     bool   `json:"isChunk,omitempty"`
+	IsLastChunk bool   `json:"isLastChunk,omitempty"`
 	Binary      []byte `json:"binary"`
 	Type        string `json:"type"`
 }
@@ -39,11 +39,11 @@ func (b BinaryMessageEvent) ScopeID() uint {
 
 type CodeGraphMessageEvent struct {
 	entity.Message
-	ProjID    string `json:"p_id"`
-	ObjectUrl string `json:"obj_url"`
+	ProjID    string `json:"projectID"`
+	ObjectUrl string `json:"objectUrl"`
 	Lang      string `json:"lang,omitempty"`
-	BeginAt   int    `json:"begin_at"`
-	EndAtAt   int    `json:"end_at"`
+	BeginAt   int    `json:"begin"`
+	EndAtAt   int    `json:"end"`
 }
 
 func (c CodeGraphMessageEvent) ToMessage() entity.Message {
@@ -56,5 +56,5 @@ func (c CodeGraphMessageEvent) ScopeID() uint {
 
 type FileUrlMessageEvent struct {
 	entity.Message
-	Url string `json:"file_url"`
+	Url string `json:"fileUrl"`
 }
