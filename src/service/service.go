@@ -1,12 +1,14 @@
 package service
 
-import "campfire/service/ws-service"
+import (
+	"campfire/ws"
+)
 
 var (
 	LoginServiceContainer    = NewLoginService()
 	MessageServiceContainer  = NewMessageService()
 	SecurityServiceContainer = NewSecurityService()
-	SessionServiceContainer  = ws_service.NewSessionService()
+	SessionServiceContainer  = ws.NewSessionService()
 	UserServiceContainer     = NewUserService()
 	TaskServiceContainer     = NewTaskService()
 	ProjectServiceContainer  = NewProjectService()

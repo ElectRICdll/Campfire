@@ -3,11 +3,11 @@ package service
 import (
 	"campfire/dao"
 	"campfire/entity"
-	"campfire/service/ws-service"
 	"campfire/util"
+	"campfire/ws"
 )
 
-type MessageHandler func(*ws_service.Notification) error
+type MessageHandler func(*ws.Notification) error
 
 type MessageService interface {
 	MessageRecord(messageID uint)

@@ -1,4 +1,4 @@
-package wsentity
+package ws
 
 import (
 	"campfire/entity"

@@ -15,7 +15,9 @@ type SecurityService interface {
 
 	encryptPassword(password string) (string, error)
 
-	tokenGenerate(entity.User) (string, error)
+	TokenGenerate(entity.User) (string, error)
+
+	WSTokenVerify(string) (uint, error)
 
 	IsUserACampMember(campID, userID uint) error
 
@@ -37,24 +39,34 @@ type securityService struct {
 	query     dao.ProjectDao
 }
 
-func (s securityService) IsUserACampMember(campID, userID uint) (bool, error) {
-	// TODO
-
-	res, err := s.campQuery.IsUserACampMember(campID, userID)
-	if err != nil {
-		return false, err
-	}
-
-	return res, nil
+func (s securityService) IsUserACampMember(campID, userID uint) error {
+	//TODO implement me
+	panic("implement me")
 }
 
-func (s securityService) IsUserAProjMember(projID, userID uint) (bool, error) {
+func (s securityService) IsUserAProjMember(projID, userID uint) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (s securityService) IsUserACampLeader(campID, userID uint) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (s securityService) IsUserAProjLeader(projID, userID uint) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (s securityService) IsUserHavingTitle(projID, userID uint) error {
 	//TODO implement me
 	panic("implement me")
 }
 
 func (s securityService) AuthMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
+
 		tokenString := ctx.GetHeader("Authorization")
 
 		if tokenString == "" {
@@ -92,7 +104,7 @@ func (s securityService) encryptPassword(password string) (string, error) {
 	return (string)(hashedPassword), nil
 }
 
-func (s securityService) tokenGenerate(user entity.User) (string, error) {
+func (s securityService) TokenGenerate(user entity.User) (string, error) {
 	claims := jwt.MapClaims{
 		"id":   user.ID,
 		"name": user.Name,
@@ -105,4 +117,21 @@ func (s securityService) tokenGenerate(user entity.User) (string, error) {
 	}
 
 	return signed, nil
+}
+
+func (s securityService) WSTokenVerify(tokenString string) (uint, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		return util.CONFIG.SecretKey, nil
+	})
+
+	if err != nil || !token.Valid {
+		return 0, util.NewExternalError("illegal token")
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return 0, util.NewExternalError("illegal token")
+	}
+
+	return (uint)(claims["id"].(float64)), nil
 }

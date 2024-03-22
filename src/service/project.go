@@ -3,8 +3,7 @@ package service
 import (
 	"campfire/dao"
 	. "campfire/entity"
-	wsentity "campfire/entity/ws-entity"
-	"campfire/service/ws-service"
+	"campfire/ws"
 	"time"
 )
 
@@ -35,7 +34,7 @@ func NewProjectService() ProjectService {
 type projectService struct {
 	query     dao.ProjectDao
 	userQuery dao.UserDao
-	mention   *ws_service.SessionService
+	mention   *ws.SessionService
 }
 
 func (p projectService) CreateProject(project Project) error {
@@ -58,9 +57,9 @@ func (p projectService) EditProjectInfo(queryID uint, project Project) error {
 	if err != nil {
 		return err
 	}
-	if err := p.mention.NotifyByEvent(&wsentity.ProjectInfoChangedEvent{
+	if err := p.mention.NotifyByEvent(&ws.ProjectInfoChangedEvent{
 		ProjectDTO: project.DTO(),
-	}, wsentity.ProjectInfoChangedEventType); err != nil {
+	}, ws.ProjectInfoChangedEventType); err != nil {
 		return err
 	}
 	return nil

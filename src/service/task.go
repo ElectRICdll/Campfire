@@ -3,8 +3,7 @@ package service
 import (
 	"campfire/dao"
 	. "campfire/entity"
-	wsentity "campfire/entity/ws-entity"
-	ws_service "campfire/service/ws-service"
+	"campfire/ws"
 )
 
 type TaskService interface {
@@ -27,7 +26,7 @@ func NewTaskService() TaskService {
 }
 
 type taskService struct {
-	mention *ws_service.SessionService
+	mention *ws.SessionService
 	query   dao.ProjectDao
 }
 
@@ -39,9 +38,9 @@ func (p taskService) CreateTask(queryID uint, task Task) error {
 	if err != nil {
 		return err
 	}
-	if err := p.mention.NotifyByEvent(&wsentity.NewTaskEvent{
+	if err := p.mention.NotifyByEvent(&ws.NewTaskEvent{
 		TaskDTO: task.DTO(),
-	}, wsentity.NewTaskEventType); err != nil {
+	}, ws.NewTaskEventType); err != nil {
 		return err
 	}
 	return nil

@@ -2,7 +2,7 @@ package api
 
 import (
 	"campfire/service"
-	"campfire/service/ws-service"
+	"campfire/ws"
 	"github.com/gin-gonic/gin"
 )
 
@@ -17,7 +17,7 @@ func NewSessionController() SessionController {
 }
 
 type sessionController struct {
-	s *ws_service.SessionService
+	s *ws.SessionService
 }
 
 /*
@@ -31,8 +31,7 @@ path: /ws (WebSocket)
 	}
 */
 func (c *sessionController) NewSession(ctx *gin.Context) {
-	id := (uint)(ctx.Keys["id"].(float64))
-	if err := c.s.NewSession(ctx.Writer, ctx.Request, nil, id); err != nil {
+	if err := c.s.NewSession(ctx.Writer, ctx.Request, nil); err != nil {
 		responseError(ctx, err)
 		return
 	}

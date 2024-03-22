@@ -1,11 +1,14 @@
-package ws_service
+package ws
 
 import (
 	"campfire/dao"
 	"campfire/entity"
-	. "campfire/entity/ws-entity"
 	"errors"
 )
+
+type Event interface {
+	ScopeID() uint
+}
 
 type EventService struct {
 	projQuery    dao.ProjectDao
@@ -17,7 +20,7 @@ func (s EventService) HandleEvent(msg *Notification) error {
 	scope := ScopeByType(msg.EType)
 	switch scope {
 	case OnCamp:
-		res, err := s.campQuery.MemberList(1, msg.Event.ScopeID())
+		res, err := s.campQuery.MemberList(msg.Event.ScopeID())
 		if err != nil {
 			return err
 		}

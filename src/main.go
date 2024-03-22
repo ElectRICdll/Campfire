@@ -17,7 +17,7 @@ func registerDependencies(engine *gin.Engine) {
 	engine.POST("/reg", login.Register)
 
 	session := api.NewSessionController()
-	engine.GET("/ws", auth.AuthMiddleware(), session.NewSession)
+	engine.GET("/ws", session.NewSession)
 
 	user := api.NewUserController()
 	engine.GET("/user/:user_id", auth.AuthMiddleware(), user.UserInfo)

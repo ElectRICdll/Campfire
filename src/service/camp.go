@@ -3,9 +3,8 @@ package service
 import (
 	"campfire/dao"
 	. "campfire/entity"
-	wsentity "campfire/entity/ws-entity"
-	"campfire/service/ws-service"
 	"campfire/util"
+	"campfire/ws"
 )
 
 type CampService interface {
@@ -50,7 +49,7 @@ func NewCampService() CampService {
 }
 
 type campService struct {
-	mention   *ws_service.SessionService
+	mention   *ws.SessionService
 	access    SecurityService
 	campQuery dao.CampDao
 	projQuery dao.ProjectDao
@@ -123,9 +122,9 @@ func (c campService) EditCampInfo(queryID uint, camp Camp) error {
 	if err := c.campQuery.SetCampInfo(camp); err != nil {
 		return err
 	}
-	if err := c.mention.NotifyByEvent(&wsentity.CampInfoChangedEvent{
+	if err := c.mention.NotifyByEvent(&ws.CampInfoChangedEvent{
 		CampDTO: camp.DTO(),
-	}, wsentity.CampInfoChangedEventType); err != nil {
+	}, ws.CampInfoChangedEventType); err != nil {
 		return err
 	}
 	return nil
@@ -138,9 +137,9 @@ func (c campService) DisableCamp(queryID uint, campID uint) error {
 	if err := c.campQuery.DeleteCamp(campID); err != nil {
 		return err
 	}
-	if err := c.mention.NotifyByEvent(&wsentity.CampDisableEvent{
+	if err := c.mention.NotifyByEvent(&ws.CampDisableEvent{
 		CampID: campID,
-	}, wsentity.CampDisableEventType); err != nil {
+	}, ws.CampDisableEventType); err != nil {
 		return err
 	}
 	return nil
@@ -153,7 +152,7 @@ func (c campService) InviteMember(queryID uint, campID uint, userID uint) error 
 	if err := c.campQuery.AddMember(campID, userID); err != nil {
 		return err
 	}
-	if err := c.mention.NotifyByEvent(&wsentity.CampInvitationEvent{
+	if err := c.mention.NotifyByEvent(&ws.CampInvitationEvent{
 		SourceID:     queryID,
 		TargetID:     userID,
 		IsAccepted:   0,
@@ -161,7 +160,7 @@ func (c campService) InviteMember(queryID uint, campID uint, userID uint) error 
 		BriefCampDTO: BriefCampDTO{
 			ID: campID,
 		},
-	}, wsentity.CampInvitationEventType); err != nil {
+	}, ws.CampInvitationEventType); err != nil {
 		return err
 	}
 	return nil
@@ -174,9 +173,9 @@ func (c campService) KickMember(queryID uint, campID uint, userID uint) error {
 	if err := c.campQuery.DeleteMember(campID, userID); err != nil {
 		return err
 	}
-	if err := c.mention.NotifyByEvent(&wsentity.MemberExitedEvent{
+	if err := c.mention.NotifyByEvent(&ws.MemberExitedEvent{
 		CampID: campID,
-	}, wsentity.MemberExitedEventType); err != nil {
+	}, ws.MemberExitedEventType); err != nil {
 		return err
 	}
 	return nil
@@ -186,12 +185,12 @@ func (c campService) EditMemberInfo(campID uint, member Member) error {
 	if err := c.campQuery.SetMemberInfo(campID, member); err != nil {
 		return err
 	}
-	if err := c.mention.NotifyByEvent(&wsentity.MemberInfoChangedEvent{
+	if err := c.mention.NotifyByEvent(&ws.MemberInfoChangedEvent{
 		MemberDTO: MemberDTO{
 			UserID: member.UserID,
 			Title:  member.Title,
 		},
-	}, wsentity.MemberInfoChangedEventType); err != nil {
+	}, ws.MemberInfoChangedEventType); err != nil {
 		return err
 	}
 	return nil
@@ -227,9 +226,9 @@ func (c campService) CreateAnnouncement(queryID uint, anno Announcement) error {
 	if err != nil {
 		return err
 	}
-	if err := c.mention.NotifyByEvent(&wsentity.NewAnnouncementEvent{
+	if err := c.mention.NotifyByEvent(&ws.NewAnnouncementEvent{
 		AnnouncementDTO: anno.DTO(),
-	}, wsentity.NewAnnouncementEventType); err != nil {
+	}, ws.NewAnnouncementEventType); err != nil {
 		return err
 	}
 	return nil
