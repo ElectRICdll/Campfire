@@ -6,6 +6,7 @@ import (
 	"campfire/dao"
 	"campfire/entity"
 	"campfire/service"
+	"campfire/util"
 	"github.com/gin-gonic/gin"
 )
 
@@ -81,7 +82,7 @@ func main() {
 
 	registerDependencies(r)
 
-	err := r.Run(":10000")
+	err := r.Run(":" + util.CONFIG.Port)
 	if err != nil {
 
 	}

@@ -3,6 +3,7 @@ package util
 import "time"
 
 var CONFIG = struct {
+	Port    string `yaml:"port""`
 	SQLConn string `yaml:"sql_conn"`
 
 	OSSEndPoint    string `yaml:"oss_end_point"`
@@ -18,6 +19,7 @@ var CONFIG = struct {
 
 	InvitationKeepDuration time.Duration
 }{
+	Port:               "8080",
 	SQLConn:            "root:420204@tcp(120.24.78.233:3443)/Campfire?charset=utf8mb4&parseTime=True&loc=Local",
 	AuthDuration:       time.Now().Add(time.Hour * 24 * 7),
 	SecretKey:          []byte("Clover"),
