@@ -8,33 +8,33 @@ import (
 )
 
 type CampDao interface {
-	CampInfo(queryMemberID uint, campID uint) (Camp, error)
+	CampInfo(campID uint) (Camp, error)
 
-	AddCamp(queryMemberID uint, camp Camp) error
+	AddCamp(camp Camp) error
 
-	SetCampInfo(queryOwnerID uint, camp Camp) error
+	SetCampInfo(camp Camp) error
 
-	DeleteCamp(queryOwnerID, campID uint) error
+	DeleteCamp(campID uint) error
 
-	MemberList(queryMemberID uint, campID uint) ([]Member, error)
+	MemberList(campID uint) ([]Member, error)
 
-	MemberInfo(queryMemberID uint, campID uint, userID uint) (Member, error)
+	MemberInfo(campID uint, userID uint) (Member, error)
 
-	AddMember(queryOwnerID uint, campID uint, userID uint) error
+	AddMember(campID uint, userID uint) error
 
-	DeleteMember(queryOwnerID uint, campID uint, userID uint) error
+	DeleteMember(campID uint, userID uint) error
 
 	SetMemberInfo(campID uint, member Member) error
 
-	AnnouncementInfo(queryMemberID uint, campID uint, annoID uint) (Announcement, error)
+	AnnouncementInfo(campID uint, annoID uint) (Announcement, error)
 
-	Announcements(queryMemberID uint, campID uint) ([]Announcement, error)
+	Announcements(campID uint) ([]Announcement, error)
 
-	EditAnnouncement(queryOwnerID uint, campID uint, anno Announcement) error
+	EditAnnouncement(anno Announcement) error
 
-	AddAnnouncement(queryOwnerID uint, campID uint, anno Announcement) error
+	AddAnnouncement(anno Announcement) error
 
-	DeleteAnnouncement(queryOwnerID uint, campID uint, annoID uint) error
+	DeleteAnnouncement(campID uint, annoID uint) error
 
 	IsUserACampMember(campID uint, userID uint) (bool, error)
 }

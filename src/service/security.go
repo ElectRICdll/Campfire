@@ -17,9 +17,15 @@ type SecurityService interface {
 
 	tokenGenerate(entity.User) (string, error)
 
-	IsUserACampMember(campID, userID uint) (bool, error)
+	IsUserACampMember(campID, userID uint) error
 
-	IsUserAProjMember(projID, userID uint) (bool, error)
+	IsUserAProjMember(projID, userID uint) error
+
+	IsUserACampLeader(campID, userID uint) error
+
+	IsUserAProjLeader(projID, userID uint) error
+
+	IsUserHavingTitle(projID, userID uint) error
 }
 
 func NewSecurityService() SecurityService {

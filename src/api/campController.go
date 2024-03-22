@@ -138,10 +138,10 @@ func (p campController) EditMemberInfo(ctx *gin.Context) {
 	if err := ctx.BindJSON(&member); err != nil {
 		responseError(ctx, util.ExternalError{Message: "invalid syntax"})
 	}
-	if err := p.campService.EditMemberInfo(uri.CID, userID, entity.Member{
+	if err := p.campService.EditMemberInfo(userID, entity.Member{
 		ID:     member.ID,
 		ProjID: member.ProjID,
-		UserID: member.UserID,
+		UserID: userID,
 		CampID: member.CampID,
 
 		IsLeader: member.IsLeader,

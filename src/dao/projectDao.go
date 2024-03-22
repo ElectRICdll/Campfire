@@ -36,7 +36,7 @@ type ProjectDao interface {
 
 	DeleteTask(queryOwnerID, projID uint, taskID uint) error
 
-	CampsOfProject(queryMemberID, projID uint) ([]Camp, error)
+	CampsOfProject(projID uint) ([]Camp, error)
 
 	IsUserAProjectMember(projID uint, userID uint) (bool, error)
 }
