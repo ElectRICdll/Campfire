@@ -3,7 +3,8 @@ package service
 import (
 	"campfire/dao"
 	. "campfire/entity"
-	"campfire/ws"
+	wsentity "campfire/entity/ws-entity"
+	ws_service "campfire/service/ws-service"
 	"time"
 )
 
@@ -34,7 +35,7 @@ func NewProjectService() ProjectService {
 type projectService struct {
 	query     dao.ProjectDao
 	userQuery dao.UserDao
-	mention   *ws.SessionService
+	mention   *ws_service.SessionService
 }
 
 func (p projectService) CreateProject(project Project) error {
@@ -48,24 +49,33 @@ func (p projectService) CreateProject(project Project) error {
 }
 
 func (p projectService) ProjectInfo(queryID uint, projectID uint) (BriefProjectDTO, error) {
+	if bl, err := securityService.IsUserAProjMember(securityService{}, projectID, queryID); bl == false {
+		return BriefProjectDTO{}, err
+	}
 	res, err := p.query.ProjectInfo(queryID, projectID)
 	return res.BriefDTO(), err
 }
 
 func (p projectService) EditProjectInfo(queryID uint, project Project) error {
+	if bl, err := securityService.IsUserAProjLeader(securityService{}, project.ID, queryID); bl == false {
+		return err
+	}
 	err := p.query.SetProjectInfo(queryID, project)
 	if err != nil {
 		return err
 	}
-	if err := p.mention.NotifyByEvent(&ws.ProjectInfoChangedEvent{
+	if err := p.mention.NotifyByEvent(&wsentity.ProjectInfoChangedEvent{
 		ProjectDTO: project.DTO(),
-	}, ws.ProjectInfoChangedEventType); err != nil {
+	}, wsentity.ProjectInfoChangedEventType); err != nil {
 		return err
 	}
 	return nil
 }
 
 func (p projectService) DisableProject(queryID uint, projID uint) error {
+	if bl, err := securityService.IsUserAProjLeader(securityService{}, projID, queryID); bl == false {
+		return err
+	}
 	err := p.query.DeleteProject(queryID, projID)
 	return err
 }
