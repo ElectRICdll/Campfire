@@ -1,13 +1,17 @@
 package service
 
 import (
+	. "campfire/cache"
 	"campfire/dao"
 	"campfire/entity"
 	"campfire/util"
+	"fmt"
+	"net/http"
+
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	"github.com/patrickmn/go-cache"
 	"golang.org/x/crypto/bcrypt"
-	"net/http"
 )
 
 type SecurityService interface {
@@ -15,19 +19,17 @@ type SecurityService interface {
 
 	encryptPassword(password string) (string, error)
 
-	TokenGenerate(entity.User) (string, error)
+	tokenGenerate(entity.User) (string, error)
 
-	WSTokenVerify(string) (uint, error)
+	IsUserACampMember(campID, userID uint) (bool, error)
 
-	IsUserACampMember(campID, userID uint) error
+	IsUserAProjMember(projID, userID uint) (bool, error)
 
-	IsUserAProjMember(projID, userID uint) error
+	IsUserACampLeader(campID, userID uint) (bool, error)
 
-	IsUserACampLeader(campID, userID uint) error
+	IsUserAProjLeader(projID, userID uint) (bool, error)
 
-	IsUserAProjLeader(projID, userID uint) error
-
-	IsUserHavingTitle(projID, userID uint) error
+	IsUserHavingTitle(projID, userID uint) (bool, error)
 }
 
 func NewSecurityService() SecurityService {
@@ -39,34 +41,74 @@ type securityService struct {
 	query     dao.ProjectDao
 }
 
-func (s securityService) IsUserACampMember(campID, userID uint) error {
-	//TODO implement me
-	panic("implement me")
+func (s securityService) IsUserACampMember(campID, userID uint) (bool, error) {
+	// TODO
+
+	res, err := s.campQuery.IsUserACampMember(campID, userID)
+	if err != nil {
+		return false, err
+	}
+
+	return res, nil
 }
 
-func (s securityService) IsUserAProjMember(projID, userID uint) error {
-	//TODO implement me
-	panic("implement me")
+func (s securityService) IsUserACampLeader(campID, userID uint) (bool, error) {
+	if camp, found := CampCache.Get(fmt.Sprintf("%d", campID)); found {
+		if camp.(entity.Camp).OwnerID == userID {
+			return true, nil
+		}
+	}
+
+	camp, err := dao.CampDao.CampInfo(dao.NewCampDao(), campID)
+	if camp.ID != 0 {
+		ProjectCache.Set(fmt.Sprintf("%d", campID), &camp, cache.DefaultExpiration)
+		if camp.OwnerID == userID {
+			return true, nil
+		}
+	}
+	return false, err
 }
 
-func (s securityService) IsUserACampLeader(campID, userID uint) error {
-	//TODO implement me
-	panic("implement me")
+func (s securityService) IsUserAProjMember(projID, userID uint) (bool, error) {
+	if project, found := ProjectCache.Get(fmt.Sprintf("%d", projID)); found {
+		for _, value := range project.(entity.Project).Members {
+			if value.UserID == userID {
+				return true, nil
+			}
+		}
+	}
+
+	project, err := dao.ProjectDao.ProjectInfo(dao.NewProjectDao(), projID)
+	if project.ID != 0 {
+		ProjectCache.Set(fmt.Sprintf("%d", projID), &project, cache.DefaultExpiration)
+		for _, value := range project.Members {
+			if value.UserID == userID {
+				return true, nil
+			}
+		}
+	}
+	return false, err
 }
 
-func (s securityService) IsUserAProjLeader(projID, userID uint) error {
-	//TODO implement me
-	panic("implement me")
-}
+func (s securityService) IsUserAProjLeader(projID, userID uint) (bool, error) {
+	if project, found := ProjectCache.Get(fmt.Sprintf("%d", projID)); found {
+		if project.(entity.Project).OwnerID == userID {
+			return true, nil
+		}
+	}
 
-func (s securityService) IsUserHavingTitle(projID, userID uint) error {
-	//TODO implement me
-	panic("implement me")
+	project, err := dao.ProjectDao.ProjectInfo(dao.NewProjectDao(), projID)
+	if project.ID != 0 {
+		ProjectCache.Set(fmt.Sprintf("%d", projID), &project, cache.DefaultExpiration)
+		if project.OwnerID == userID {
+			return true, nil
+		}
+	}
+	return false, err
 }
 
 func (s securityService) AuthMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-
 		tokenString := ctx.GetHeader("Authorization")
 
 		if tokenString == "" {
@@ -104,7 +146,7 @@ func (s securityService) encryptPassword(password string) (string, error) {
 	return (string)(hashedPassword), nil
 }
 
-func (s securityService) TokenGenerate(user entity.User) (string, error) {
+func (s securityService) tokenGenerate(user entity.User) (string, error) {
 	claims := jwt.MapClaims{
 		"id":   user.ID,
 		"name": user.Name,
@@ -117,21 +159,4 @@ func (s securityService) TokenGenerate(user entity.User) (string, error) {
 	}
 
 	return signed, nil
-}
-
-func (s securityService) WSTokenVerify(tokenString string) (uint, error) {
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		return util.CONFIG.SecretKey, nil
-	})
-
-	if err != nil || !token.Valid {
-		return 0, util.NewExternalError("illegal token")
-	}
-
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if !ok {
-		return 0, util.NewExternalError("illegal token")
-	}
-
-	return (uint)(claims["id"].(float64)), nil
 }
