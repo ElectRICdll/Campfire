@@ -2,39 +2,44 @@ package dao
 
 import (
 	. "campfire/entity"
+
+	//"fmt"
+	//"time"
+
 	//. "campfire/util"
 
+	//"github.com/patrickmn/go-cache"
 	"gorm.io/gorm"
 )
 
 type ProjectDao interface {
-	ProjectInfo(queryMemberID uint, projID uint) (Project, error)
+	ProjectInfo(projID uint) (Project, error) //需要鉴权
 
-	SetProjectInfo(queryOwnerID uint, project Project) error
+	SetProjectInfo(project Project) error //需要鉴权
 
 	AddProject(proj Project) error
 
-	DeleteProject(queryOwnerID, projID uint) error
+	DeleteProject(projID uint) error //需要鉴权
 
-	MemberList(queryMemberID uint, projID uint) ([]ProjectMember, error)
+	MemberList(projID uint) ([]ProjectMember, error) //需要鉴权
 
-	MemberInfo(queryMemberID uint, projID uint, userID uint) (ProjectMember, error)
+	MemberInfo(projID uint, userID uint) (ProjectMember, error) //需要鉴权
 
-	AddMember(queryOwnerID uint, projID uint, userID uint) error
+	AddMember(projID uint, userID uint) error //需要鉴权
 
-	DeleteMember(queryOwnerID uint, projID uint, userID uint) error
+	DeleteMember(projID uint, userID uint) error //需要鉴权
 
 	SetMemberInfo(campID uint, member ProjectMember) error
 
-	TasksOfProject(queryMemberID, projID uint) ([]Task, error)
+	TasksOfProject(projID uint) ([]Task, error) //需要鉴权
 
-	TaskInfo(queryMemberID uint, projID uint, taskID uint) (Task, error)
+	TaskInfo(projID uint, taskID uint) (Task, error) //需要鉴权
 
-	SetTaskInfo(queryOwnerID uint, projID uint, task Task) error
+	SetTaskInfo(projID uint, task Task) error //需要鉴权
 
-	AddTask(queryProjMemberID uint, task Task) error
+	AddTask(task Task) error //需要鉴权
 
-	DeleteTask(queryOwnerID, projID uint, taskID uint) error
+	DeleteTask(projID uint, taskID uint) error //需要鉴权
 
 	CampsOfProject(projID uint) ([]Camp, error)
 
@@ -48,10 +53,29 @@ func NewProjectDao() ProjectDao {
 type projectDao struct{}
 
 func (d projectDao) IsUserAProjectMember(projID uint, userID uint) (bool, error) {
-	panic("wait for implement")
+	// if project, found := ProjectCache.Get(fmt.Sprintf("%d", projID)); found {
+	// 	for _, value := range project.(Project).Members {
+	// 		if value.UserID == userID {
+	// 			return true, nil
+	// 		}
+	// 	}
+	// }
+
+	// project, err := projectDao.ProjectInfo(projectDao{}, userID, projID)
+	// if project.ID != 0 {
+	// 	ProjectCache.Set(fmt.Sprintf("%d", projID), &project, cache.DefaultExpiration)
+	// 	for _, value := range project.Members {
+	// 		if value.UserID == userID {
+	// 			return true, nil
+	// 		}
+	// 	}
+	// }
+	// return false, err
+	return false, DB.Error
 }
 
-func (d projectDao) ProjectInfo(queryMemberID uint, projID uint) (Project, error) {
+func (d projectDao) ProjectInfo(projID uint) (Project, error) {
+
 	var project Project
 	var result = DB.Preload("Tasks").Preload("Camps").Preload("Members.User").
 		Joins("JOIN project_members ON project_members.project_id = projects.id").
@@ -69,6 +93,7 @@ func (d projectDao) ProjectInfo(queryMemberID uint, projID uint) (Project, error
 }
 
 func (d projectDao) SetProjectInfo(project Project) error {
+
 	var result = DB.Updates(&project)
 	if result.Error == gorm.ErrRecordNotFound {
 		return ExternalError{}
