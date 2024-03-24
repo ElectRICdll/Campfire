@@ -7,6 +7,7 @@ import (
 	"campfire/dao"
 	"campfire/entity"
 	"campfire/log"
+	"campfire/test"
 	"github.com/gin-gonic/gin"
 )
 
@@ -80,7 +81,7 @@ func main() {
 	cache.InitCampCache()
 
 	log.Info("activating test demo...")
-	TestDemo()
+	test.Demo()
 
 	//r := gin.Default()
 	//registerDependencies(r)

@@ -1,6 +1,8 @@
-package main
+package test
 
-import "campfire/service"
+import (
+	"campfire/service"
+)
 
 var TestResource = struct {
 	service.CampService
@@ -18,5 +20,6 @@ var TestResource = struct {
 	service.TaskServiceContainer,
 }
 
-func TestDemo() {
+func Demo() {
+	UserDemo()
 }
