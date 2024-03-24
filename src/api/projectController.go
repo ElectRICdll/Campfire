@@ -51,14 +51,15 @@ func (p projectController) CreateCamp(ctx *gin.Context) {
 	}
 	camp := entity.CampDTO{}
 	if err := ctx.BindJSON(&camp); err != nil {
-		responseError(ctx, util.ExternalError{Message: "invalid syntax."})
+		responseError(ctx, util.NewExternalError("invalid syntax"))
 		return
 	}
 
 	if err := p.campService.CreateCamp(userID, entity.Camp{
-		Name:    camp.Name,
-		OwnerID: userID,
-		ProjID:  uri.PID,
+		Name:      camp.Name,
+		IsPrivate: camp.IsPrivate,
+		OwnerID:   userID,
+		ProjID:    uri.PID,
 	},
 	); err != nil {
 		responseError(ctx, err)
@@ -100,7 +101,7 @@ func (p projectController) CreateProject(ctx *gin.Context) {
 
 	proj := entity.ProjectDTO{}
 	if err := ctx.BindJSON(&proj); err != nil {
-		responseError(ctx, util.ExternalError{Message: "invalid syntax."})
+		responseError(ctx, util.NewExternalError("invalid syntax"))
 		return
 	}
 
@@ -162,7 +163,7 @@ func (p projectController) EditProjectInfo(ctx *gin.Context) {
 		return
 	}
 	if err := ctx.BindJSON(&proj); err != nil {
-		responseError(ctx, util.ExternalError{Message: "invalid syntax"})
+		responseError(ctx, util.NewExternalError("invalid syntax"))
 	}
 	if err := p.projService.EditProjectInfo(userID, entity.Project{
 		ID:          uri.PID,

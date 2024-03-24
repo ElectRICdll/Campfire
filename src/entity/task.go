@@ -12,7 +12,8 @@ const (
 )
 
 const (
-	NotStart = iota
+	NoStatus = iota
+	NotStart
 	Processing
 	Completed
 	Expired

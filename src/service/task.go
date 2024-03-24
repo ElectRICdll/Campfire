@@ -1,6 +1,8 @@
 package service
 
 import (
+	"campfire/auth"
+	"campfire/cache"
 	"campfire/dao"
 	. "campfire/entity"
 	"campfire/ws"
@@ -22,22 +24,27 @@ func NewTaskService() TaskService {
 	return taskService{
 		mention: SessionServiceContainer,
 		query:   dao.ProjectDaoContainer,
+		sec:     auth.SecurityInstance,
 	}
 }
 
 type taskService struct {
 	mention *ws.SessionService
 	query   dao.ProjectDao
+	sec     auth.SecurityGuard
 }
 
 func (p taskService) CreateTask(queryID uint, task Task) error {
-	task.StartATimer()
-	// TODO
-	//cache.StoreTaskInCache()
-	err := p.query.AddTask(queryID, task)
-	if err != nil {
+	if err := p.sec.IsUserHavingTitle(task.ProjID, queryID); err != nil {
 		return err
 	}
+	if err := p.query.AddTask(task); err != nil {
+		return err
+	}
+	if err := cache.StoreTaskToProject(task.ProjID, task); err != nil {
+		return err
+	}
+	task.StartATimer()
 	if err := p.mention.NotifyByEvent(&ws.NewTaskEvent{
 		TaskDTO: task.DTO(),
 	}, ws.NewTaskEventType); err != nil {
@@ -47,7 +54,10 @@ func (p taskService) CreateTask(queryID uint, task Task) error {
 }
 
 func (p taskService) Tasks(queryID uint, projID uint) ([]TaskDTO, error) {
-	res, err := p.query.TasksOfProject(queryID, projID)
+	if err := p.sec.IsUserAProjMember(projID, queryID); err != nil {
+		return nil, err
+	}
+	res, err := p.query.TasksOfProject(projID)
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +65,10 @@ func (p taskService) Tasks(queryID uint, projID uint) ([]TaskDTO, error) {
 }
 
 func (p taskService) TaskInfo(queryID uint, projID uint, taskID uint) (TaskDTO, error) {
-	res, err := p.query.TaskInfo(queryID, projID, taskID)
+	if err := p.sec.IsUserAProjMember(projID, queryID); err != nil {
+		return TaskDTO{}, err
+	}
+	res, err := p.query.TaskInfo(taskID)
 	if err != nil {
 		return TaskDTO{}, err
 	}
@@ -63,7 +76,13 @@ func (p taskService) TaskInfo(queryID uint, projID uint, taskID uint) (TaskDTO, 
 }
 
 func (p taskService) EditTaskInfo(queryID uint, projID uint, task Task) error {
-	err := p.query.SetTaskInfo(queryID, projID, task)
+	if err := p.sec.IsUserHavingTitle(task.ProjID, queryID); err != nil {
+		return err
+	}
+	if err := cache.EditTaskFromCache(task); err != nil {
+		return err
+	}
+	err := p.query.SetTaskInfo(projID, task)
 	if err != nil {
 		return err
 	}
@@ -71,6 +90,9 @@ func (p taskService) EditTaskInfo(queryID uint, projID uint, task Task) error {
 }
 
 func (p taskService) DeleteTask(queryID uint, projID uint, taskID uint) error {
-	err := p.query.DeleteTask(queryID, projID, taskID)
+	if err := p.sec.IsUserATaskOwner(projID, taskID, queryID); err != nil {
+		return err
+	}
+	err := p.query.DeleteTask(taskID)
 	return err
 }

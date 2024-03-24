@@ -1,10 +1,10 @@
 package service
 
 import (
+	"campfire/auth"
 	"campfire/dao"
 	. "campfire/entity"
-	wsentity "campfire/entity/ws-entity"
-	ws_service "campfire/service/ws-service"
+	"campfire/ws"
 	"time"
 )
 
@@ -29,13 +29,15 @@ func NewProjectService() ProjectService {
 		query:     dao.ProjectDaoContainer,
 		userQuery: dao.UserDaoContainer,
 		mention:   SessionServiceContainer,
+		sec:       auth.SecurityInstance,
 	}
 }
 
 type projectService struct {
 	query     dao.ProjectDao
 	userQuery dao.UserDao
-	mention   *ws_service.SessionService
+	mention   *ws.SessionService
+	sec       auth.SecurityGuard
 }
 
 func (p projectService) CreateProject(project Project) error {
@@ -49,34 +51,34 @@ func (p projectService) CreateProject(project Project) error {
 }
 
 func (p projectService) ProjectInfo(queryID uint, projectID uint) (BriefProjectDTO, error) {
-	if bl, err := securityService.IsUserAProjMember(securityService{}, projectID, queryID); bl == false {
+	if err := p.sec.IsUserAProjMember(projectID, queryID); err != nil {
 		return BriefProjectDTO{}, err
 	}
-	res, err := p.query.ProjectInfo(queryID, projectID)
+	res, err := p.query.ProjectInfo(projectID)
 	return res.BriefDTO(), err
 }
 
 func (p projectService) EditProjectInfo(queryID uint, project Project) error {
-	if bl, err := securityService.IsUserAProjLeader(securityService{}, project.ID, queryID); bl == false {
+	if err := p.sec.IsUserAProjLeader(project.ID, queryID); err != nil {
 		return err
 	}
-	err := p.query.SetProjectInfo(queryID, project)
+	err := p.query.SetProjectInfo(project)
 	if err != nil {
 		return err
 	}
-	if err := p.mention.NotifyByEvent(&wsentity.ProjectInfoChangedEvent{
+	if err := p.mention.NotifyByEvent(&ws.ProjectInfoChangedEvent{
 		ProjectDTO: project.DTO(),
-	}, wsentity.ProjectInfoChangedEventType); err != nil {
+	}, ws.ProjectInfoChangedEventType); err != nil {
 		return err
 	}
 	return nil
 }
 
 func (p projectService) DisableProject(queryID uint, projID uint) error {
-	if bl, err := securityService.IsUserAProjLeader(securityService{}, projID, queryID); bl == false {
+	if err := p.sec.IsUserAProjLeader(projID, queryID); err != nil {
 		return err
 	}
-	err := p.query.DeleteProject(queryID, projID)
+	err := p.query.DeleteProject(projID)
 	return err
 }
 

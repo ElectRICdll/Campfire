@@ -1,6 +1,7 @@
 package service
 
 import (
+	"campfire/auth"
 	"campfire/cache"
 	"campfire/dao"
 	"campfire/entity"
@@ -18,14 +19,14 @@ func NewLoginService() LoginService {
 	return &loginService{
 		dao.UserDaoContainer,
 		NewUserService(),
-		NewSecurityService(),
+		auth.SecurityInstance,
 	}
 }
 
 type loginService struct {
 	query dao.UserDao
 	user  UserService
-	sec   SecurityService
+	sec   auth.SecurityGuard
 }
 
 func (s *loginService) EmailVerify(vefiryCode string) error {
@@ -39,7 +40,7 @@ func (s *loginService) Login(email string, password string) (entity.LoginDTO, er
 		return entity.LoginDTO{}, err
 	}
 
-	token, err := s.sec.tokenGenerate(user)
+	token, err := s.sec.TokenGenerate(user)
 	if err != nil {
 		return entity.LoginDTO{}, err
 	}
@@ -54,7 +55,7 @@ func (s *loginService) Login(email string, password string) (entity.LoginDTO, er
 }
 
 func (s *loginService) Register(dto entity.UserDTO, password string) error {
-	p, err := s.sec.encryptPassword(password)
+	p, err := s.sec.EncryptPassword(password)
 	if err != nil {
 		return err
 	}

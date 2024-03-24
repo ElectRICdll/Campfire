@@ -1,6 +1,7 @@
 package service
 
 import (
+	"campfire/auth"
 	"campfire/dao"
 	. "campfire/entity"
 	"campfire/util"
@@ -12,7 +13,7 @@ type CampService interface {
 
 	CampInfo(queryID uint, campID uint) (CampDTO, error)
 
-	CreateCamp(queryID uint, camp Camp) error
+	CreateCamp(queryID uint, camp Camp, usersID ...uint) error
 
 	EditCampInfo(queryID uint, camp Camp) error
 
@@ -42,17 +43,19 @@ type CampService interface {
 func NewCampService() CampService {
 	return campService{
 		mention:   SessionServiceContainer,
-		access:    SecurityServiceContainer,
+		access:    auth.SecurityInstance,
 		campQuery: dao.CampDaoContainer,
 		projQuery: dao.ProjectDaoContainer,
+		userQuery: dao.UserDaoContainer,
 	}
 }
 
 type campService struct {
 	mention   *ws.SessionService
-	access    SecurityService
+	access    auth.SecurityGuard
 	campQuery dao.CampDao
 	projQuery dao.ProjectDao
+	userQuery dao.UserDao
 }
 
 func (c campService) MemberList(queryID uint, campID uint) ([]MemberDTO, error) {
@@ -103,7 +106,7 @@ func (c campService) CampInfo(queryID uint, campID uint) (CampDTO, error) {
 	return res.DTO(), nil
 }
 
-func (c campService) CreateCamp(queryID uint, camp Camp) error {
+func (c campService) CreateCamp(queryID uint, camp Camp, usersID ...uint) error {
 	if err := c.access.IsUserAProjMember(camp.ProjID, queryID); err != nil {
 		return err
 	}
@@ -111,8 +114,31 @@ func (c campService) CreateCamp(queryID uint, camp Camp) error {
 		UserID:   camp.OwnerID,
 		IsLeader: true,
 	})
-	err := c.campQuery.AddCamp(camp)
-	return err
+	id, err := c.campQuery.AddCamp(camp)
+	if err != nil {
+		return err
+	}
+	errGroup := util.NewErrorGroup()
+	for _, userID := range usersID {
+		//if err := c.access.IsUserAProjMember(camp.ProjID, userID); err != nil {
+		//	return util.NewExternalError("some member have no access.")
+		//}
+
+		err := c.campQuery.AddMember(Member{
+			UserID: userID,
+			CampID: id,
+			IsLeader: func(a, b uint) bool {
+				if a == b {
+					return true
+				}
+				return false
+			}(userID, camp.OwnerID),
+		})
+		if err != nil {
+			errGroup.AddError(err)
+		}
+	}
+	return errGroup
 }
 
 func (c campService) EditCampInfo(queryID uint, camp Camp) error {
@@ -149,7 +175,7 @@ func (c campService) InviteMember(queryID uint, campID uint, userID uint) error 
 	if err := c.access.IsUserACampLeader(campID, queryID); err != nil {
 		return err
 	}
-	if err := c.campQuery.AddMember(campID, userID); err != nil {
+	if err := c.campQuery.AddMember(Member{UserID: userID, CampID: campID}); err != nil {
 		return err
 	}
 	if err := c.mention.NotifyByEvent(&ws.CampInvitationEvent{

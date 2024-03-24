@@ -2,16 +2,16 @@ package main
 
 import (
 	"campfire/api"
+	"campfire/auth"
 	"campfire/cache"
 	"campfire/dao"
 	"campfire/entity"
-	"campfire/service"
-	"campfire/util"
+	"campfire/log"
 	"github.com/gin-gonic/gin"
 )
 
 func registerDependencies(engine *gin.Engine) {
-	auth := service.NewSecurityService()
+	auth := auth.SecurityInstance
 	login := api.NewLoginController()
 	engine.POST("/login", login.Login)
 	engine.POST("/reg", login.Register)
@@ -55,11 +55,10 @@ func registerDependencies(engine *gin.Engine) {
 }
 
 func main() {
-	r := gin.Default()
 
 	db := dao.DB
 
-	err2 := db.AutoMigrate(
+	if err := db.AutoMigrate(
 		&entity.Project{},
 		&entity.Branch{},
 		&entity.PullRequest{},
@@ -71,19 +70,22 @@ func main() {
 		&entity.Announcement{},
 		&entity.Message{},
 		&entity.ProjectMember{},
-	)
-
-	cache.InitCache()
-
-	if err2 != nil {
-		println(err2)
+	); err != nil {
+		log.Error(err.Error())
 		return
 	}
 
-	registerDependencies(r)
+	cache.InitCache()
+	cache.InitProjectCache()
+	cache.InitCampCache()
 
-	err := r.Run(":" + util.CONFIG.Port)
-	if err != nil {
+	log.Info("activating test demo...")
+	TestDemo()
 
-	}
+	//r := gin.Default()
+	//registerDependencies(r)
+	//
+	//if err := r.Run(":" + util.CONFIG.Port); err != nil {
+	//
+	//}
 }

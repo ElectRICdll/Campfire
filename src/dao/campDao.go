@@ -10,7 +10,7 @@ import (
 type CampDao interface {
 	CampInfo(campID uint) (Camp, error)
 
-	AddCamp(camp Camp) error
+	AddCamp(camp Camp) (uint, error)
 
 	SetCampInfo(camp Camp) error
 
@@ -20,7 +20,7 @@ type CampDao interface {
 
 	MemberInfo(campID uint, userID uint) (Member, error)
 
-	AddMember(campID uint, userID uint) error
+	AddMember(member Member) error
 
 	DeleteMember(campID uint, userID uint) error
 
@@ -73,15 +73,15 @@ func (d campDao) SetCampInfo(camp Camp) error {
 	return nil
 }
 
-func (d campDao) AddCamp(camp Camp) error {
+func (d campDao) AddCamp(camp Camp) (uint, error) {
 	var result = DB.Save(&camp)
 	if result.Error != nil {
-		return result.Error
+		return 0, result.Error
 	}
 	if result == nil {
-		return ExternalError{}
+		return 0, ExternalError{}
 	}
-	return nil
+	return camp.ID, nil
 }
 
 func (d campDao) DeleteCamp(campID uint) error {
@@ -120,8 +120,7 @@ func (d campDao) MemberInfo(campID uint, userID uint) (Member, error) {
 	return member, nil
 }
 
-func (d campDao) AddMember(campID uint, userID uint) error {
-	var member = Member{CampID: campID, UserID: userID}
+func (d campDao) AddMember(member Member) error {
 	var result = DB.Save(&member)
 	if result.Error == gorm.ErrRecordNotFound {
 		return ExternalError{}

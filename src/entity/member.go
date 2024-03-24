@@ -4,9 +4,8 @@ type MemberList map[int]*Member
 
 type Member struct {
 	ID     uint `gorm:"primaryKey;autoIncrement"`
-	ProjID uint `gorm:"index;not null"`
-	UserID uint `gorm:"index;not null"`
-	CampID uint `gorm:"index;not null"`
+	UserID uint `gorm:"not null"`
+	CampID uint `gorm:"not null"`
 
 	IsLeader bool
 	Nickname string
@@ -31,8 +30,8 @@ type MemberDTO struct {
 
 type ProjectMember struct {
 	ID        uint `gorm:"primaryKey"`
-	UserID    uint `gorm:"index;not null"`
-	ProjID    uint `gorm:"index;not null"`
+	UserID    uint `gorm:"not null"`
+	ProjID    uint `gorm:"not null"`
 	IsCreator bool
 	Title     string
 
@@ -44,7 +43,6 @@ func (m Member) DTO() MemberDTO {
 	return MemberDTO{
 		ID:        m.ID,
 		UserID:    m.UserID,
-		ProjID:    m.ProjID,
 		CampID:    m.CampID,
 		Nickname:  m.Nickname,
 		AvatarUrl: m.User.AvatarUrl,
@@ -57,7 +55,6 @@ func (m ProjectMember) DTO() MemberDTO {
 	return MemberDTO{
 		ID:        m.ID,
 		UserID:    m.UserID,
-		ProjID:    m.ProjID,
 		AvatarUrl: m.User.AvatarUrl,
 		Status:    m.User.Status,
 		Title:     m.Title,

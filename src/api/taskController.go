@@ -47,7 +47,7 @@ func (p taskController) CreateTask(ctx *gin.Context) {
 	}
 	task := entity.TaskDTO{}
 	if err := ctx.BindJSON(&task); err != nil {
-		responseError(ctx, util.ExternalError{Message: "invalid syntax."})
+		responseError(ctx, util.NewExternalError("invalid syntax"))
 	}
 
 	if err := p.service.CreateTask(userID, entity.Task{
@@ -126,7 +126,7 @@ func (p taskController) EditTaskInfo(ctx *gin.Context) {
 	}
 	task := entity.TaskDTO{}
 	if err := ctx.BindJSON(&task); err != nil {
-		responseError(ctx, util.ExternalError{Message: "invalid syntax."})
+		responseError(ctx, util.NewExternalError("invalid syntax"))
 	}
 
 	if err := p.service.EditTaskInfo(userID, uri.PID, entity.Task{

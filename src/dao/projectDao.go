@@ -2,6 +2,7 @@ package dao
 
 import (
 	. "campfire/entity"
+	"campfire/util"
 
 	//"fmt"
 	//"time"
@@ -33,13 +34,13 @@ type ProjectDao interface {
 
 	TasksOfProject(projID uint) ([]Task, error) //需要鉴权
 
-	TaskInfo(projID uint, taskID uint) (Task, error) //需要鉴权
+	TaskInfo(taskID uint) (Task, error) //需要鉴权
 
 	SetTaskInfo(projID uint, task Task) error //需要鉴权
 
 	AddTask(task Task) error //需要鉴权
 
-	DeleteTask(projID uint, taskID uint) error //需要鉴权
+	DeleteTask(taskID uint) error //需要鉴权
 
 	CampsOfProject(projID uint) ([]Camp, error)
 
@@ -78,12 +79,12 @@ func (d projectDao) ProjectInfo(projID uint) (Project, error) {
 
 	var project Project
 	var result = DB.Preload("Tasks").Preload("Camps").Preload("Members.User").
-		Joins("JOIN project_members ON project_members.project_id = projects.id").
+		Joins("JOIN project_members ON project_members.proj_id = projects.id").
 		Joins("JOIN users ON users.id = project_members.user_id").
-		Where("projects.id = ? AND users.id = ?", projID, queryMemberID).
+		Where("projects.id = ?", projID).
 		First(&project)
 	if result.Error == gorm.ErrRecordNotFound {
-		return project, NewExternalError("Access denied.")
+		return project, util.NewExternalError("No such data")
 	}
 	if result.Error != nil {
 		return project, result.Error
@@ -96,7 +97,7 @@ func (d projectDao) SetProjectInfo(project Project) error {
 
 	var result = DB.Updates(&project)
 	if result.Error == gorm.ErrRecordNotFound {
-		return ExternalError{}
+		return util.NewExternalError("No such data")
 	}
 	if result.Error != nil {
 		return result.Error
@@ -107,7 +108,7 @@ func (d projectDao) SetProjectInfo(project Project) error {
 func (d projectDao) AddProject(proj Project) error {
 	result := DB.Save(&proj)
 	if result.Error == gorm.ErrRecordNotFound {
-		return ExternalError{}
+		return util.NewExternalError("No such data")
 	}
 	if result.Error != nil {
 		return result.Error
@@ -118,7 +119,7 @@ func (d projectDao) AddProject(proj Project) error {
 func (d projectDao) DeleteProject(projID uint) error {
 	result := DB.Where("id = ?", projID).Delete(&Project{})
 	if result.Error == gorm.ErrRecordNotFound {
-		return ExternalError{}
+		return util.NewExternalError("No such data")
 	}
 	if result.Error != nil {
 		return result.Error
@@ -130,7 +131,7 @@ func (d projectDao) MemberList(projID uint) ([]ProjectMember, error) {
 	var projmember []ProjectMember
 	var result = DB.Where("proj_id = ?", projID).Find(&projmember)
 	if result.Error == gorm.ErrRecordNotFound {
-		return projmember, ExternalError{}
+		return projmember, util.NewExternalError("No such data")
 	}
 	if result.Error != nil {
 		return projmember, result.Error
@@ -142,7 +143,7 @@ func (d projectDao) MemberInfo(projID uint, userID uint) (ProjectMember, error) 
 	var projmember ProjectMember
 	var result = DB.Where("proj_id = ? AND user_id = ?", projID, userID).Find(&projmember)
 	if result.Error == gorm.ErrRecordNotFound {
-		return projmember, ExternalError{}
+		return projmember, util.NewExternalError("No such data")
 	}
 	if result.Error != nil {
 		return projmember, result.Error
@@ -155,7 +156,7 @@ func (d projectDao) AddMember(projID uint, userID uint) error {
 	var projmember = ProjectMember{ProjID: projID, UserID: userID}
 	result = DB.Save(&projmember)
 	if result.Error == gorm.ErrRecordNotFound {
-		return ExternalError{}
+		return util.NewExternalError("No such data")
 	}
 	if result.Error != nil {
 		return result.Error
@@ -166,7 +167,7 @@ func (d projectDao) AddMember(projID uint, userID uint) error {
 func (d projectDao) DeleteMember(projID uint, userID uint) error {
 	var result = DB.Where("proj_id = ? AND user_id = ?", projID, userID).Delete(&ProjectMember{})
 	if result.Error == gorm.ErrRecordNotFound {
-		return ExternalError{}
+		return util.NewExternalError("No such data")
 	}
 	if result.Error != nil {
 		return result.Error
@@ -177,7 +178,7 @@ func (d projectDao) DeleteMember(projID uint, userID uint) error {
 func (d projectDao) SetMemberInfo(projID uint, member ProjectMember) error {
 	var result = DB.Where("proj_id = ?", projID).Updates(&member)
 	if result.Error == gorm.ErrRecordNotFound {
-		return ExternalError{}
+		return util.NewExternalError("No such data")
 	}
 	if result.Error != nil {
 		return result.Error
@@ -189,7 +190,7 @@ func (d projectDao) TasksOfProject(projID uint) ([]Task, error) {
 	var task []Task
 	var result = DB.Where("proj_id = ?", projID).Find(&task)
 	if result.Error == gorm.ErrRecordNotFound {
-		return task, ExternalError{}
+		return task, util.NewExternalError("No such data")
 	}
 	if result.Error != nil {
 		return task, result.Error
@@ -197,11 +198,11 @@ func (d projectDao) TasksOfProject(projID uint) ([]Task, error) {
 	return task, nil
 }
 
-func (d projectDao) TaskInfo(projID uint, taskID uint) (Task, error) {
+func (d projectDao) TaskInfo(taskID uint) (Task, error) {
 	var task Task
 	var result = DB.Where("id = ?", taskID).Find(&task)
 	if result.Error == gorm.ErrRecordNotFound {
-		return task, ExternalError{}
+		return task, util.NewExternalError("No such data")
 	}
 	if result.Error != nil {
 		return task, result.Error
@@ -212,7 +213,7 @@ func (d projectDao) TaskInfo(projID uint, taskID uint) (Task, error) {
 func (d projectDao) SetTaskInfo(projID uint, task Task) error {
 	var result = DB.Where("proj_id = ?", projID).Updates(&task)
 	if result.Error == gorm.ErrRecordNotFound {
-		return ExternalError{}
+		return util.NewExternalError("No such data")
 	}
 	if result.Error != nil {
 		return result.Error
@@ -223,7 +224,7 @@ func (d projectDao) SetTaskInfo(projID uint, task Task) error {
 func (d projectDao) AddTask(task Task) error {
 	var result = DB.Save(&task)
 	if result.Error == gorm.ErrRecordNotFound {
-		return ExternalError{}
+		return util.NewExternalError("No such data")
 	}
 	if result.Error != nil {
 		return result.Error
@@ -234,7 +235,7 @@ func (d projectDao) AddTask(task Task) error {
 func (d projectDao) DeleteTask(taskID uint) error {
 	var result = DB.Where("id = ?", taskID).Delete(&Task{})
 	if result.Error == gorm.ErrRecordNotFound {
-		return ExternalError{}
+		return util.NewExternalError("No such data")
 	}
 	if result.Error != nil {
 		return result.Error
@@ -246,7 +247,7 @@ func (d projectDao) CampsOfProject(projID uint) ([]Camp, error) {
 	var camp []Camp
 	var result = DB.Where("proj_id = ?", projID).Find(&camp)
 	if result.Error == gorm.ErrRecordNotFound {
-		return camp, ExternalError{}
+		return camp, util.NewExternalError("No such data")
 	}
 	if result.Error != nil {
 		return camp, result.Error

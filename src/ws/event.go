@@ -32,7 +32,7 @@ func (s EventService) HandleEvent(msg *Notification) error {
 			return res
 		}(res)
 	case OnProject:
-		res, err := s.projQuery.MemberList(1, msg.Event.ScopeID())
+		res, err := s.projQuery.MemberList(msg.Event.ScopeID())
 		if err != nil {
 			return err
 		}

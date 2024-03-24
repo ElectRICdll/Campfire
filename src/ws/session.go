@@ -1,8 +1,8 @@
 package ws
 
 import (
+	"campfire/auth"
 	"campfire/log"
-	"campfire/service"
 	"campfire/util"
 	"encoding/json"
 	"github.com/gorilla/websocket"
@@ -14,7 +14,7 @@ type SessionSender func(*websocket.Conn, int, []byte) error
 
 func NewSessionService() *SessionService {
 	res := &SessionService{
-		sec:          service.SecurityServiceContainer,
+		sec:          auth.SecurityInstance,
 		generator:    websocket.Upgrader{},
 		pool:         NewSessionPool(),
 		eventHandler: EventService{},
@@ -23,7 +23,7 @@ func NewSessionService() *SessionService {
 }
 
 type SessionService struct {
-	sec          service.SecurityService
+	sec          auth.SecurityGuard
 	generator    websocket.Upgrader
 	pool         SessionPool
 	eventHandler EventService

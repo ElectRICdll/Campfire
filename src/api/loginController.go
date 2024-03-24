@@ -46,7 +46,7 @@ func (c *loginController) Login(ctx *gin.Context) {
 		Password string `json:"p"`
 	}{}
 	if err := ctx.BindJSON(&body); err != nil {
-		responseError(ctx, util.ExternalError{Message: "invalid syntax"})
+		responseError(ctx, util.NewExternalError("invalid syntax"))
 	}
 	res, err := c.loginService.Login(body.Email, body.Password)
 	responseJSON(ctx, res, err)

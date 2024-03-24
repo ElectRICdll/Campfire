@@ -47,25 +47,6 @@ func GetTaskFromCacheByUserID(userID int) (bool, Task) {
 	return false, Task{}
 }
 
-var (
-	ProjectCache *cache.Cache
-)
-
-func ProjectInitBy() {
-	ProjectCache = cache.New(30*time.Minute, 60*time.Minute) // 设置缓存，过期时间为 30 分钟，清理间隔为 60 分钟
-}
-
-func StoreProjectInCacheByUserID(user User, project Project) {
-	ProjectCache.Set(fmt.Sprintf("user:%d", user.ID), project, cache.DefaultExpiration)
-}
-
-func GetProjectFromCacheByUserID(userID int) (bool, Project) {
-	if project, found := userCache.Get(fmt.Sprintf("user:%d", userID)); found {
-		return true, project.(Project)
-	}
-	return false, Project{}
-}
-
 func GetLastReadMsgIDFromCache(userID int) int {
 	if found, user := GetUserFromCache(userID); found {
 		return user.LastMsgID
