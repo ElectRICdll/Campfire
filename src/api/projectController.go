@@ -78,7 +78,7 @@ jwt_auth: true
 func (p projectController) PublicCamps(ctx *gin.Context) {
 	userID := (uint)(ctx.Keys["id"].(float64))
 	uri := struct {
-		PID uint `uri:"p_id" binding:"required"`
+		PID uint `uri:"project_id" binding:"required"`
 	}{}
 	if err := ctx.BindUri(&uri); err != nil {
 		responseError(ctx, err)
@@ -131,7 +131,7 @@ jwt_auth: true
 func (p projectController) ProjectInfo(ctx *gin.Context) {
 	userID := (uint)(ctx.Keys["id"].(float64))
 	uri := struct {
-		PID uint `uri:"p_id" binding:"required"`
+		PID uint `uri:"project_id" binding:"required"`
 	}{}
 
 	if err := ctx.BindUri(&uri); err != nil {
@@ -156,7 +156,7 @@ func (p projectController) EditProjectInfo(ctx *gin.Context) {
 	userID := (uint)(ctx.Keys["id"].(float64))
 	proj := entity.ProjectDTO{}
 	uri := struct {
-		PID uint `uri:"p_id" binding:"required"`
+		PID uint `uri:"project_id" binding:"required"`
 	}{}
 	if err := ctx.BindUri(&uri); err != nil {
 		responseError(ctx, err)
@@ -187,7 +187,7 @@ jwt_auth: true
 func (p projectController) DisableProject(ctx *gin.Context) {
 	userID := (uint)(ctx.Keys["id"].(float64))
 	uri := struct {
-		PID uint `uri:"p_id" binding:"required"`
+		PID uint `uri:"project_id" binding:"required"`
 	}{}
 	if err := p.projService.DisableProject(userID, uri.PID); err != nil {
 		responseError(ctx, err)

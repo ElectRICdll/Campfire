@@ -4,10 +4,10 @@ import (
 	"campfire/api"
 	"campfire/auth"
 	"campfire/cache"
+	"campfire/util"
 	"campfire/dao"
 	"campfire/entity"
 	"campfire/log"
-	"campfire/test"
 	"github.com/gin-gonic/gin"
 )
 
@@ -32,7 +32,7 @@ func registerDependencies(engine *gin.Engine) {
 	engine.POST("/user/tasks", auth.AuthMiddleware(), user.Tasks)
 
 	proj := api.NewProjectController()
-	engine.GET("/project/:project_id", proj.ProjectInfo)
+	engine.GET("/project/:project_id", auth.AuthMiddleware(), proj.ProjectInfo)
 	engine.POST("/project/:project_id/del", auth.AuthMiddleware(), proj.DisableProject)
 	engine.GET("/project/:project_id/camps", auth.AuthMiddleware(), proj.PublicCamps)
 	engine.POST("/project/new_proj", auth.AuthMiddleware(), proj.CreateProject)
@@ -80,13 +80,13 @@ func main() {
 	cache.InitProjectCache()
 	cache.InitCampCache()
 
-	log.Info("activating test demo...")
-	test.Demo()
+	// log.Info("activating test demo...")
+	// test.Demo()
 
-	//r := gin.Default()
-	//registerDependencies(r)
-	//
-	//if err := r.Run(":" + util.CONFIG.Port); err != nil {
-	//
-	//}
+	r := gin.Default()
+	registerDependencies(r)
+	
+	if err := r.Run(":" + util.CONFIG.Port); err != nil {
+	
+	}
 }

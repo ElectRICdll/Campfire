@@ -78,11 +78,7 @@ func (d projectDao) IsUserAProjectMember(projID uint, userID uint) (bool, error)
 func (d projectDao) ProjectInfo(projID uint) (Project, error) {
 
 	var project Project
-	var result = DB.Preload("Tasks").Preload("Camps").Preload("Members.User").
-		Joins("JOIN project_members ON project_members.proj_id = projects.id").
-		Joins("JOIN users ON users.id = project_members.user_id").
-		Where("projects.id = ?", projID).
-		First(&project)
+	var result = DB.Where("id = ?",projID).Find(&project)
 	if result.Error == gorm.ErrRecordNotFound {
 		return project, util.NewExternalError("No such data")
 	}

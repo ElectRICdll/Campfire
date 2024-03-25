@@ -79,6 +79,8 @@ func (p projectService) DisableProject(queryID uint, projID uint) error {
 		return err
 	}
 	err := p.query.DeleteProject(projID)
+	// TODO: 
+	
 	return err
 }
 

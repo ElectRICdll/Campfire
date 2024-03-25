@@ -120,7 +120,7 @@ func (s SecurityGuard) IsUserAProjLeader(projID, userID uint) error {
 		return util.NewExternalError("access denied")
 	}
 
-	project, err := dao.ProjectDao.ProjectInfo(dao.NewProjectDao(), projID)
+	project, err := s.query.ProjectInfo(projID)
 	if project.ID != 0 {
 		ProjectCache.Set(fmt.Sprintf("%d", projID), &project, cache.DefaultExpiration)
 		if project.OwnerID == userID {
