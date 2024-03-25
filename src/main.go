@@ -8,6 +8,7 @@ import (
 	"campfire/dao"
 	"campfire/entity"
 	"campfire/log"
+	"campfire/util"
 	"github.com/gin-gonic/gin"
 )
 
@@ -80,6 +81,7 @@ func main() {
 	cache.InitProjectCache()
 	cache.InitCampCache()
 
+<<<<<<< Updated upstream
 	// log.Info("activating test demo...")
 	// test.Demo()
 
@@ -88,5 +90,15 @@ func main() {
 	
 	if err := r.Run(":" + util.CONFIG.Port); err != nil {
 	
+=======
+	//log.Info("activating test demo...")
+	//test.Demo()
+
+	r := gin.Default()
+	registerDependencies(r)
+
+	if err := r.Run(":" + util.CONFIG.Port); err != nil {
+
+>>>>>>> Stashed changes
 	}
 }
