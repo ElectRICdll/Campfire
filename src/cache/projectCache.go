@@ -34,6 +34,14 @@ func GetProjectFromCache(projID uint) (*Project, bool) {
 
 }
 
+func DelProjectFromCache(projID uint) error {
+	if _ , found := ProjectCache.Get(fmt.Sprintf("%d", projID)); found {
+		ProjectCache.Delete(fmt.Sprintf("%d", projID))
+	}
+	return errors.New("no such data in cache")
+}
+
+
 func StoreTaskToProject(projID uint, task Task) error {
 	if project, found := ProjectCache.Get(fmt.Sprintf("%d", projID)); found {
 		project.(*Project).Tasks = append(project.(*Project).Tasks, task)
