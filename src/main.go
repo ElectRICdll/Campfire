@@ -4,7 +4,6 @@ import (
 	"campfire/api"
 	"campfire/auth"
 	"campfire/cache"
-	"campfire/util"
 	"campfire/dao"
 	"campfire/entity"
 	"campfire/log"
@@ -81,24 +80,22 @@ func main() {
 	cache.InitProjectCache()
 	cache.InitCampCache()
 
-<<<<<<< Updated upstream
 	// log.Info("activating test demo...")
 	// test.Demo()
 
 	r := gin.Default()
 	registerDependencies(r)
-	
-	if err := r.Run(":" + util.CONFIG.Port); err != nil {
-	
-=======
-	//log.Info("activating test demo...")
-	//test.Demo()
-
-	r := gin.Default()
-	registerDependencies(r)
 
 	if err := r.Run(":" + util.CONFIG.Port); err != nil {
 
->>>>>>> Stashed changes
+		//log.Info("activating test demo...")
+		//test.Demo()
+
+		r := gin.Default()
+		registerDependencies(r)
+
+		if err := r.Run(":" + util.CONFIG.Port); err != nil {
+
+		}
 	}
 }

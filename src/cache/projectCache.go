@@ -13,6 +13,10 @@ var (
 	ProjectCache *cache.Cache
 )
 
+func Instance() {
+
+}
+
 func InitProjectCache() {
 	ProjectCache = cache.New(30*time.Minute, 60*time.Minute)
 }
