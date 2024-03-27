@@ -1,7 +1,6 @@
 package cache
 
 import (
-	"campfire/entity"
 	. "campfire/entity"
 	"fmt"
 	"time"
@@ -86,16 +85,16 @@ func TaskInit() {
 	taskCache = cache.New(30*time.Minute, 60*time.Minute) // 设置缓存，过期时间为 30 分钟，清理间隔为 60 分钟
 }
 
-func StoreTaskInCache(user []User, task Task) {
-	taskCache.Set(fmt.Sprintf("task:%d", task.ID), user, cache.DefaultExpiration)
-}
-
-func GetUnfinishedUsersFromCache(taskID int) []User {
-	if users, found := taskCache.Get(fmt.Sprintf("task:%d", taskID)); found {
-		return users.([]User)
-	}
-	return nil
-}
+//func StoreTaskInCache(user []User, task Task) {
+//	taskCache.Set(fmt.Sprintf("task:%d", task.ID), user, cache.DefaultExpiration)
+//}
+//
+//func GetUnfinishedUsersFromCache(taskID int) []User {
+//	if users, found := taskCache.Get(fmt.Sprintf("task:%d", taskID)); found {
+//		return users.([]User)
+//	}
+//	return nil
+//}
 
 //var TestProjects = []entity.Project{
 //	{
@@ -125,24 +124,3 @@ func GetUnfinishedUsersFromCache(taskID int) []User {
 //		FUrl: "",
 //	},
 //}
-
-var TestUsers = map[uint]*entity.User{
-	1: {
-		ID:       1,
-		Email:    "hare@email.com",
-		Name:     "electric",
-		IsOnline: false,
-	},
-	2: {
-		ID:       2,
-		Email:    "bdeng@email.com",
-		Name:     "wryte",
-		IsOnline: false,
-	},
-	3: {
-		ID:       3,
-		Email:    "koishi@email.com",
-		Name:     "koishi",
-		IsOnline: false,
-	},
-}

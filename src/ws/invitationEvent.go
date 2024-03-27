@@ -20,12 +20,22 @@ type InviteEvent interface {
 }
 
 type ProjectInvitationEvent struct {
-	Timestamp  time.Time     `json:"timestamp"`
-	TargetID   uint          `json:"targetID"`
-	IsAccepted int           `json:"isAccepted"`
-	KeepTime   time.Duration `json:"keepTime"`
-	util.Timer `json:"-"`
-	entity.BriefProjectDTO
+	Timestamp    time.Time              `json:"timestamp"`
+	TargetID     uint                   `json:"targetID"`
+	IsAccepted   int                    `json:"isAccepted"`
+	KeepDuration time.Duration          `json:"keepTime"`
+	Data         entity.BriefProjectDTO `json:"projectInfo"`
+	util.Timer   `json:"-"`
+}
+
+func NewProjectInvitationEvent(data entity.BriefProjectDTO, targetID uint) *ProjectInvitationEvent {
+	return &ProjectInvitationEvent{
+		Timestamp:    time.Now(),
+		TargetID:     targetID,
+		IsAccepted:   0,
+		KeepDuration: util.CONFIG.InvitationKeepDuration,
+		Data:         data,
+	}
 }
 
 func (a *ProjectInvitationEvent) Activate() {
@@ -38,17 +48,27 @@ func (a *ProjectInvitationEvent) Received(newStatus int) {
 }
 
 func (a *ProjectInvitationEvent) ScopeID() uint {
-	return a.ID
+	return a.TargetID
 }
 
 type CampInvitationEvent struct {
-	Timestamp    time.Time     `json:"timestamp"`
-	SourceID     uint          `json:"sourceID"`
-	TargetID     uint          `json:"targetID"`
-	IsAccepted   int           `json:"isAccepted"`
-	KeepDuration time.Duration `json:"keepDuration"`
+	Timestamp    time.Time           `json:"timestamp"`
+	SourceID     uint                `json:"sourceID"`
+	TargetID     uint                `json:"targetID"`
+	IsAccepted   int                 `json:"isAccepted"`
+	KeepDuration time.Duration       `json:"keepDuration"`
+	Data         entity.BriefCampDTO `json:"campInfo"`
 	util.Timer   `json:"-"`
-	entity.BriefCampDTO
+}
+
+func NewCampInvitationEvent(data entity.BriefCampDTO, targetID uint) *CampInvitationEvent {
+	return &CampInvitationEvent{
+		Timestamp:    time.Now(),
+		TargetID:     targetID,
+		IsAccepted:   0,
+		KeepDuration: util.CONFIG.InvitationKeepDuration,
+		Data:         data,
+	}
 }
 
 func (a *CampInvitationEvent) Activate() {

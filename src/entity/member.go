@@ -3,69 +3,24 @@ package entity
 type MemberList map[int]*Member
 
 type Member struct {
-	ID     uint `gorm:"primaryKey;autoIncrement"`
-	UserID uint `gorm:"not null"`
-	CampID uint `gorm:"not null"`
+	UserID uint `gorm:"primaryKey;autoIncrement:false" json:"userID"`
+	CampID uint `gorm:"primaryKey;autoIncrement:false" json:"campID"`
 
-	IsLeader bool
-	Nickname string
-	Title    string
+	Nickname string `json:"nickname"`
+	Title    string `json:"memberTitle"`
+	IsRuler  bool   `gorm:"not null" json:"isRuler"`
 
-	User User `gorm:"foreignKey:UserID"`
-	Camp Camp `gorm:"foreignKey:CampID"`
-}
-
-type MemberDTO struct {
-	ID        uint   `json:"id,omitempty" uri:"user_id" binding:"required"`
-	UserID    uint   `json:"userID,omitempty"`
-	ProjID    uint   `json:"projectID,omitempty"`
-	CampID    uint   `json:"campID,omitempty"`
-	IsLeader  bool   `json:"isLeader"`
-	AvatarUrl string `json:"avatarUrl,omitempty"`
-	Signature string `json:"signature,omitempty"`
-	Status    int    `json:"status,omitempty"`
-	Nickname  string `json:"nickname"`
-	Title     string `json:"member_title"`
+	User User `gorm:"foreignKey:UserID;onDelete:CASCADE" json:"user"`
 }
 
 type ProjectMember struct {
-	ID        uint `gorm:"primaryKey"`
-	UserID    uint `gorm:"not null"`
-	ProjID    uint `gorm:"not null"`
-	IsCreator bool
-	Title     string
+	UserID uint `gorm:"primaryKey" json:"userID"`
+	ProjID uint `gorm:"primaryKey" json:"projID"`
 
-	User    User    `gorm:"foreignKey:UserID"`
-	Project Project `gorm:"foreignKey:ProjID"`
-}
+	Title string `json:"title"`
 
-func (m Member) DTO() MemberDTO {
-	return MemberDTO{
-		ID:        m.ID,
-		UserID:    m.UserID,
-		CampID:    m.CampID,
-		Nickname:  m.Nickname,
-		AvatarUrl: m.User.AvatarUrl,
-		Status:    m.User.Status,
-		Title:     m.Title,
-	}
-}
+	ReceivingTasks []TaskReceivers `gorm:"foreignKey:MemberUserID;references:UserID;onDelete:SET NULL"`
+	ExecutingTasks []TaskExecutors `gorm:"foreignKey:MemberUserID;references:UserID;onDelete:SET NULL"`
 
-func (m ProjectMember) DTO() MemberDTO {
-	return MemberDTO{
-		ID:        m.ID,
-		UserID:    m.UserID,
-		AvatarUrl: m.User.AvatarUrl,
-		Status:    m.User.Status,
-		Title:     m.Title,
-	}
-}
-
-func MembersDTO(members []Member) []MemberDTO {
-	res := []MemberDTO{}
-	for _, member := range members {
-		res = append(res, member.DTO())
-	}
-
-	return res
+	User User `gorm:"foreignKey:UserID;onDelete:CASCADE" json:"user"`
 }

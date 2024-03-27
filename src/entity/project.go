@@ -13,87 +13,23 @@ const (
 )
 
 type Project struct {
-	ID      uint `gorm:"primaryKey;autoIncrement"`
-	OwnerID uint `gorm:"not null"`
+	ID uint `gorm:"primaryKey;autoIncrement" json:"projectID"`
 
-	Title        string `gorm:"not null"`
-	Description  string
-	Status       int
-	BeginAt      time.Time
-	Branches     []Branch      `gorm:"foreignKey:ProjID"`
-	PullRequests []PullRequest `gorm:"foreignKey:ProjID"`
-	Releases     []Release     `gorm:"foreignKey:ProjID"`
+	Title       string    `gorm:"not null" json:"title"`
+	Description string    `json:"description"`
+	Status      int       `gorm:"not null" json:"status"`
+	BeginAt     time.Time `json:"begin"`
 
-	Members []ProjectMember `gorm:"foreignKey:ProjID"`
-	Camps   []Camp          `gorm:"foreignKey:ProjID"`
-	Tasks   []Task          `gorm:"foreignKey:ProjID"`
-	FUrl    string
-}
+	Branches []Branch  `gorm:"foreignKey:ProjID;onDelete:CASCADE" json:"branches"`
+	Releases []Release `gorm:"foreignKey:ProjID;onDelete:CASCADE" json:"releases"`
 
-type BriefProjectDTO struct {
-	ID           uint      `json:"projectID,omitempty"`
-	OwnerID      uint      `json:"ownerID,omitempty"`
-	Title        string    `json:"projectTitle,omitempty"`
-	BeginAt      time.Time `json:"begin"`
-	Description  string    `json:"description,omitempty"`
-	BranchCount  int       `json:"branchCount"`
-	PullCount    int       `json:"pullCount"`
-	ReleaseCount int       `json:"releaseCount"`
-	CampCount    int       `json:"campCount,omitempty"`
-	TaskCount    int       `json:"taskCount,omitempty"`
-	Status       int       `json:"status"`
-}
+	OwnerID uint `json:"-"`
+	Owner   User `gorm:"foreignKey:OwnerID;onDelete:CASCADE" json:"owner"`
 
-type ProjectDTO struct {
-	ID           uint          `json:"projectID,omitempty"`
-	OwnerID      uint          `json:"ownerID,omitempty"`
-	Title        string        `json:"projectTitle,omitempty"`
-	Description  string        `json:"description,omitempty"`
-	BeginAt      time.Time     `json:"begin"`
-	Branches     []Branch      `json:"branches"`
-	PullRequests []PullRequest `json:"pull_requests"`
-	Releases     []Release     `json:"releases"`
-	Camps        []CampDTO     `json:"camps,omitempty"`
-	Tasks        []TaskDTO     `json:"tasks,omitempty"`
-	Status       int           `json:"status"`
-}
+	Members []ProjectMember `gorm:"foreignKey:ProjID;onDelete:CASCADE" json:"members"`
 
-func (p Project) BriefDTO() BriefProjectDTO {
-	return BriefProjectDTO{
-		ID:          p.ID,
-		OwnerID:     p.OwnerID,
-		Title:       p.Title,
-		Description: p.Description,
-		CampCount:   len(p.Camps),
-		TaskCount:   len(p.Tasks),
-	}
-}
-
-func (p Project) DTO() ProjectDTO {
-	return ProjectDTO{
-		ID:           p.ID,
-		OwnerID:      p.OwnerID,
-		Title:        p.Title,
-		Description:  p.Description,
-		Branches:     p.Branches,
-		PullRequests: p.PullRequests,
-		Releases:     p.Releases,
-		Camps:        CampsDTO(p.Camps),
-		Tasks:        TasksDTO(p.Tasks),
-	}
-}
-
-func ProjectsDTO(projects []Project) []ProjectDTO {
-	res := []ProjectDTO{}
-	for _, project := range projects {
-		res = append(res, project.DTO())
-	}
-	return res
-}
-
-type Branch struct {
-	ProjID uint
-	Name   string `json:"branch"`
+	Camps []Camp `gorm:"foreignKey:ProjID;onDelete:CASCADE" json:"camps"`
+	Tasks []Task `gorm:"foreignKey:ProjID;onDelete:CASCADE" json:"tasks"`
 }
 
 const (
@@ -102,19 +38,28 @@ const (
 	Merged
 )
 
-type PullRequest struct {
-	ID      string `json:"id" gorm:"primaryKey"`
-	ProjID  uint
-	Title   string `json:"title"`
-	Body    string `json:"body"`
-	Branch  string `json:"branch"`
-	OwnerID uint   `json:"ownerID"`
-	Status  int
+type Branch struct {
+	ID          uint     `gorm:"primaryKey;autoIncrement" json:"-"`
+	ProjID      uint     `gorm:"not null" json:"projID"`
+	OwnerID     uint     `gorm:"not null" json:"ownerID"`
+	Name        string   `gorm:"not null;unique" json:"branch"`
+	Commits     []Commit `gorm:"foreignKey:ProjID;onDelete:CASCADE" json:"-"`
+	CommitCount int      `gorm:"-" json:"commitCount"`
+	Status      int      `gorm:"not null" json:"status"`
+}
+
+type Commit struct {
+	ID          string `gorm:"primaryKey;autoIncrement" json:"-"`
+	ProjID      uint   `gorm:"not null" json:"projID"`
+	Title       string `gorm:"not null" json:"title"`
+	Description string `json:"description"`
+	OwnerID     uint   `json:"ownerID"`
 }
 
 type Release struct {
-	ProjID   uint
-	Version  string    `json:"version"`
-	Date     time.Time `json:"date"`
-	FilePath string    `json:"-"`
+	ID       string    `gorm:"primaryKey;autoIncrement" json:"id"`
+	ProjID   uint      `gorm:"not null" json:"projID"`
+	Version  string    `gorm:"not null;unique" json:"version"`
+	Date     time.Time `gorm:"not null" json:"date"`
+	FilePath string    `gorm:"not null;uri" json:"-"`
 }

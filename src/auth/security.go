@@ -25,16 +25,16 @@ type SecurityGuard struct {
 }
 
 func (s SecurityGuard) IsUserHavingTitle(projID, userID uint) error {
-	if project, found := ProjectCache.Get(fmt.Sprintf("%d", projID)); found {
-		for _, value := range project.(*entity.Project).Members {
-			if value.UserID == userID && len(value.Title) != 0 {
-				return nil
-			}
-		}
-		return util.NewExternalError("access denied")
-	}
+	//if project, found := ProjectCache.Get(fmt.Sprintf("%d", projID)); found {
+	//	for _, value := range project.(*entity.Project).Members {
+	//		if value.UserID == userID && len(value.Title) != 0 {
+	//			return nil
+	//		}
+	//	}
+	//	return util.NewExternalError("access denied")
+	//}
 
-	project, err := dao.ProjectDao.ProjectInfo(dao.NewProjectDao(), projID)//---------------------
+	project, err := s.query.ProjectInfo(projID) //---------------------
 	if project.ID != 0 {
 		ProjectCache.Set(fmt.Sprintf("%d", projID), &project, cache.DefaultExpiration)
 		for _, value := range project.Members {
@@ -48,19 +48,27 @@ func (s SecurityGuard) IsUserHavingTitle(projID, userID uint) error {
 }
 
 func (s SecurityGuard) IsUserACampMember(campID, userID uint) error {
-	if camp, found := CampCache.Get(fmt.Sprintf("%d", campID)); found {
-		for _, value := range camp.(*entity.Camp).Members {
+	//if camp, found := CampCache.Get(fmt.Sprintf("%d", campID)); found {
+	//	for _, value := range camp.(*entity.Camp).Members {
+	//		if value.UserID == userID {
+	//			return nil
+	//		}
+	//	}
+	//	return util.NewExternalError("access denied")
+	//}
+
+	camp, err := s.campQuery.CampInfo(campID) //----------------------------
+	if camp.ID != 0 {
+		CampCache.Set(fmt.Sprintf("%d", campID), &camp, cache.DefaultExpiration)
+		if camp.Owner.UserID == userID {
+			return nil
+		}
+		for _, value := range camp.Rulers {
 			if value.UserID == userID {
 				return nil
 			}
 		}
-		return util.NewExternalError("access denied")
-	}
-
-	camp, err := dao.ProjectDao.ProjectInfo(dao.NewProjectDao(), campID)//----------------------------
-	if camp.ID != 0 {
-		CampCache.Set(fmt.Sprintf("%d", campID), &camp, cache.DefaultExpiration)
-		for _, value := range camp.Members {
+		for _, value := range camp.Regulars {
 			if value.UserID == userID {
 				return nil
 			}
@@ -71,17 +79,17 @@ func (s SecurityGuard) IsUserACampMember(campID, userID uint) error {
 }
 
 func (s SecurityGuard) IsUserACampLeader(campID, userID uint) error {
-	if camp, found := CampCache.Get(fmt.Sprintf("%d", campID)); found {
-		if camp.(*entity.Camp).OwnerID == userID {
-			return nil
-		}
-		return util.NewExternalError("access denied")
-	}
+	//if camp, found := CampCache.Get(fmt.Sprintf("%d", campID)); found {
+	//	if camp.(*entity.Camp).OwnerID == userID {
+	//		return nil
+	//	}
+	//	return util.NewExternalError("access denied")
+	//}
 
-	camp, err := dao.CampDao.CampInfo(dao.NewCampDao(), campID)//---------------------
+	camp, err := dao.CampDao.CampInfo(dao.NewCampDao(), campID) //---------------------
 	if camp.ID != 0 {
 		ProjectCache.Set(fmt.Sprintf("%d", campID), &camp, cache.DefaultExpiration)
-		if camp.OwnerID == userID {
+		if camp.Owner.UserID == userID {
 			return nil
 		}
 		return util.NewExternalError("access denied")
@@ -90,18 +98,21 @@ func (s SecurityGuard) IsUserACampLeader(campID, userID uint) error {
 }
 
 func (s SecurityGuard) IsUserAProjMember(projID, userID uint) error {
-	if project, found := ProjectCache.Get(fmt.Sprintf("%d", projID)); found {
-		for _, value := range project.(*entity.Project).Members {
-			if value.UserID == userID {
-				return nil
-			}
-		}
-		return util.NewExternalError("access denied")
-	}
+	//if project, found := ProjectCache.Get(fmt.Sprintf("%d", projID)); found {
+	//	for _, value := range project.(*entity.Project).Members {
+	//		if value.UserID == userID {
+	//			return nil
+	//		}
+	//	}
+	//	return util.NewExternalError("access denied")
+	//}
 
-	project, err := s.query.ProjectInfo(projID)
+	project, err := s.query.ProjectInfo(projID, "Members", "Owner")
 	if project.ID != 0 {
 		ProjectCache.Set(fmt.Sprintf("%d", projID), &project, cache.DefaultExpiration)
+		if project.OwnerID == userID {
+			return nil
+		}
 		for _, value := range project.Members {
 			if value.UserID == userID {
 				return nil
@@ -113,16 +124,15 @@ func (s SecurityGuard) IsUserAProjMember(projID, userID uint) error {
 }
 
 func (s SecurityGuard) IsUserAProjLeader(projID, userID uint) error {
-	if project, found := ProjectCache.Get(fmt.Sprintf("%d", projID)); found {
-		if project.(*entity.Project).OwnerID == userID {
-			return nil
-		}
-		return util.NewExternalError("access denied")
-	}
+	//if project, found := ProjectCache.Get(fmt.Sprintf("%d", projID)); found {
+	//	if project.(*entity.Project).OwnerID == userID {
+	//		return nil
+	//	}
+	//	return util.NewExternalError("access denied")
+	//}
 
-	project, err := s.query.ProjectInfo(projID)
+	project, err := s.query.ProjectInfo(projID, "Owner")
 	if project.ID != 0 {
-		ProjectCache.Set(fmt.Sprintf("%d", projID), &project, cache.DefaultExpiration)
 		if project.OwnerID == userID {
 			return nil
 		}
@@ -132,16 +142,16 @@ func (s SecurityGuard) IsUserAProjLeader(projID, userID uint) error {
 }
 
 func (s SecurityGuard) IsUserATaskOwner(projID, taskID, userID uint) error {
-	task, err := GetTaskFromCache(projID, taskID)
+	//task, err := GetTaskFromCache(projID, taskID)
+	//if err != nil {
+	task, err := s.query.TaskInfo(taskID)
 	if err != nil {
-		task, err := s.query.TaskInfo(taskID)
-		if err != nil {
-			return err
-		}
-		if err := StoreTaskToProject(projID, task); err != nil {
-			return err
-		}
+		return err
 	}
+	if err := StoreTaskToProject(projID, task); err != nil {
+		return err
+	}
+	//}
 	if task.OwnerID != userID {
 		return util.NewExternalError("access denied")
 	}

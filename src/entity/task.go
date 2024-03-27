@@ -20,17 +20,21 @@ const (
 )
 
 type Task struct {
-	ID        uint     `gorm:"primaryKey;autoIncrement"`
-	OwnerID   uint     `gorm:"not null"`
-	ProjID    uint     `gorm:"not null"`
-	Receivers []Member `gorm:"foreignKey:ID"`
+	ID      uint `gorm:"primaryKey;autoIncrement" json:"taskID"`
+	ProjID  uint `gorm:"primaryKey;autoIncrement:false" json:"projID"`
+	OwnerID uint `gorm:"not null" json:"ownerID"`
 
-	Title       string
-	BeginAt     time.Time
-	EndAt       time.Time
-	Content     string
-	Status      int
-	*util.Timer `gorm:"-"`
+	Owner     User            `gorm:"foreignKey:OwnerID"`
+	Receivers []TaskReceivers `gorm:"foreignKey:ProjectID,TaskID;references:ProjID,ID;onDelete:CASCADE"`
+	Executors []TaskExecutors `gorm:"foreignKey:ProjectID,TaskID;references:ProjID,ID;onDelete:CASCADE"`
+
+	Title       string    `gorm:"not null" json:"title"`
+	IsFree      bool      `gorm:"not null" json:"isFree"`
+	BeginAt     time.Time `gorm:"not null" json:"begin"`
+	EndAt       time.Time `json:"end"`
+	Content     string    `json:"content"`
+	Status      int       `gorm:"not null" json:"status"`
+	*util.Timer `gorm:"-" json:"-"`
 }
 
 func (t *Task) StartATimer() {
@@ -44,44 +48,14 @@ func (t *Task) SetStatus(code int) {
 	t.Status = code
 }
 
-type TaskDTO struct {
-	ID          uint   `json:"id"`
-	OwnerID     uint   `json:"ownerID"`
-	ProjID      uint   `json:"projectID"`
-	ReceiversID []uint `json:"receiversID"`
-
-	IsFree  bool      `json:"isFree"`
-	Title   string    `json:"taskTitle"`
-	BeginAt time.Time `json:"begin"`
-	EndAt   time.Time `json:"deadline"`
-	Content string    `json:"content"`
-	Status  int       `json:"status"`
+type TaskExecutors struct {
+	TaskID       uint `gorm:"primaryKey"`
+	ProjectID    uint `gorm:"primaryKey"`
+	MemberUserID uint `gorm:"primaryKey"`
 }
 
-func (t *Task) DTO() TaskDTO {
-	return TaskDTO{
-		ID:      t.ID,
-		OwnerID: t.OwnerID,
-		ProjID:  t.ProjID,
-		ReceiversID: func(members []Member) []uint {
-			res := []uint{}
-			for _, member := range members {
-				res = append(res, member.ID)
-			}
-			return res
-		}(t.Receivers),
-		Title:   t.Title,
-		BeginAt: t.BeginAt,
-		EndAt:   t.EndAt,
-		Content: t.Content,
-		Status:  t.Status,
-	}
-}
-
-func TasksDTO(tasks []Task) []TaskDTO {
-	res := []TaskDTO{}
-	for _, task := range tasks {
-		res = append(res, task.DTO())
-	}
-	return res
+type TaskReceivers struct {
+	TaskID       uint `gorm:"primaryKey"`
+	ProjectID    uint `gorm:"primaryKey"`
+	MemberUserID uint `gorm:"primaryKey"`
 }

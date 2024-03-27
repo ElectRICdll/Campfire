@@ -1,6 +1,7 @@
 package api
 
 import (
+	"campfire/auth"
 	"campfire/entity"
 	"campfire/service"
 	"campfire/util"
@@ -18,17 +19,31 @@ type CampController interface {
 
 	KickMember(*gin.Context)
 
-	EditMemberInfo(*gin.Context)
+	ExitCamp(*gin.Context)
+
+	GiveOwner(*gin.Context)
+
+	Promotion(*gin.Context)
+
+	Demotion(*gin.Context)
+
+	EditMyMemberInfo(*gin.Context)
+
+	SetTitle(*gin.Context)
+
+	MessageRecord(*gin.Context)
 }
 
 func NewCampController() CampController {
 	return campController{
-		campService: nil,
+		campService:    service.CampServiceContainer,
+		messageService: service.MessageServiceContainer,
 	}
 }
 
 type campController struct {
-	campService service.CampService
+	campService    service.CampService
+	messageService service.MessageService
 }
 
 /*
@@ -52,10 +67,9 @@ func (p campController) EditCampInfo(ctx *gin.Context) {
 		return
 	}
 	if err := p.campService.EditCampInfo(userID, entity.Camp{
-		ID:      camp.ID,
-		OwnerID: camp.OwnerID,
-		ProjID:  camp.ProjID,
-		Name:    camp.Name,
+		ID:     camp.ID,
+		ProjID: camp.ProjID,
+		Name:   camp.Name,
 	}); err != nil {
 		responseError(ctx, err)
 		return
@@ -90,7 +104,7 @@ func (p campController) InviteMember(ctx *gin.Context) {
 		responseError(ctx, err)
 		return
 	}
-	user := entity.UserDTO{}
+	user := entity.User{}
 	if err := ctx.BindJSON(&user); err != nil {
 		responseError(ctx, err)
 		return
@@ -112,7 +126,7 @@ func (p campController) KickMember(ctx *gin.Context) {
 		responseError(ctx, err)
 		return
 	}
-	user := entity.UserDTO{}
+	user := entity.User{}
 	if err := ctx.BindJSON(&user); err != nil {
 		responseError(ctx, err)
 		return
@@ -125,9 +139,9 @@ func (p campController) KickMember(ctx *gin.Context) {
 	return
 }
 
-func (p campController) EditMemberInfo(ctx *gin.Context) {
+func (p campController) EditMyMemberInfo(ctx *gin.Context) {
 	userID := (uint)(ctx.Keys["id"].(float64))
-	member := entity.MemberDTO{}
+	member := entity.Member{}
 	uri := struct {
 		CID uint `uri:"p_id" binding:"required"`
 	}{}
@@ -138,14 +152,11 @@ func (p campController) EditMemberInfo(ctx *gin.Context) {
 	if err := ctx.BindJSON(&member); err != nil {
 		responseError(ctx, util.NewExternalError("invalid syntax"))
 	}
-	if err := p.campService.EditMemberInfo(userID, entity.Member{
-		ID:     member.ID,
+	if err := p.campService.EditMemberInfo(entity.Member{
 		UserID: userID,
 		CampID: member.CampID,
 
-		IsLeader: member.IsLeader,
 		Nickname: member.Nickname,
-		Title:    member.Title,
 	}); err != nil {
 		responseError(ctx, err)
 		return
@@ -184,7 +195,7 @@ jwt_auth: true
 */
 func (p campController) EditCamp(ctx *gin.Context) {
 	userID := (uint)(ctx.Keys["id"].(float64))
-	proj := entity.CampDTO{}
+	proj := entity.Camp{}
 	uri := struct {
 		PID uint `uri:"p_id" binding:"required"`
 	}{}
@@ -196,9 +207,8 @@ func (p campController) EditCamp(ctx *gin.Context) {
 		responseError(ctx, util.NewExternalError("invalid syntax"))
 	}
 	if err := p.campService.EditCampInfo(userID, entity.Camp{
-		ID:      uri.PID,
-		Name:    proj.Name,
-		OwnerID: proj.OwnerID,
+		ID:   uri.PID,
+		Name: proj.Name,
 	}); err != nil {
 		responseError(ctx, err)
 		return
@@ -216,10 +226,121 @@ jwt_auth: true
 func (p projectController) DisableCamp(ctx *gin.Context) {
 	userID := (uint)(ctx.Keys["id"].(float64))
 	uri := struct {
-		PID uint `uri:"p_id" binding:"required"`
 		CID uint `uri:"c_id" binding:"required"`
 	}{}
 	if err := p.campService.DisableCamp(userID, uri.CID); err != nil {
+		responseError(ctx, err)
+		return
+	}
+	return
+}
+
+func (p campController) SetTitle(ctx *gin.Context) {
+	userID := (uint)(ctx.Keys["id"].(float64))
+	uri := struct {
+		CID uint `uri:"c_id" binding:"required"`
+	}{}
+	body := struct {
+		UserID uint   `json:"userID"`
+		Title  string `json:"title"`
+	}{}
+	if err := ctx.BindJSON(&body); err != nil {
+		responseError(ctx, err)
+		return
+	}
+	if err := p.campService.SetTitle(userID, uri.CID, body.UserID, body.Title); err != nil {
+		responseError(ctx, err)
+		return
+	}
+	return
+}
+
+func (p campController) MessageRecord(ctx *gin.Context) {
+	userID := (uint)(ctx.Keys["id"].(float64))
+	uri := struct {
+		CID uint `uri:"c_id" binding:"required"`
+	}{}
+	beginID := struct {
+		BeginMessageID uint `json:"beginMessageID"`
+	}{}
+	if err := ctx.BindJSON(&beginID); err != nil {
+		responseError(ctx, err)
+		return
+	}
+	if err := auth.SecurityInstance.IsUserACampMember(uri.CID, userID); err != nil {
+		responseError(ctx, util.NewExternalError("access denied"))
+	}
+	res, err := p.messageService.PullMessageRecord(uri.CID, beginID.BeginMessageID)
+	resStruct := struct {
+		Msgs []entity.Message `json:"msgs"`
+	}{res}
+	responseJSON(ctx, resStruct, err)
+	return
+}
+
+func (p campController) GiveOwner(ctx *gin.Context) {
+	userID := (uint)(ctx.Keys["id"].(float64))
+	uri := struct {
+		CID uint `uri:"c_id" binding:"required"`
+	}{}
+	body := struct {
+		UserID uint `json:"userID"`
+	}{}
+	if err := ctx.BindJSON(&body); err != nil {
+		responseError(ctx, err)
+		return
+	}
+	if err := p.campService.GiveOwner(userID, uri.CID, body.UserID); err != nil {
+		responseError(ctx, err)
+		return
+	}
+	return
+}
+
+func (p campController) Promotion(ctx *gin.Context) {
+	userID := (uint)(ctx.Keys["id"].(float64))
+	uri := struct {
+		CID uint `uri:"c_id" binding:"required"`
+	}{}
+	body := struct {
+		UserID uint `json:"userID"`
+	}{}
+	if err := ctx.BindJSON(&body); err != nil {
+		responseError(ctx, err)
+		return
+	}
+	if err := p.campService.GiveRuler(userID, uri.CID, body.UserID); err != nil {
+		responseError(ctx, err)
+		return
+	}
+	return
+}
+
+func (p campController) Demotion(ctx *gin.Context) {
+	userID := (uint)(ctx.Keys["id"].(float64))
+	uri := struct {
+		CID uint `uri:"c_id" binding:"required"`
+	}{}
+	body := struct {
+		UserID uint `json:"userID"`
+	}{}
+	if err := ctx.BindJSON(&body); err != nil {
+		responseError(ctx, err)
+		return
+	}
+	if err := p.campService.DelRuler(userID, uri.CID, body.UserID); err != nil {
+		responseError(ctx, err)
+		return
+	}
+	return
+}
+
+func (p campController) ExitCamp(ctx *gin.Context) {
+	userID := (uint)(ctx.Keys["id"].(float64))
+	uri := struct {
+		CID uint `uri:"c_id" binding:"required"`
+	}{}
+	if err := p.campService.ExitCamp(userID, uri.CID); err != nil {
 		responseError(ctx, err)
 		return
 	}

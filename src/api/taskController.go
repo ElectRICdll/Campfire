@@ -39,28 +39,28 @@ jwt_auth: true
 func (p taskController) CreateTask(ctx *gin.Context) {
 	userID := (uint)(ctx.Keys["id"].(float64))
 	uri := struct {
-		PID uint `uri:"p_id" binding:"required"`
+		PID uint `uri:"project_id" binding:"required"`
 	}{}
 	if err := ctx.BindUri(&uri); err != nil {
 		responseError(ctx, err)
 		return
 	}
-	task := entity.TaskDTO{}
+	task := entity.Task{}
 	if err := ctx.BindJSON(&task); err != nil {
 		responseError(ctx, util.NewExternalError("invalid syntax"))
 	}
 
-	if err := p.service.CreateTask(userID, entity.Task{
+	res1, res2, err := p.service.CreateTask(userID, entity.Task{
 		Title:   task.Title,
-		OwnerID: userID,
-		//ReceiversID: task.ReceiversID,
 		Content: task.Content,
 		BeginAt: task.BeginAt,
 		EndAt:   task.EndAt,
-	}); err != nil {
-		responseError(ctx, err)
-		return
-	}
+	})
+	resStruct := struct {
+		ProjID uint `json:"projID"`
+		TaskID uint `json:"taskID"`
+	}{res1, res2}
+	responseJSON(ctx, resStruct, err)
 	return
 }
 
@@ -74,7 +74,7 @@ jwt_auth: true
 func (p taskController) Tasks(ctx *gin.Context) {
 	userID := (uint)(ctx.Keys["id"].(float64))
 	uri := struct {
-		PID uint `uri:"p_id" binding:"required"`
+		PID uint `uri:"project_id" binding:"required"`
 	}{}
 	if err := ctx.BindUri(&uri); err != nil {
 		responseError(ctx, err)
@@ -95,8 +95,8 @@ jwt_auth: true
 func (p taskController) TaskInfo(ctx *gin.Context) {
 	userID := (uint)(ctx.Keys["id"].(float64))
 	uri := struct {
-		PID uint `uri:"p_id" binding:"required"`
-		TID uint `uri:"t_id" binding:"required"`
+		PID uint `uri:"project_id" binding:"required"`
+		TID uint `uri:"task_id" binding:"required"`
 	}{}
 	if err := ctx.BindUri(&uri); err != nil {
 		responseError(ctx, err)
@@ -117,14 +117,14 @@ jwt_auth: true
 func (p taskController) EditTaskInfo(ctx *gin.Context) {
 	userID := (uint)(ctx.Keys["id"].(float64))
 	uri := struct {
-		PID uint `uri:"p_id" binding:"required"`
-		TID uint `uri:"t_id" binding:"required"`
+		PID uint `uri:"project_id" binding:"required"`
+		TID uint `uri:"task_id" binding:"required"`
 	}{}
 	if err := ctx.BindUri(&uri); err != nil {
 		responseError(ctx, err)
 		return
 	}
-	task := entity.TaskDTO{}
+	task := entity.Task{}
 	if err := ctx.BindJSON(&task); err != nil {
 		responseError(ctx, util.NewExternalError("invalid syntax"))
 	}
@@ -132,8 +132,6 @@ func (p taskController) EditTaskInfo(ctx *gin.Context) {
 	if err := p.service.EditTaskInfo(userID, uri.PID, entity.Task{
 		ID:      uri.TID,
 		Title:   task.Title,
-		OwnerID: userID,
-		//ReceiversID: task.ReceiversID,
 		Content: task.Content,
 		BeginAt: task.BeginAt,
 		EndAt:   task.EndAt,
@@ -154,8 +152,8 @@ jwt_auth: true
 func (p taskController) DeleteTask(ctx *gin.Context) {
 	userID := (uint)(ctx.Keys["id"].(float64))
 	uri := struct {
-		PID uint `uri:"p_id" binding:"required"`
-		TID uint `uri:"t_id" binding:"required"`
+		PID uint `uri:"project_id" binding:"required"`
+		TID uint `uri:"task_id" binding:"required"`
 	}{}
 	if err := p.service.DeleteTask(userID, uri.PID, uri.TID); err != nil {
 		responseError(ctx, err)

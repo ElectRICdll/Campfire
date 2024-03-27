@@ -43,7 +43,7 @@ path: /login
 func (c *loginController) Login(ctx *gin.Context) {
 	body := struct {
 		Email    string `json:"email"`
-		Password string `json:"p"`
+		Password string `json:"password"`
 	}{}
 	if err := ctx.BindJSON(&body); err != nil {
 		responseError(ctx, util.NewExternalError("invalid syntax"))
@@ -65,19 +65,22 @@ path: /reg
 	}
 */
 func (c *loginController) Register(ctx *gin.Context) {
-	newUser := struct {
-		entity.UserDTO
-		Password string `json:"p"`
-	}{}
+	var newUser struct {
+		entity.User
+		Password string `json:"password"`
+	}
 	if err := ctx.BindJSON(&newUser); err != nil {
 		responseError(ctx, err)
 		return
 	}
-	if err := c.loginService.Register(newUser.UserDTO, newUser.Password); err != nil {
-		responseError(ctx, err)
-		return
-	}
-
-	responseSuccess(ctx)
+	res, err := c.loginService.Register(entity.User{
+		Email:    newUser.Email,
+		Name:     newUser.Name,
+		Password: newUser.Password,
+	}, newUser.Password)
+	resStruct := struct {
+		ID uint `json:"id"`
+	}{res}
+	responseJSON(ctx, resStruct, err)
 	return
 }

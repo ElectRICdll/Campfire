@@ -32,11 +32,11 @@ type ExternalErrorGroup struct {
 	Errors []error
 }
 
-func (e *ExternalErrorGroup) AddError(err error) {
+func AddError(e *ExternalErrorGroup, err error) {
 	e.Errors = append(e.Errors, err)
 }
 
-func (e *ExternalErrorGroup) Error() string {
+func (e ExternalErrorGroup) Error() string {
 	var b strings.Builder
 	for i, err := range e.Errors {
 		if i > 0 {

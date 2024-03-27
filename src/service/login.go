@@ -5,12 +5,13 @@ import (
 	"campfire/cache"
 	"campfire/dao"
 	"campfire/entity"
+	"campfire/util"
 )
 
 type LoginService interface {
 	Login(email string, password string) (entity.LoginDTO, error)
 
-	Register(user entity.UserDTO, password string) error
+	Register(user entity.User, password string) (uint, error)
 
 	EmailVerify(vefiryCode string) error
 }
@@ -54,17 +55,26 @@ func (s *loginService) Login(email string, password string) (entity.LoginDTO, er
 	}, nil
 }
 
-func (s *loginService) Register(dto entity.UserDTO, password string) error {
+func (s *loginService) Register(dto entity.User, password string) (uint, error) {
+	if ok := util.ValidateUsername(dto.Name); !ok {
+		return 0, util.NewExternalError("illegal username format")
+	}
+
+	if ok := util.ValidatePassword(password); !ok {
+		return 0, util.NewExternalError("illegal password format")
+	}
+
 	p, err := s.sec.EncryptPassword(password)
 	if err != nil {
-		return err
+		return 0, err
 	}
-	if err := s.query.CreateUser(entity.User{
+	res, err := s.query.CreateUser(entity.User{
 		Email:    dto.Email,
 		Name:     dto.Name,
 		Password: p,
-	}); err != nil {
-		return err
+	})
+	if err != nil {
+		return 0, err
 	}
-	return nil
+	return res, err
 }

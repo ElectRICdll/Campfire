@@ -1,67 +1,16 @@
 package entity
 
 type Camp struct {
-	ID      uint `gorm:"primaryKey;autoIncrement"`
-	ProjID  uint `gorm:"not null"`
-	OwnerID uint `gorm:"not null"`
+	ID      uint `gorm:"primaryKey;autoIncrement" json:"campID"`
+	ProjID  uint `gorm:"not null" json:"projectID"`
+	OwnerID uint `gorm:"not null" json:"ownerID"`
 
-	Name      string
-	IsPrivate bool
-	Members   []Member `gorm:"foreignKey:CampID"`
+	Name      string `gorm:"not null" json:"name"`
+	IsPrivate bool   `gorm:"not null" json:"isPrivate"`
 
-	Announcements  []Announcement `gorm:"foreignKey:CampID"`
-	MessageRecords []Message      `gorm:"foreignKey:CampID"`
-}
+	Owner   User     `gorm:"foreignKey:OwnerID" json:"owner"`
+	Members []Member `gorm:"foreignKey:CampID;onDelete:CASCADE" json:"members"`
 
-type BriefCampDTO struct {
-	ID           uint   `json:"campID" uri:"camp_id"`
-	OwnerID      uint   `json:"ownerID"`
-	ProjID       uint   `json:"projectID"`
-	Name         string `json:"name"`
-	IsPrivate    bool   `json:"isPrivate"`
-	MembersCount int    `json:"memberCount"`
-}
-
-type CampDTO struct {
-	ID                  uint              `json:"campID" uri:"camp_id"`
-	OwnerID             uint              `json:"ownerID"`
-	ProjID              uint              `json:"projectID"`
-	IsPrivate           bool              `json:"isPrivate"`
-	Name                string            `json:"name"`
-	MembersCount        int               `json:"memberCount"`
-	MembersID           []uint            `json:"membersID"`
-	Members             []MemberDTO       `json:"members"`
-	Announcements       []AnnouncementDTO `json:"announcements"`
-	RecentMessageRecord []Message         `json:"recentMessageRecord"`
-}
-
-func (c Camp) BriefDTO() BriefCampDTO {
-	return BriefCampDTO{
-		ID:           c.ID,
-		OwnerID:      c.OwnerID,
-		ProjID:       c.ProjID,
-		Name:         c.Name,
-		MembersCount: len(c.Members),
-	}
-}
-
-func (c Camp) DTO() CampDTO {
-	return CampDTO{
-		ID:            c.ID,
-		OwnerID:       c.OwnerID,
-		ProjID:        c.ProjID,
-		Name:          c.Name,
-		MembersCount:  len(c.Members),
-		Members:       MembersDTO(c.Members),
-		Announcements: AnnouncementsDTO(c.Announcements),
-	}
-}
-
-func CampsDTO(camps []Camp) []CampDTO {
-	var res []CampDTO
-	for _, camp := range camps {
-		res = append(res, camp.DTO())
-	}
-
-	return res
+	Announcements  []Announcement `gorm:"foreignKey:CampID;onDelete:CASCADE" json:"announcements"`
+	MessageRecords []Message      `gorm:"foreignKey:CampID;onDelete:CASCADE" json:"messageRecords"`
 }

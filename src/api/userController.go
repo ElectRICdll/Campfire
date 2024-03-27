@@ -59,7 +59,7 @@ path: /user/{user_id}
 jwt_auth: false
 */
 func (c userController) UserInfo(ctx *gin.Context) {
-	user := entity.UserDTO{}
+	user := entity.User{}
 	err := ctx.ShouldBindUri(&user)
 	if err != nil {
 		responseError(ctx, util.NewExternalError("invalid syntax"))
@@ -97,7 +97,7 @@ jwt_auth: true
 */
 func (c userController) EditUserInfo(ctx *gin.Context) {
 	id := (uint)(ctx.Keys["id"].(float64))
-	user := entity.UserDTO{ID: id}
+	user := entity.User{ID: id}
 	if err := ctx.BindJSON(&user); err != nil {
 		responseError(ctx, util.NewExternalError("invalid syntax"))
 		return
@@ -214,7 +214,7 @@ jwt_auth: true
 */
 func (c userController) EditCampInfo(ctx *gin.Context) {
 	userID := (uint)(ctx.Keys["id"].(float64))
-	camp := entity.CampDTO{}
+	camp := entity.Camp{}
 	uri := struct {
 		CID uint `uri:"c_id" binding:"required"`
 	}{}
@@ -225,9 +225,8 @@ func (c userController) EditCampInfo(ctx *gin.Context) {
 		responseError(ctx, util.NewExternalError("invalid syntax"))
 	}
 	if err := c.campService.EditCampInfo(userID, entity.Camp{
-		ID:      uri.CID,
-		Name:    camp.Name,
-		OwnerID: camp.OwnerID,
+		ID:   uri.CID,
+		Name: camp.Name,
 	}); err != nil {
 		responseError(ctx, err)
 		return

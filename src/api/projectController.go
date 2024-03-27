@@ -19,6 +19,16 @@ type ProjectController interface {
 	CreateCamp(*gin.Context)
 
 	PublicCamps(*gin.Context)
+
+	InviteMember(*gin.Context)
+
+	KickMember(*gin.Context)
+
+	GiveOwner(*gin.Context)
+
+	GiveTitle(*gin.Context)
+
+	RemoveTitle(*gin.Context)
 }
 
 func NewProjectController() ProjectController {
@@ -49,22 +59,22 @@ func (p projectController) CreateCamp(ctx *gin.Context) {
 		responseError(ctx, err)
 		return
 	}
-	camp := entity.CampDTO{}
+	camp := entity.BriefCampDTO{}
 	if err := ctx.BindJSON(&camp); err != nil {
 		responseError(ctx, util.NewExternalError("invalid syntax"))
 		return
 	}
 
-	if err := p.campService.CreateCamp(userID, entity.Camp{
+	res, err := p.campService.CreateCamp(userID, entity.Camp{
 		Name:      camp.Name,
 		IsPrivate: camp.IsPrivate,
-		OwnerID:   userID,
 		ProjID:    uri.PID,
-	},
-	); err != nil {
-		responseError(ctx, err)
-		return
-	}
+	}, camp.RegularsID...,
+	)
+	resStruct := struct {
+		ID uint `json:"id"`
+	}{res}
+	responseJSON(ctx, resStruct, err)
 	return
 }
 
@@ -99,26 +109,24 @@ jwt_auth: true
 func (p projectController) CreateProject(ctx *gin.Context) {
 	userID := (uint)(ctx.Keys["id"].(float64))
 
-	proj := entity.ProjectDTO{}
+	proj := entity.BriefProjectDTO{}
 	if err := ctx.BindJSON(&proj); err != nil {
 		responseError(ctx, util.NewExternalError("invalid syntax"))
 		return
 	}
 
-	if err := p.projService.CreateProject(
+	res, err := p.projService.CreateProject(userID,
 		entity.Project{
 			Title:       proj.Title,
-			OwnerID:     userID,
 			Description: proj.Description,
-			Members:     nil,
-			Camps:       nil,
-			Tasks:       nil,
-			FUrl:        "",
-		},
-	); err != nil {
-		responseError(ctx, err)
-	}
-	responseSuccess(ctx)
+		}, proj.MembersID...,
+	)
+
+	resStruct := struct {
+		ID uint `json:"id"`
+	}{res}
+
+	responseJSON(ctx, resStruct, err)
 }
 
 /*
@@ -154,7 +162,7 @@ jwt_auth: true
 */
 func (p projectController) EditProjectInfo(ctx *gin.Context) {
 	userID := (uint)(ctx.Keys["id"].(float64))
-	proj := entity.ProjectDTO{}
+	proj := entity.Project{}
 	uri := struct {
 		PID uint `uri:"project_id" binding:"required"`
 	}{}
@@ -168,7 +176,6 @@ func (p projectController) EditProjectInfo(ctx *gin.Context) {
 	if err := p.projService.EditProjectInfo(userID, entity.Project{
 		ID:          uri.PID,
 		Title:       proj.Title,
-		OwnerID:     proj.OwnerID,
 		Description: proj.Description,
 	}); err != nil {
 		responseError(ctx, err)
@@ -181,7 +188,7 @@ func (p projectController) EditProjectInfo(ctx *gin.Context) {
 DisableProject
 删除项目接口
 method: POST
-path: /user/{project_id}/del
+path: /project/{project_id}/del
 jwt_auth: true
 */
 func (p projectController) DisableProject(ctx *gin.Context) {
@@ -189,9 +196,38 @@ func (p projectController) DisableProject(ctx *gin.Context) {
 	uri := struct {
 		PID uint `uri:"project_id" binding:"required"`
 	}{}
+	if err := ctx.BindUri(&uri); err != nil {
+		responseError(ctx, err)
+		return
+	}
 	if err := p.projService.DisableProject(userID, uri.PID); err != nil {
 		responseError(ctx, err)
 		return
 	}
 	return
+}
+
+func (p projectController) InviteMember(ctx *gin.Context) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (p projectController) KickMember(ctx *gin.Context) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (p projectController) GiveOwner(ctx *gin.Context) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (p projectController) GiveTitle(ctx *gin.Context) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (p projectController) RemoveTitle(ctx *gin.Context) {
+	//TODO implement me
+	panic("implement me")
 }

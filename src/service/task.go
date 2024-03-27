@@ -5,15 +5,16 @@ import (
 	"campfire/cache"
 	"campfire/dao"
 	. "campfire/entity"
+	"campfire/util"
 	"campfire/ws"
 )
 
 type TaskService interface {
-	CreateTask(queryID uint, task Task) error
+	CreateTask(queryID uint, task Task) (uint, uint, error)
 
-	Tasks(queryID uint, projID uint) ([]TaskDTO, error)
+	Tasks(queryID uint, projID uint) ([]Task, error)
 
-	TaskInfo(queryID uint, projID uint, taskID uint) (TaskDTO, error)
+	TaskInfo(queryID uint, projID uint, taskID uint) (Task, error)
 
 	EditTaskInfo(queryID uint, projID uint, task Task) error
 
@@ -34,26 +35,30 @@ type taskService struct {
 	sec     auth.SecurityGuard
 }
 
-func (p taskService) CreateTask(queryID uint, task Task) error {
+func (p taskService) CreateTask(queryID uint, task Task) (uint, uint, error) {
 	if err := p.sec.IsUserHavingTitle(task.ProjID, queryID); err != nil {
-		return err
+		return 0, 0, err
 	}
-	if err := p.query.AddTask(task); err != nil {
-		return err
+	if ok := util.ValidateTitle(task.Title); !ok {
+		return 0, 0, util.NewExternalError("illegal title format")
 	}
-	if err := cache.StoreTaskToProject(task.ProjID, task); err != nil {
-		return err
+	projID, userID, err := p.query.AddTask(task)
+	if err != nil {
+		return 0, 0, err
 	}
 	task.StartATimer()
-	if err := p.mention.NotifyByEvent(&ws.NewTaskEvent{
-		TaskDTO: task.DTO(),
-	}, ws.NewTaskEventType); err != nil {
-		return err
+	if err := cache.StoreTaskToProject(task.ProjID, task); err != nil {
+		return 0, 0, err
 	}
-	return nil
+	if err := p.mention.NotifyByEvent(&ws.NewTaskEvent{
+		Task: task,
+	}, ws.NewTaskEventType); err != nil {
+		return 0, 0, err
+	}
+	return projID, userID, nil
 }
 
-func (p taskService) Tasks(queryID uint, projID uint) ([]TaskDTO, error) {
+func (p taskService) Tasks(queryID uint, projID uint) ([]Task, error) {
 	if err := p.sec.IsUserAProjMember(projID, queryID); err != nil {
 		return nil, err
 	}
@@ -61,27 +66,30 @@ func (p taskService) Tasks(queryID uint, projID uint) ([]TaskDTO, error) {
 	if err != nil {
 		return nil, err
 	}
-	return TasksDTO(res), nil
+	return res, nil
 }
 
-func (p taskService) TaskInfo(queryID uint, projID uint, taskID uint) (TaskDTO, error) {
+func (p taskService) TaskInfo(queryID uint, projID uint, taskID uint) (Task, error) {
 	if err := p.sec.IsUserAProjMember(projID, queryID); err != nil {
-		return TaskDTO{}, err
+		return Task{}, err
 	}
 	res, err := p.query.TaskInfo(taskID)
 	if err != nil {
-		return TaskDTO{}, err
+		return Task{}, err
 	}
-	return res.DTO(), nil
+	return res, nil
 }
 
 func (p taskService) EditTaskInfo(queryID uint, projID uint, task Task) error {
 	if err := p.sec.IsUserHavingTitle(task.ProjID, queryID); err != nil {
 		return err
 	}
-	if err := cache.EditTaskFromCache(task); err != nil {
-		return err
+	if len(task.Title) != 0 && !util.ValidateTitle(task.Title) {
+		return util.NewExternalError("illegal title format")
 	}
+	//if err := cache.EditTaskFromCache(task); err != nil {
+	//	return err
+	//}
 	err := p.query.SetTaskInfo(projID, task)
 	if err != nil {
 		return err

@@ -33,6 +33,12 @@ func responseError(ctx *gin.Context, err error) {
 	if err == nil {
 		return
 	}
+	if _, ok := err.(util.ExternalErrorGroup); ok {
+		ctx.JSON(http.StatusOK, gin.H{
+			"res": RES_SUCCESS,
+			"but": err.Error(),
+		})
+	}
 	if _, ok := err.(util.ExternalError); ok {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"res": RES_FAILURE,

@@ -4,24 +4,29 @@ import (
 	"campfire/auth"
 	"campfire/dao"
 	. "campfire/entity"
+	"campfire/util"
 	"campfire/ws"
 	"time"
 )
 
 type ProjectService interface {
-	CreateProject(project Project) error
+	CreateProject(userID uint, project Project, users ...uint) (uint, error)
 
-	ProjectInfo(queryID uint, projectID uint) (BriefProjectDTO, error)
+	ProjectInfo(queryID, projectID uint) (Project, error)
 
 	EditProjectInfo(queryID uint, project Project) error
 
-	DisableProject(queryID uint, projID uint) error
+	DisableProject(queryID, projID uint) error
 
-	// UploadProject 暂时搁置
-	UploadProject(queryID uint)
+	GiveOwner(queryID, projID, userID uint) error
 
-	// DownloadProject 暂时搁置
-	DownloadProject(queryID uint)
+	GiveTitle(queryID, projID, userID uint, title string) error
+
+	RemoveTitle(queryID, projID, userID uint) error
+
+	InviteMember(queryID, projID, userID uint) error
+
+	KickMember(queryID, projID, userID uint) error
 }
 
 func NewProjectService() ProjectService {
@@ -40,25 +45,38 @@ type projectService struct {
 	sec       auth.SecurityGuard
 }
 
-func (p projectService) CreateProject(project Project) error {
-	project.Members = append(project.Members, ProjectMember{
-		UserID:    project.OwnerID,
-		IsCreator: true,
-	})
+func (p projectService) CreateProject(userID uint, project Project, usersID ...uint) (uint, error) {
+	if ok := util.ValidateTitle(project.Title); !ok {
+		return 0, util.NewExternalError("Illegal title format")
+	}
 	project.BeginAt = time.Now()
-	err := p.query.AddProject(project)
-	return err
+	res, err := p.query.AddProject(userID, project, usersID...)
+	if err != nil {
+		return 0, err
+	}
+	return res, nil
 }
 
-func (p projectService) ProjectInfo(queryID uint, projectID uint) (BriefProjectDTO, error) {
+func (p projectService) ProjectInfo(queryID uint, projectID uint) (Project, error) {
 	if err := p.sec.IsUserAProjMember(projectID, queryID); err != nil {
-		return BriefProjectDTO{}, err
+		return Project{}, err
 	}
-	res, err := p.query.ProjectInfo(projectID)
-	return res.BriefDTO(), err
+	res, err := p.query.ProjectInfo(
+		projectID,
+		"Branches",
+		"Releases",
+		"Owner",
+		"Members.User",
+		"Camps",
+		"Tasks",
+	)
+	return res, err
 }
 
 func (p projectService) EditProjectInfo(queryID uint, project Project) error {
+	if len(project.Title) != 0 && !util.ValidateTitle(project.Title) {
+		return util.NewExternalError("Illegal title format")
+	}
 	if err := p.sec.IsUserAProjLeader(project.ID, queryID); err != nil {
 		return err
 	}
@@ -67,7 +85,7 @@ func (p projectService) EditProjectInfo(queryID uint, project Project) error {
 		return err
 	}
 	if err := p.mention.NotifyByEvent(&ws.ProjectInfoChangedEvent{
-		ProjectDTO: project.DTO(),
+		Project: project,
 	}, ws.ProjectInfoChangedEventType); err != nil {
 		return err
 	}
@@ -79,17 +97,78 @@ func (p projectService) DisableProject(queryID uint, projID uint) error {
 		return err
 	}
 	err := p.query.DeleteProject(projID)
-	// TODO: 
-	
 	return err
 }
 
-func (p projectService) UploadProject(queryID uint) {
-	//TODO implement me
-	panic("implement me")
+func (p projectService) InviteMember(queryID, projID, userID uint) error {
+	if err := p.sec.IsUserAProjLeader(projID, queryID); err != nil {
+		return err
+	}
+	if err := p.sec.IsUserAProjMember(projID, userID); err != nil {
+		return util.NewExternalError("user has already been in project")
+	}
+	if err := p.query.AddMember(ProjectMember{UserID: userID, ProjID: projID}); err != nil {
+		return err
+	}
+	res, err := p.query.ProjectInfo(projID)
+	if err != nil {
+		return err
+	}
+	if err := p.mention.NotifyByEvent(ws.NewProjectInvitationEvent(res.BriefDTO(), userID), ws.ProjectInvitationEventType); err != nil {
+		return err
+	}
+	return nil
 }
 
-func (p projectService) DownloadProject(queryID uint) {
-	//TODO implement me
-	panic("implement me")
+func (p projectService) KickMember(queryID, projID, userID uint) error {
+	if err := p.sec.IsUserAProjLeader(projID, queryID); err != nil {
+		return err
+	}
+	if err := p.query.DeleteMember(userID, projID); err != nil {
+		return err
+	}
+	res, err := p.query.ProjectInfo(projID)
+	if err != nil {
+		return err
+	}
+	if err := p.mention.NotifyByEvent(&ws.ProjectInfoChangedEvent{
+		Project: res,
+	}, ws.ProjectInfoChangedEventType); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (p projectService) GiveOwner(queryID, projID, userID uint) error {
+	if err := p.sec.IsUserAProjLeader(projID, queryID); err != nil {
+		return err
+	}
+	if err := p.query.SetOwner(projID, userID); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (p projectService) GiveTitle(queryID, projID, userID uint, title string) error {
+	if err := p.sec.IsUserAProjLeader(projID, queryID); err != nil {
+		return err
+	}
+	if err := p.query.SetMemberInfo(ProjectMember{
+		UserID: userID,
+		ProjID: projID,
+		Title:  title,
+	}); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (p projectService) RemoveTitle(queryID, projID, userID uint) error {
+	if err := p.sec.IsUserAProjLeader(projID, queryID); err != nil {
+		return err
+	}
+	if err := p.query.RemoveTitle(projID, userID); err != nil {
+		return err
+	}
+	return nil
 }

@@ -12,7 +12,7 @@ import (
 )
 
 func registerDependencies(engine *gin.Engine) {
-	auth := auth.SecurityInstance
+	security := auth.SecurityInstance
 	login := api.NewLoginController()
 	engine.POST("/login", login.Login)
 	engine.POST("/reg", login.Register)
@@ -21,38 +21,44 @@ func registerDependencies(engine *gin.Engine) {
 	engine.GET("/ws", session.NewSession)
 
 	user := api.NewUserController()
-	engine.GET("/user/:user_id", auth.AuthMiddleware(), user.UserInfo)
+	engine.GET("/user/:user_id", security.AuthMiddleware(), user.UserInfo)
 	engine.GET("/user/search", user.FindUsersByName)
-	engine.GET("/user/camps/private", auth.AuthMiddleware(), user.PrivateCamps)
-	engine.GET("/user/camps", auth.AuthMiddleware(), user.PublicCamps)
-	engine.GET("/user/projects", auth.AuthMiddleware(), user.Projects)
-	engine.GET("/user/project/:project_id/tasks", auth.AuthMiddleware(), user.Tasks)
-	engine.POST("/user/edit", auth.AuthMiddleware(), user.EditUserInfo)
-	engine.POST("/user/edit/p", auth.AuthMiddleware(), user.ChangePassword)
-	engine.POST("/user/tasks", auth.AuthMiddleware(), user.Tasks)
+	engine.GET("/user/camps/private", security.AuthMiddleware(), user.PrivateCamps)
+	engine.GET("/user/camps", security.AuthMiddleware(), user.PublicCamps)
+	engine.GET("/user/projects", security.AuthMiddleware(), user.Projects)
+	engine.GET("/user/project/:project_id/tasks", security.AuthMiddleware(), user.Tasks)
+	engine.POST("/user/edit", security.AuthMiddleware(), user.EditUserInfo)
+	engine.POST("/user/edit/p", security.AuthMiddleware(), user.ChangePassword)
+	engine.POST("/user/tasks", security.AuthMiddleware(), user.Tasks)
 
 	proj := api.NewProjectController()
-	engine.GET("/project/:project_id", auth.AuthMiddleware(), proj.ProjectInfo)
-	engine.POST("/project/:project_id/del", auth.AuthMiddleware(), proj.DisableProject)
-	engine.GET("/project/:project_id/camps", auth.AuthMiddleware(), proj.PublicCamps)
-	engine.POST("/project/new_proj", auth.AuthMiddleware(), proj.CreateProject)
-	engine.POST("/project/:project_id/edit", auth.AuthMiddleware(), proj.EditProjectInfo)
-	engine.POST("/project/:project_id/new_camp", auth.AuthMiddleware(), proj.CreateCamp)
+	engine.GET("/project/:project_id", security.AuthMiddleware(), proj.ProjectInfo)
+	engine.POST("/project/:project_id/del", security.AuthMiddleware(), proj.DisableProject)
+	engine.GET("/project/:project_id/camps", security.AuthMiddleware(), proj.PublicCamps)
+	engine.POST("/project/new_proj", security.AuthMiddleware(), proj.CreateProject)
+	engine.POST("/project/:project_id/edit", security.AuthMiddleware(), proj.EditProjectInfo)
+	engine.POST("/project/:project_id/new_camp", security.AuthMiddleware(), proj.CreateCamp)
 
 	task := api.NewTaskController()
-	engine.POST("/project/:project_id/new_task", auth.AuthMiddleware(), task.CreateTask)
-	engine.POST("/project/:project_id/:task_id/edit", auth.AuthMiddleware(), task.EditTaskInfo)
-	engine.POST("/project/:project_id/:task_id/del", auth.AuthMiddleware(), task.DeleteTask)
-	engine.GET("/project/:project_id/:task_id", auth.AuthMiddleware(), task.TaskInfo)
-	engine.GET("/project/:project_id/tasks", auth.AuthMiddleware(), task.Tasks)
+	engine.POST("/project/:project_id/new_task", security.AuthMiddleware(), task.CreateTask)
+	engine.POST("/project/:project_id/:task_id/edit", security.AuthMiddleware(), task.EditTaskInfo)
+	engine.POST("/project/:project_id/:task_id/del", security.AuthMiddleware(), task.DeleteTask)
+	engine.GET("/project/:project_id/:task_id", security.AuthMiddleware(), task.TaskInfo)
+	engine.GET("/project/:project_id/tasks", security.AuthMiddleware(), task.Tasks)
 
 	camp := api.NewCampController()
-	engine.GET("/camp/:camp_id", camp.CampInfo)
-	engine.POST("/camp/:camp_id/edit", camp.EditCampInfo)
-	engine.POST("/camp/:camp_id/del", camp.DisableCamp)
-	engine.POST("/camp/:camp_id/members/add", camp.InviteMember)
-	engine.POST("/camp/:camp_id/members/del", camp.KickMember)
-	engine.POST("/camp/:camp_id/members/edit", camp.EditMemberInfo)
+	engine.GET("/camp/:camp_id", security.AuthMiddleware(), camp.CampInfo)
+	engine.GET("/camp/:camp_id/msg", security.AuthMiddleware(), camp.MessageRecord)
+	engine.POST("/camp/:camp_id/edit", security.AuthMiddleware(), camp.EditCampInfo)
+	engine.POST("/camp/:camp_id/del", security.AuthMiddleware(), camp.DisableCamp)
+	engine.POST("/camp/:camp_id/members/invite", security.AuthMiddleware(), camp.InviteMember)
+	engine.POST("/camp/:camp_id/members/kick", security.AuthMiddleware(), camp.KickMember)
+	engine.POST("/camp/:camp_id/members/edit", security.AuthMiddleware(), camp.EditMyMemberInfo)
+	engine.POST("/camp/:camp_id/exit", security.AuthMiddleware(), camp.ExitCamp)
+	engine.POST("/camp/:camp_id/promotion", security.AuthMiddleware(), camp.Promotion)
+	engine.POST("/camp/:camp_id/demotion", security.AuthMiddleware(), camp.Demotion)
+	engine.POST("/camp/:camp_id/own", security.AuthMiddleware(), camp.GiveOwner)
+	engine.POST("/camp/:camp_id/title/set", security.AuthMiddleware(), camp.SetTitle)
 }
 
 func main() {
@@ -62,10 +68,12 @@ func main() {
 	if err := db.AutoMigrate(
 		&entity.Project{},
 		&entity.Branch{},
-		&entity.PullRequest{},
+		&entity.Branch{},
 		&entity.Release{},
-		&entity.Member{},
 		&entity.User{},
+		&entity.Member{},
+		&entity.TaskExecutors{},
+		&entity.TaskReceivers{},
 		&entity.Task{},
 		&entity.Camp{},
 		&entity.Announcement{},
@@ -80,22 +88,10 @@ func main() {
 	cache.InitProjectCache()
 	cache.InitCampCache()
 
-	// log.Info("activating test demo...")
-	// test.Demo()
-
 	r := gin.Default()
 	registerDependencies(r)
 
 	if err := r.Run(":" + util.CONFIG.Port); err != nil {
 
-		//log.Info("activating test demo...")
-		//test.Demo()
-
-		r := gin.Default()
-		registerDependencies(r)
-
-		if err := r.Run(":" + util.CONFIG.Port); err != nil {
-
-		}
 	}
 }

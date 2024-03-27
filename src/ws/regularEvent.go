@@ -7,7 +7,7 @@ import (
 
 type ProjectInfoChangedEvent struct {
 	Timestamp time.Time `json:"timestamp"`
-	entity.ProjectDTO
+	entity.Project
 }
 
 func (e ProjectInfoChangedEvent) ScopeID() uint {
@@ -16,16 +16,16 @@ func (e ProjectInfoChangedEvent) ScopeID() uint {
 
 type NewTaskEvent struct {
 	Timestamp time.Time `json:"timestamp"`
-	entity.TaskDTO
+	entity.Task
 }
 
 func (t NewTaskEvent) ScopeID() uint {
-	return t.TaskDTO.ProjID
+	return t.Task.ProjID
 }
 
 type NewAnnouncementEvent struct {
 	Timestamp time.Time `json:"timestamp"`
-	entity.AnnouncementDTO
+	entity.Announcement
 }
 
 func (a NewAnnouncementEvent) ScopeID() uint {
@@ -43,7 +43,7 @@ func (a RequestMessageRecordEvent) ScopeID() uint {
 
 type CampInfoChangedEvent struct {
 	Timestamp time.Time `json:"timestamp"`
-	entity.CampDTO
+	entity.Camp
 }
 
 func (e CampInfoChangedEvent) ScopeID() uint {
@@ -61,7 +61,7 @@ func (a CampDisableEvent) ScopeID() uint {
 
 type MemberInfoChangedEvent struct {
 	Timestamp time.Time `json:"timestamp"`
-	entity.MemberDTO
+	entity.Member
 }
 
 func (e MemberInfoChangedEvent) ScopeID() uint {

@@ -11,33 +11,43 @@ import (
 type CampService interface {
 	PublicCamps(queryID uint, projID uint) ([]BriefCampDTO, error)
 
-	CampInfo(queryID uint, campID uint) (CampDTO, error)
+	CampInfo(queryID uint, campID uint) (Camp, error)
 
-	CreateCamp(queryID uint, camp Camp, usersID ...uint) error
+	CreateCamp(queryID uint, camp Camp, users ...uint) (uint, error)
 
 	EditCampInfo(queryID uint, camp Camp) error
 
 	DisableCamp(queryID uint, campID uint) error
 
-	MemberList(queryID uint, campID uint) ([]MemberDTO, error)
+	ExitCamp(queryID uint, campID uint) error
 
-	MemberInfo(queryID uint, campID uint, userID uint) (MemberDTO, error)
+	GiveOwner(queryID uint, campID uint, userID uint) error
+
+	GiveRuler(queryID uint, campID uint, userID uint) error
+
+	DelRuler(queryID uint, campID uint, userID uint) error
+
+	MemberList(queryID uint, campID uint) ([]Member, error)
+
+	MemberInfo(queryID uint, campID uint, userID uint) (Member, error)
 
 	InviteMember(queryID uint, campID uint, userID uint) error
 
 	KickMember(queryID uint, campID uint, userID uint) error
 
-	EditMemberInfo(campID uint, member Member) error
+	EditMemberInfo(member Member) error
 
-	Announcements(queryID uint, campID uint) ([]AnnouncementDTO, error)
+	Announcements(queryID uint, campID uint) ([]Announcement, error)
 
-	AnnouncementInfo(queryID uint, campID uint, annoID uint) (AnnouncementDTO, error)
+	AnnouncementInfo(queryID uint, campID uint, annoID uint) (Announcement, error)
 
 	CreateAnnouncement(queryID uint, anno Announcement) error
 
 	EditAnnouncementInfo(queryID uint, anno Announcement) error
 
 	DeleteAnnouncement(queryID uint, campID uint, annoID uint) error
+
+	SetTitle(queryID uint, campID uint, userID uint, title string) error
 }
 
 func NewCampService() CampService {
@@ -58,7 +68,58 @@ type campService struct {
 	userQuery dao.UserDao
 }
 
-func (c campService) MemberList(queryID uint, campID uint) ([]MemberDTO, error) {
+func (c campService) SetTitle(queryID uint, campID uint, userID uint, title string) error {
+	if err := c.access.IsUserACampLeader(campID, queryID); err != nil {
+		return err
+	}
+	if err := c.campQuery.SetMemberInfo(Member{
+		UserID: userID,
+		CampID: campID,
+		Title:  title,
+	}); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (c campService) ExitCamp(queryID uint, campID uint) error {
+	if err := c.campQuery.DeleteMember(campID, queryID); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (c campService) GiveOwner(queryID uint, campID uint, userID uint) error {
+	if err := c.access.IsUserACampLeader(campID, queryID); err != nil {
+		return err
+	}
+	if err := c.campQuery.TransferOwner(campID, userID); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (c campService) GiveRuler(queryID uint, campID uint, userID uint) error {
+	if err := c.access.IsUserACampLeader(campID, queryID); err != nil {
+		return err
+	}
+	if err := c.campQuery.Promotion(campID, userID); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (c campService) DelRuler(queryID uint, campID uint, userID uint) error {
+	if err := c.access.IsUserACampLeader(campID, queryID); err != nil {
+		return err
+	}
+	if err := c.campQuery.Demotion(campID, userID); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (c campService) MemberList(queryID uint, campID uint) ([]Member, error) {
 	if err := c.access.IsUserACampMember(campID, queryID); err != nil {
 		return nil, err
 	}
@@ -66,18 +127,18 @@ func (c campService) MemberList(queryID uint, campID uint) ([]MemberDTO, error) 
 	if err != nil {
 		return nil, err
 	}
-	return MembersDTO(res), nil
+	return res, nil
 }
 
-func (c campService) MemberInfo(queryID uint, campID uint, userID uint) (MemberDTO, error) {
+func (c campService) MemberInfo(queryID uint, campID uint, userID uint) (Member, error) {
 	if err := c.access.IsUserACampMember(campID, queryID); err != nil {
-		return MemberDTO{}, err
+		return Member{}, err
 	}
 	member, err := c.campQuery.MemberInfo(campID, userID)
 	if err != nil {
-		return MemberDTO{}, err
+		return Member{}, err
 	}
-	return member.DTO(), err
+	return member, err
 }
 
 func (c campService) PublicCamps(queryID uint, projID uint) ([]BriefCampDTO, error) {
@@ -95,50 +156,31 @@ func (c campService) PublicCamps(queryID uint, projID uint) ([]BriefCampDTO, err
 	return camps, nil
 }
 
-func (c campService) CampInfo(queryID uint, campID uint) (CampDTO, error) {
+func (c campService) CampInfo(queryID uint, campID uint) (Camp, error) {
 	if err := c.access.IsUserACampMember(campID, queryID); err != nil {
-		return CampDTO{}, err
+		return Camp{}, err
 	}
 	res, err := c.campQuery.CampInfo(campID)
 	if err != nil {
-		return CampDTO{}, err
+		return Camp{}, err
 	}
-	return res.DTO(), nil
+	return res, nil
 }
 
-func (c campService) CreateCamp(queryID uint, camp Camp, usersID ...uint) error {
+func (c campService) CreateCamp(queryID uint, camp Camp, usersID ...uint) (uint, error) {
 	if err := c.access.IsUserAProjMember(camp.ProjID, queryID); err != nil {
-		return err
+		return 0, err
 	}
-	camp.Members = append(camp.Members, Member{
-		UserID:   camp.OwnerID,
-		IsLeader: true,
-	})
-	id, err := c.campQuery.AddCamp(camp)
-	if err != nil {
-		return err
-	}
-	errGroup := util.NewErrorGroup()
 	for _, userID := range usersID {
-		//if err := c.access.IsUserAProjMember(camp.ProjID, userID); err != nil {
-		//	return util.NewExternalError("some member have no access.")
-		//}
-
-		err := c.campQuery.AddMember(Member{
-			UserID: userID,
-			CampID: id,
-			IsLeader: func(a, b uint) bool {
-				if a == b {
-					return true
-				}
-				return false
-			}(userID, camp.OwnerID),
-		})
-		if err != nil {
-			errGroup.AddError(err)
+		if err := c.access.IsUserAProjMember(camp.ProjID, userID); err != nil {
+			return 0, util.NewExternalError("some user have no access.")
 		}
 	}
-	return errGroup
+	id, err := c.campQuery.AddCamp(queryID, camp, usersID...)
+	if err != nil {
+		return 0, err
+	}
+	return id, nil
 }
 
 func (c campService) EditCampInfo(queryID uint, camp Camp) error {
@@ -149,7 +191,7 @@ func (c campService) EditCampInfo(queryID uint, camp Camp) error {
 		return err
 	}
 	if err := c.mention.NotifyByEvent(&ws.CampInfoChangedEvent{
-		CampDTO: camp.DTO(),
+		Camp: camp,
 	}, ws.CampInfoChangedEventType); err != nil {
 		return err
 	}
@@ -175,18 +217,17 @@ func (c campService) InviteMember(queryID uint, campID uint, userID uint) error 
 	if err := c.access.IsUserACampLeader(campID, queryID); err != nil {
 		return err
 	}
+	if err := c.access.IsUserACampMember(campID, userID); err != nil {
+		return util.NewExternalError("user has already been in camp")
+	}
 	if err := c.campQuery.AddMember(Member{UserID: userID, CampID: campID}); err != nil {
 		return err
 	}
-	if err := c.mention.NotifyByEvent(&ws.CampInvitationEvent{
-		SourceID:     queryID,
-		TargetID:     userID,
-		IsAccepted:   0,
-		KeepDuration: util.CONFIG.InvitationKeepDuration,
-		BriefCampDTO: BriefCampDTO{
-			ID: campID,
-		},
-	}, ws.CampInvitationEventType); err != nil {
+	res, err := c.campQuery.CampInfo(campID)
+	if err != nil {
+		return err
+	}
+	if err := c.mention.NotifyByEvent(ws.NewCampInvitationEvent(res.BriefDTO(), userID), ws.CampInvitationEventType); err != nil {
 		return err
 	}
 	return nil
@@ -207,12 +248,12 @@ func (c campService) KickMember(queryID uint, campID uint, userID uint) error {
 	return nil
 }
 
-func (c campService) EditMemberInfo(campID uint, member Member) error {
-	if err := c.campQuery.SetMemberInfo(campID, member); err != nil {
+func (c campService) EditMemberInfo(member Member) error {
+	if err := c.campQuery.SetMemberInfo(member); err != nil {
 		return err
 	}
 	if err := c.mention.NotifyByEvent(&ws.MemberInfoChangedEvent{
-		MemberDTO: MemberDTO{
+		Member: Member{
 			UserID: member.UserID,
 			Title:  member.Title,
 		},
@@ -222,7 +263,7 @@ func (c campService) EditMemberInfo(campID uint, member Member) error {
 	return nil
 }
 
-func (c campService) Announcements(queryID uint, campID uint) ([]AnnouncementDTO, error) {
+func (c campService) Announcements(queryID uint, campID uint) ([]Announcement, error) {
 	if err := c.access.IsUserACampMember(campID, queryID); err != nil {
 		return nil, err
 	}
@@ -230,18 +271,18 @@ func (c campService) Announcements(queryID uint, campID uint) ([]AnnouncementDTO
 	if err != nil {
 		return nil, err
 	}
-	return AnnouncementsDTO(res), nil
+	return res, nil
 }
 
-func (c campService) AnnouncementInfo(queryID uint, campID uint, annoID uint) (AnnouncementDTO, error) {
+func (c campService) AnnouncementInfo(queryID uint, campID uint, annoID uint) (Announcement, error) {
 	if err := c.access.IsUserACampMember(campID, queryID); err != nil {
-		return AnnouncementDTO{}, err
+		return Announcement{}, err
 	}
 	res, err := c.campQuery.AnnouncementInfo(campID, annoID)
 	if err != nil {
-		return AnnouncementDTO{}, err
+		return Announcement{}, err
 	}
-	return res.DTO(), nil
+	return res, nil
 }
 
 func (c campService) CreateAnnouncement(queryID uint, anno Announcement) error {
@@ -253,7 +294,7 @@ func (c campService) CreateAnnouncement(queryID uint, anno Announcement) error {
 		return err
 	}
 	if err := c.mention.NotifyByEvent(&ws.NewAnnouncementEvent{
-		AnnouncementDTO: anno.DTO(),
+		Announcement: anno,
 	}, ws.NewAnnouncementEventType); err != nil {
 		return err
 	}
