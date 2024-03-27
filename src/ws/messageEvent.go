@@ -54,6 +54,19 @@ func (c CodeGraphMessageEvent) ScopeID() uint {
 	return c.Message.CampID
 }
 
+type MarkdownMessageEvent struct {
+	entity.Message
+	Content string `json:"content"`
+}
+
+func (c MarkdownMessageEvent) ToMessage() entity.Message {
+	return c.Message
+}
+
+func (c MarkdownMessageEvent) ScopeID() uint {
+	return c.Message.CampID
+}
+
 type FileUrlMessageEvent struct {
 	entity.Message
 	Url string `json:"fileUrl"`

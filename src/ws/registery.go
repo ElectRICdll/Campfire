@@ -14,6 +14,7 @@ const (
 	TextMessageEventType
 	BinaryMessageEventType
 	CodeGraphMessageEventType
+	MarkdownMessageEventType
 	RequestMessageRecordEventType
 
 	ProjectInfoChangedEventType
@@ -33,6 +34,7 @@ var EventsByType = map[int]func() (Event, int){
 	TextMessageEventType:          func() (Event, int) { return &TextMessageEvent{}, OnCamp },
 	BinaryMessageEventType:        func() (Event, int) { return &BinaryMessageEvent{}, OnCamp },
 	CodeGraphMessageEventType:     func() (Event, int) { return &CodeGraphMessageEvent{}, OnCamp },
+	MarkdownMessageEventType:      func() (Event, int) { return &MarkdownMessageEvent{}, OnCamp },
 	RequestMessageRecordEventType: func() (Event, int) { return &RequestMessageRecordEvent{}, OnNobody },
 
 	ProjectInfoChangedEventType: func() (Event, int) { return &ProjectInfoChangedEvent{}, OnProject },
