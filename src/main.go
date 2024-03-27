@@ -59,6 +59,14 @@ func registerDependencies(engine *gin.Engine) {
 	engine.POST("/camp/:camp_id/demotion", security.AuthMiddleware(), camp.Demotion)
 	engine.POST("/camp/:camp_id/own", security.AuthMiddleware(), camp.GiveOwner)
 	engine.POST("/camp/:camp_id/title/set", security.AuthMiddleware(), camp.SetTitle)
+
+	git := api.NewGitController()
+	engine.GET("/project/:project_id/workplace/:branch/clone", security.AuthMiddleware(), git.Clone)
+	engine.GET("/project/:project_id/workplace/:branch/open", security.AuthMiddleware(), git.OpenFile)
+	engine.GET("/project/:project_id/workplace/:branch/dir", security.AuthMiddleware(), git.RepoDir)
+	engine.POST("/project/:project_id/workplace/:branch/commit", security.AuthMiddleware(), git.Commit)
+	engine.POST("/project/:project_id/workplace/:branch/create", security.AuthMiddleware(), git.CreateBranch)
+	engine.POST("/project/:project_id/workplace/:branch/rm", security.AuthMiddleware(), git.RemoveBranch)
 }
 
 func main() {

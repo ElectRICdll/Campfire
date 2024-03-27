@@ -218,7 +218,7 @@ func (c campService) InviteMember(queryID uint, campID uint, userID uint) error 
 		return err
 	}
 	if err := c.access.IsUserACampMember(campID, userID); err != nil {
-		return util.NewExternalError("user has already been in camp")
+		return util.NewExternalError("用户已在群聊中")
 	}
 	if err := c.campQuery.AddMember(Member{UserID: userID, CampID: campID}); err != nil {
 		return err
@@ -236,6 +236,9 @@ func (c campService) InviteMember(queryID uint, campID uint, userID uint) error 
 func (c campService) KickMember(queryID uint, campID uint, userID uint) error {
 	if err := c.access.IsUserACampLeader(campID, queryID); err != nil {
 		return err
+	}
+	if queryID == userID {
+		return util.NewExternalError("群主无法踢除自身！")
 	}
 	if err := c.campQuery.DeleteMember(campID, userID); err != nil {
 		return err

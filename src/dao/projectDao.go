@@ -155,32 +155,33 @@ func (d *projectDao) SetOwner(projID uint, userID uint) error {
 		return err
 	}
 
-	tran := d.db.Begin()
-	var owner ProjectMember
-	if err := tran.Model(&project).Association("Owner").Find(&owner); err != nil {
-		tran.Rollback()
+	//tran := d.db.Begin()
+	var owner = ProjectMember{
+		UserID: userID,
+	}
+	//if err := tran.Model(&project).Association("Owner").Find(&owner); err != nil {
+	//	tran.Rollback()
+	//	return err
+	//}
+	//if owner.UserID == userID {
+	//	return util.NewExternalError("user has already been owner")
+	//}
+	//if err := tran.Model(&project).Association("Regulars").Append(&owner); err != nil {
+	//	tran.Rollback()
+	//	return err
+	//}
+	//if err := tran.Where("user_id = ? AND proj_id = ?", userID, projID).First(&owner).Error; err != nil {
+	//	if err == gorm.ErrRecordNotFound {
+	//		tran.Rollback()
+	//		return util.NewExternalError("no such data")
+	//	}
+	//	tran.Rollback()
+	//	return err
+	//}
+	if err := d.db.Model(&project).Update("Owner", owner).Error; err != nil {
 		return err
 	}
-	if owner.UserID == userID {
-		return util.NewExternalError("user has already been owner")
-	}
-	if err := tran.Model(&project).Association("Regulars").Append(&owner); err != nil {
-		tran.Rollback()
-		return err
-	}
-	if err := tran.Where("user_id = ? AND proj_id = ?", userID, projID).First(&owner).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			tran.Rollback()
-			return util.NewExternalError("no such data")
-		}
-		tran.Rollback()
-		return err
-	}
-	if err := tran.Model(&project).Update("Owner", owner).Error; err != nil {
-		tran.Rollback()
-		return err
-	}
-	tran.Commit()
+	d.db.Commit()
 	return nil
 }
 

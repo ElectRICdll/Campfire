@@ -6,6 +6,7 @@ import (
 	. "campfire/entity"
 	"campfire/util"
 	"campfire/ws"
+	"fmt"
 	"time"
 )
 
@@ -35,6 +36,7 @@ func NewProjectService() ProjectService {
 		userQuery: dao.UserDaoContainer,
 		mention:   SessionServiceContainer,
 		sec:       auth.SecurityInstance,
+		git:       NewGitService(),
 	}
 }
 
@@ -42,6 +44,7 @@ type projectService struct {
 	query     dao.ProjectDao
 	userQuery dao.UserDao
 	mention   *ws.SessionService
+	git       GitService
 	sec       auth.SecurityGuard
 }
 
@@ -50,8 +53,13 @@ func (p projectService) CreateProject(userID uint, project Project, usersID ...u
 		return 0, util.NewExternalError("Illegal title format")
 	}
 	project.BeginAt = time.Now()
+
 	res, err := p.query.AddProject(userID, project, usersID...)
 	if err != nil {
+		return 0, err
+	}
+	project.Path = fmt.Sprintf("%d-%s", project)
+	if err := p.git.CreateRepo(&project); err != nil {
 		return 0, err
 	}
 	return res, nil

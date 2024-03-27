@@ -1,7 +1,7 @@
 package storage
 
 type File struct {
-	Path string `json:"path"`
-	Name string `json:"name"`
-	Data []byte `json:"data"`
+	Path        string `json:"path"`
+	Name        string `json:"name"`
+	IsDirectory bool   `json:"isDirectory"`
 }

@@ -59,16 +59,8 @@ func (s SecurityGuard) IsUserACampMember(campID, userID uint) error {
 
 	camp, err := s.campQuery.CampInfo(campID) //----------------------------
 	if camp.ID != 0 {
-		CampCache.Set(fmt.Sprintf("%d", campID), &camp, cache.DefaultExpiration)
-		if camp.Owner.UserID == userID {
-			return nil
-		}
-		for _, value := range camp.Rulers {
-			if value.UserID == userID {
-				return nil
-			}
-		}
-		for _, value := range camp.Regulars {
+		//CampCache.Set(fmt.Sprintf("%d", campID), &camp, cache.DefaultExpiration)
+		for _, value := range camp.Members {
 			if value.UserID == userID {
 				return nil
 			}
@@ -88,8 +80,8 @@ func (s SecurityGuard) IsUserACampLeader(campID, userID uint) error {
 
 	camp, err := dao.CampDao.CampInfo(dao.NewCampDao(), campID) //---------------------
 	if camp.ID != 0 {
-		ProjectCache.Set(fmt.Sprintf("%d", campID), &camp, cache.DefaultExpiration)
-		if camp.Owner.UserID == userID {
+		//ProjectCache.Set(fmt.Sprintf("%d", campID), &camp, cache.DefaultExpiration)
+		if camp.OwnerID == userID {
 			return nil
 		}
 		return util.NewExternalError("access denied")
@@ -109,7 +101,7 @@ func (s SecurityGuard) IsUserAProjMember(projID, userID uint) error {
 
 	project, err := s.query.ProjectInfo(projID, "Members", "Owner")
 	if project.ID != 0 {
-		ProjectCache.Set(fmt.Sprintf("%d", projID), &project, cache.DefaultExpiration)
+		//ProjectCache.Set(fmt.Sprintf("%d", projID), &project, cache.DefaultExpiration)
 		if project.OwnerID == userID {
 			return nil
 		}

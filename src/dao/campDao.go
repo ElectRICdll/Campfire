@@ -87,8 +87,12 @@ func (d *campDao) AddCamp(ownerID uint, camp Camp, usersID ...uint) (uint, error
 		tran.Rollback()
 		return 0, err
 	}
+	if err := tran.Model(&camp).Association("Members").Append(&Member{CampID: camp.ID, UserID: ownerID}); err != nil {
+		tran.Rollback()
+		return 0, err
+	}
 	for _, userID := range usersID {
-		if err := tran.Model(&camp).Association("Regulars").Append(&Member{CampID: camp.ID, UserID: userID}); err != nil {
+		if err := tran.Model(&camp).Association("Members").Append(&Member{CampID: camp.ID, UserID: userID}); err != nil {
 			tran.Rollback()
 			return 0, err
 		}
@@ -128,22 +132,10 @@ func (d *campDao) MemberInfo(campID uint, userID uint) (Member, error) {
 	}
 
 	var member *Member
-	if camp.Owner.UserID == userID {
-		member = &camp.Owner
-	} else {
-		for _, ruler := range camp.Rulers {
-			if ruler.UserID == userID {
-				member = &ruler
-				break
-			}
-		}
-		if member == nil {
-			for _, regular := range camp.Regulars {
-				if regular.UserID == userID {
-					member = &regular
-					break
-				}
-			}
+	for _, regular := range camp.Members {
+		if regular.UserID == userID {
+			member = &regular
+			break
 		}
 	}
 	if member == nil {
@@ -163,7 +155,7 @@ func (d *campDao) AddMember(member Member) error {
 		return result.Error
 	}
 
-	if err := d.db.Model(&camp).Association("Regulars").Append(&member); err != nil {
+	if err := d.db.Model(&camp).Association("Members").Append(&member); err != nil {
 		return err
 	}
 
@@ -257,7 +249,7 @@ func (d *campDao) Promotion(campID uint, memberID uint) error {
 		return err
 	}
 
-	var member ProjectMember
+	var member Member
 	if err := d.db.Where("user_id = ? AND camp_id = ?", memberID, campID).First(&member).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return NewExternalError("no such data")
@@ -265,24 +257,14 @@ func (d *campDao) Promotion(campID uint, memberID uint) error {
 		return err
 	}
 
-	for _, ruler := range camp.Rulers {
-		if ruler.UserID == member.UserID {
-			return NewExternalError("member has already been ruler")
-		}
+	if member.IsRuler == true {
+		return NewExternalError("成员已是管理者")
 	}
-
-	tran := d.db.Begin()
-	if err := tran.Model(&camp).Association("Rulers").Append(&member); err != nil {
-		tran.Rollback()
+	member.IsRuler = false
+	if err := d.db.Where("user_id = ? AND camp_id = ?", memberID, campID).Updates(&member).Error; err != nil {
 		return err
 	}
 
-	if err := tran.Model(&camp).Association("Regulars").Delete(&member); err != nil && err != gorm.ErrRecordNotFound {
-		tran.Rollback()
-		return err
-	}
-
-	tran.Commit()
 	return nil
 }
 
@@ -295,7 +277,7 @@ func (d *campDao) Demotion(campID uint, memberID uint) error {
 		return err
 	}
 
-	var member ProjectMember
+	var member Member
 	if err := d.db.Where("user_id = ? AND camp_id = ?", memberID, campID).First(&member).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return NewExternalError("no such data")
@@ -303,29 +285,14 @@ func (d *campDao) Demotion(campID uint, memberID uint) error {
 		return err
 	}
 
-	var isTitled bool
-	for _, ruler := range camp.Rulers {
-		if ruler.UserID == member.UserID {
-			isTitled = true
-			break
-		}
+	if member.IsRuler == false {
+		return NewExternalError("成员已是普通身份")
 	}
-	if !isTitled {
-		return NewExternalError("member has already been regulars")
-	}
-
-	tran := d.db.Begin()
-	if err := tran.Model(&camp).Association("Rulers").Delete(&member); err != nil {
-		tran.Rollback()
+	member.IsRuler = true
+	if err := d.db.Where("user_id = ? AND camp_id = ?", memberID, campID).Updates(&member).Error; err != nil {
 		return err
 	}
 
-	if err := tran.Model(&camp).Association("Regulars").Append(&member); err != nil && err != gorm.ErrRecordNotFound {
-		tran.Rollback()
-		return err
-	}
-
-	tran.Commit()
 	return nil
 }
 
@@ -339,29 +306,30 @@ func (d *campDao) TransferOwner(campID uint, memberID uint) error {
 		return err
 	}
 
-	tran := d.db.Begin()
-	var newOwner Member
-	if err := tran.Model(&camp).Association("Owner").Find(&newOwner); err != nil {
-		tran.Rollback()
-		return err
+	//tran := d.db.Begin()
+	var newOwner = Member{
+		UserID: memberID,
 	}
-	if err := tran.Model(&camp).Association("Regulars").Append(&newOwner); err != nil {
-		tran.Rollback()
-		return err
-	}
-	if err := tran.Where("user_id = ? AND camp_id = ?", memberID, campID).First(&newOwner).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			tran.Rollback()
-			return NewExternalError("no such data")
-		}
-		tran.Rollback()
-		return err
-	}
+	//if err := tran.Model(&camp).Association("Owner").Find(&newOwner); err != nil {
+	//	tran.Rollback()
+	//	return err
+	//}
+	//if err := tran.Model(&camp).Association("Regulars").Append(&newOwner); err != nil {
+	//	tran.Rollback()
+	//	return err
+	//}
+	//if err := tran.Where("user_id = ? AND camp_id = ?", memberID, campID).First(&newOwner).Error; err != nil {
+	//	if err == gorm.ErrRecordNotFound {
+	//		tran.Rollback()
+	//		return NewExternalError("no such data")
+	//	}
+	//	tran.Rollback()
+	//	return err
+	//}
 
-	if err := tran.Model(&camp).Update("Owner", newOwner).Error; err != nil {
-		tran.Rollback()
+	if err := d.db.Model(&camp).Update("Owner", newOwner).Error; err != nil {
 		return err
 	}
-	tran.Commit()
+	//d.db.Commit()
 	return nil
 }

@@ -150,7 +150,7 @@ func (s *userService) PublicCamps(userID uint) ([]BriefCampDTO, error) {
 		camps = append(camps, BriefCampDTO{
 			ID:           camp.ID,
 			Name:         camp.Name,
-			MembersCount: len(camp.Regulars) + len(camp.Rulers) + 1,
+			MembersCount: len(camp.Members) + 1,
 			IsPrivate:    camp.IsPrivate,
 		})
 	}

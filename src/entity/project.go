@@ -1,6 +1,8 @@
 package entity
 
-import "time"
+import (
+	"time"
+)
 
 const (
 	Planning = iota
@@ -20,8 +22,7 @@ type Project struct {
 	Status      int       `gorm:"not null" json:"status"`
 	BeginAt     time.Time `json:"begin"`
 
-	Branches []Branch  `gorm:"foreignKey:ProjID;onDelete:CASCADE" json:"branches"`
-	Releases []Release `gorm:"foreignKey:ProjID;onDelete:CASCADE" json:"releases"`
+	Branches []Branch `gorm:"foreignKey:ProjID;onDelete:CASCADE" json:"branches"`
 
 	OwnerID uint `json:"-"`
 	Owner   User `gorm:"foreignKey:OwnerID;onDelete:CASCADE" json:"owner"`
@@ -30,6 +31,8 @@ type Project struct {
 
 	Camps []Camp `gorm:"foreignKey:ProjID;onDelete:CASCADE" json:"camps"`
 	Tasks []Task `gorm:"foreignKey:ProjID;onDelete:CASCADE" json:"tasks"`
+
+	Path string `json:"-"`
 }
 
 const (
@@ -39,21 +42,8 @@ const (
 )
 
 type Branch struct {
-	ID          uint     `gorm:"primaryKey;autoIncrement" json:"-"`
-	ProjID      uint     `gorm:"not null" json:"projID"`
-	OwnerID     uint     `gorm:"not null" json:"ownerID"`
-	Name        string   `gorm:"not null;unique" json:"branch"`
-	Commits     []Commit `gorm:"foreignKey:ProjID;onDelete:CASCADE" json:"-"`
-	CommitCount int      `gorm:"-" json:"commitCount"`
-	Status      int      `gorm:"not null" json:"status"`
-}
-
-type Commit struct {
-	ID          string `gorm:"primaryKey;autoIncrement" json:"-"`
-	ProjID      uint   `gorm:"not null" json:"projID"`
-	Title       string `gorm:"not null" json:"title"`
-	Description string `json:"description"`
-	OwnerID     uint   `json:"ownerID"`
+	Name   string `gorm:"not null;" json:"branch"`
+	ProjID uint   `gorm:"not null" json:"projID"`
 }
 
 type Release struct {

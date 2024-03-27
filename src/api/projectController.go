@@ -69,7 +69,7 @@ func (p projectController) CreateCamp(ctx *gin.Context) {
 		Name:      camp.Name,
 		IsPrivate: camp.IsPrivate,
 		ProjID:    uri.PID,
-	}, camp.RegularsID...,
+	}, camp.MembersID...,
 	)
 	resStruct := struct {
 		ID uint `json:"id"`
