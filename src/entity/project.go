@@ -49,7 +49,7 @@ type Branch struct {
 type Release struct {
 	ID       string    `gorm:"primaryKey;autoIncrement" json:"id"`
 	ProjID   uint      `gorm:"not null" json:"projID"`
-	Version  string    `gorm:"not null;unique" json:"version"`
+	Version  string    `gorm:"not null" json:"version"`
 	Date     time.Time `gorm:"not null" json:"date"`
-	FilePath string    `gorm:"not null;uri" json:"-"`
+	FilePath string    `gorm:"not null" json:"-"`
 }
