@@ -9,5 +9,5 @@ type Message struct {
 
 	Timestamp time.Time `json:"timestamp" gorm:"not null"`
 	Type      int       `json:"mType" gorm:"not null"`
-	Content   string    `json:"-"`
+	Content   string    `json:"content"`
 }
