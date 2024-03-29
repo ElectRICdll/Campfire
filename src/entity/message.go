@@ -8,6 +8,6 @@ type Message struct {
 	ReplyID uint `json:"replyID"`
 
 	Timestamp time.Time `json:"timestamp" gorm:"not null"`
-	Type      int       `json:"mType" gorm:"not null"`
+	Type      int       `json:"eType" gorm:"not null"`
 	Content   string    `json:"content"`
 }

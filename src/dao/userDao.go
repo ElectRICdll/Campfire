@@ -67,26 +67,36 @@ func (d userDao) TasksOfUser(userID uint) ([]Task, error) {
 
 func (d userDao) CampsOfUser(userID uint) ([]Camp, error) {
 	var camps []Camp
-	if err := d.db.Where("owner_id = ?", userID).Where("is_private = ?", false).Find(&camps).Error; err != nil {
+
+	if err := d.db.Table("members").
+		Select("camps.*").
+		Joins("JOIN camps ON members.camp_id = camps.id").
+		Where("members.user_id = ? and is_private = false", userID).
+		Find(&camps).Error; err != nil {
 		return nil, err
 	}
+
 	return camps, nil
 }
 
 func (d userDao) PrivateCampsOfUser(userID uint) ([]Camp, error) {
 	var camps []Camp
-	if err := d.db.Where("owner_id = ?", userID).Where("is_private = ?", true).Find(&camps).Error; err != nil {
+
+	if err := d.db.Table("members").
+		Select("camps.*").
+		Joins("JOIN camps ON members.camp_id = camps.id").
+		Where("members.user_id = ? and is_private = true", userID).
+		Find(&camps).Error; err != nil {
 		return nil, err
 	}
+
 	return camps, nil
 }
 
 func (d userDao) ProjectsOfUser(userID uint) ([]Project, error) {
 	var projects []Project
-	result := d.db.Preload("Members").
-		Preload("Camps").
-		Preload("Tasks").
-		Joins("JOIN project_members ON project_members.proj_id = projects.id").
+	result := d.db.Table("project_members").
+		Joins("JOIN projects ON project_members.proj_id = projects.id").
 		Where("project_members.user_id = ?", userID).
 		Find(&projects)
 

@@ -9,7 +9,6 @@ const (
 
 const (
 	UnknownEventType int = iota
-	AuthEventType
 	PingEventType
 	TextMessageEventType
 	BinaryMessageEventType
