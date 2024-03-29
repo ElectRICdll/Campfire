@@ -96,8 +96,9 @@ func (d userDao) PrivateCampsOfUser(userID uint) ([]Camp, error) {
 func (d userDao) ProjectsOfUser(userID uint) ([]Project, error) {
 	var projects []Project
 	if err := d.db.Table("project_members").
-		Select("projects.*").
+		Select("projects.*, users.username, users.email"). // 选择项目及项目成员的用户名和邮箱
 		Joins("JOIN projects ON project_members.proj_id = projects.id").
+		Joins("JOIN users ON project_members.user_id = users.id"). // 联接用户表
 		Where("project_members.user_id = ?", userID).
 		Find(&projects).Error; err != nil {
 		return nil, err
