@@ -91,7 +91,7 @@ func (d userDao) PrivateCampsOfUser(userID uint) ([]Camp, error) {
 
 func (d userDao) ProjectsOfUser(userID uint) ([]Project, error) {
 	var projects []Project
-	if err := d.db.Preload("Members.User", d.db.Where(&ProjectMember{UserID: userID})).Model(&Project{}).
+	if err := d.db.Preload("Members.User", d.db.Where(&User{ID: userID})).Model(&Project{}).
 		Find(&projects).Error; err != nil {
 		return nil, err
 	}
