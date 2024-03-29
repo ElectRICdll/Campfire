@@ -53,12 +53,12 @@ func (p projectService) CreateProject(userID uint, project Project, usersID ...u
 		return 0, util.NewExternalError("Illegal title format")
 	}
 	project.BeginAt = time.Now()
-
+	project.Path = fmt.Sprintf("%s/%d-%s", util.CONFIG.NativeStorageRootPath, res, project.Title)
 	res, err := p.query.AddProject(userID, project, usersID...)
 	if err != nil {
 		return 0, err
 	}
-	project.Path = fmt.Sprintf("%s/%d-%s", util.CONFIG.NativeStorageRootPath, res, project.Title)
+
 	if err := p.git.CreateRepo(&project); err != nil {
 		return 0, err
 	}
