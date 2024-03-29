@@ -198,7 +198,7 @@ func (g *gitService) Clone(queryID uint, projID uint, branch string) ([]byte, er
 }
 
 func (g *gitService) Dir(queryID, projID uint, branch, path string) ([]storage.File, error) {
-	if err := g.access.IsUserAProjMember(queryID, projID); err != nil {
+	if err := g.access.IsUserAProjMember(projID, queryID); err != nil {
 		return nil, err
 	}
 	project, err := g.query.ProjectInfo(projID)
