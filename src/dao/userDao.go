@@ -95,13 +95,12 @@ func (d userDao) PrivateCampsOfUser(userID uint) ([]Camp, error) {
 
 func (d userDao) ProjectsOfUser(userID uint) ([]Project, error) {
 	var projects []Project
-	result := d.db.Table("project_members").
+	if err := d.db.Table("project_members").
+		Select("projects.*").
 		Joins("JOIN projects ON project_members.proj_id = projects.id").
 		Where("project_members.user_id = ?", userID).
-		Find(&projects)
-
-	if result.Error != nil {
-		return nil, result.Error
+		Find(&projects).Error; err != nil {
+		return nil, err
 	}
 
 	return projects, nil
