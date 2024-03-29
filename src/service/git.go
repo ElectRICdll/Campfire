@@ -178,6 +178,12 @@ func (g *gitService) Clone(queryID uint, projID uint, branch string) ([]byte, er
 		return nil, err
 	}
 
+	g.repo, err = git.PlainOpen(project.Path)
+	defer g.closeRepo()
+	if err != nil {
+		return nil, err
+	}
+
 	w, err := g.repo.Worktree()
 	if err != nil {
 		return nil, err
@@ -202,6 +208,12 @@ func (g *gitService) Dir(queryID, projID uint, branch, path string) ([]storage.F
 		return nil, err
 	}
 	project, err := g.query.ProjectInfo(projID)
+	if err != nil {
+		return nil, err
+	}
+
+	g.repo, err = git.PlainOpen(project.Path)
+	defer g.closeRepo()
 	if err != nil {
 		return nil, err
 	}
