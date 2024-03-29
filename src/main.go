@@ -13,6 +13,9 @@ import (
 
 func registerDependencies(engine *gin.Engine) {
 	security := auth.SecurityInstance
+
+	engine.Use(security.CorsMiddleware())
+
 	login := api.NewLoginController()
 	engine.POST("/login", login.Login)
 	engine.POST("/reg", login.Register)
