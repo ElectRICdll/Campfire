@@ -7,7 +7,6 @@ import (
 	"campfire/log"
 	"campfire/storage"
 	"campfire/util"
-	"fmt"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"io/ioutil"
@@ -100,7 +99,6 @@ func (g *gitService) Commit(queryID uint, projID uint, branch string, descriptio
 }
 
 func (g *gitService) CreateRepo(project *entity.Project) error {
-	project.Path = fmt.Sprintf("%d-%s", project.OwnerID, project.Title)
 	_, err := git.PlainInit(project.Path, false)
 	if err != nil {
 		return err
