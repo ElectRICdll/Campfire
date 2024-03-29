@@ -55,7 +55,7 @@ jwt_auth: true
 func (p campController) EditCampInfo(ctx *gin.Context) {
 	userID := (uint)(ctx.Keys["id"].(float64))
 	uri := struct {
-		CID uint `json:"c_id"`
+		CID uint `uri:"camp_id"`
 	}{}
 	if err := ctx.BindUri(&uri); err != nil {
 		responseError(ctx, err)
@@ -81,7 +81,7 @@ func (p campController) EditCampInfo(ctx *gin.Context) {
 func (p campController) DisableCamp(ctx *gin.Context) {
 	userID := (uint)(ctx.Keys["id"].(float64))
 	uri := struct {
-		CID uint `json:"c_id"`
+		CID uint `uri:"camp_id"`
 	}{}
 	if err := ctx.BindUri(&uri); err != nil {
 		responseError(ctx, err)
@@ -98,7 +98,7 @@ func (p campController) DisableCamp(ctx *gin.Context) {
 func (p campController) InviteMember(ctx *gin.Context) {
 	userID := (uint)(ctx.Keys["id"].(float64))
 	uri := struct {
-		CID uint `json:"c_id"`
+		CID uint `uri:"camp_id"`
 	}{}
 	if err := ctx.BindUri(&uri); err != nil {
 		responseError(ctx, err)
@@ -120,7 +120,7 @@ func (p campController) InviteMember(ctx *gin.Context) {
 func (p campController) KickMember(ctx *gin.Context) {
 	userID := (uint)(ctx.Keys["id"].(float64))
 	uri := struct {
-		CID uint `json:"c_id"`
+		CID uint `uri:"camp_id"`
 	}{}
 	if err := ctx.BindUri(&uri); err != nil {
 		responseError(ctx, err)
@@ -143,7 +143,7 @@ func (p campController) EditMyMemberInfo(ctx *gin.Context) {
 	userID := (uint)(ctx.Keys["id"].(float64))
 	member := entity.Member{}
 	uri := struct {
-		CID uint `uri:"p_id" binding:"required"`
+		CID uint `uri:"camp_id" binding:"required"`
 	}{}
 	if err := ctx.BindUri(&uri); err != nil {
 		responseError(ctx, err)
@@ -174,8 +174,8 @@ jwt_auth: true
 func (p campController) CampInfo(ctx *gin.Context) {
 	userID := (uint)(ctx.Keys["id"].(float64))
 	uri := struct {
-		PID uint `uri:"p_id" binding:"required"`
-		CID uint `uri:"c_id" binding:"required"`
+		PID uint `uri:"project_id" binding:"required"`
+		CID uint `uri:"camp_id" binding:"required"`
 	}{}
 	if err := ctx.BindUri(&uri); err != nil {
 		responseError(ctx, err)
@@ -197,7 +197,7 @@ func (p campController) EditCamp(ctx *gin.Context) {
 	userID := (uint)(ctx.Keys["id"].(float64))
 	proj := entity.Camp{}
 	uri := struct {
-		PID uint `uri:"p_id" binding:"required"`
+		PID uint `uri:"project_id" binding:"required"`
 	}{}
 	if err := ctx.BindUri(&uri); err != nil {
 		responseError(ctx, err)
@@ -226,7 +226,7 @@ jwt_auth: true
 func (p projectController) DisableCamp(ctx *gin.Context) {
 	userID := (uint)(ctx.Keys["id"].(float64))
 	uri := struct {
-		CID uint `uri:"c_id" binding:"required"`
+		CID uint `uri:"camp_id" binding:"required"`
 	}{}
 	if err := p.campService.DisableCamp(userID, uri.CID); err != nil {
 		responseError(ctx, err)
@@ -238,11 +238,11 @@ func (p projectController) DisableCamp(ctx *gin.Context) {
 func (p campController) SetTitle(ctx *gin.Context) {
 	userID := (uint)(ctx.Keys["id"].(float64))
 	uri := struct {
-		CID uint `uri:"c_id" binding:"required"`
+		CID uint `uri:"camp_id" binding:"required"`
 	}{}
 	body := struct {
-		UserID uint   `json:"userID"`
-		Title  string `json:"title"`
+		UserID uint   `uri:"userID"`
+		Title  string `uri:"title"`
 	}{}
 	if err := ctx.BindJSON(&body); err != nil {
 		responseError(ctx, err)
@@ -258,10 +258,10 @@ func (p campController) SetTitle(ctx *gin.Context) {
 func (p campController) MessageRecord(ctx *gin.Context) {
 	userID := (uint)(ctx.Keys["id"].(float64))
 	uri := struct {
-		CID uint `uri:"c_id" binding:"required"`
+		CID uint `uri:"camp_id" binding:"required"`
 	}{}
 	beginID := struct {
-		BeginMessageID uint `json:"beginMessageID"`
+		BeginMessageID uint `uri:"beginMessageID"`
 	}{}
 	if err := ctx.BindJSON(&beginID); err != nil {
 		responseError(ctx, err)
@@ -281,7 +281,7 @@ func (p campController) MessageRecord(ctx *gin.Context) {
 func (p campController) GiveOwner(ctx *gin.Context) {
 	userID := (uint)(ctx.Keys["id"].(float64))
 	uri := struct {
-		CID uint `uri:"c_id" binding:"required"`
+		CID uint `uri:"camp_id" binding:"required"`
 	}{}
 	body := struct {
 		UserID uint `json:"userID"`
@@ -300,7 +300,7 @@ func (p campController) GiveOwner(ctx *gin.Context) {
 func (p campController) Promotion(ctx *gin.Context) {
 	userID := (uint)(ctx.Keys["id"].(float64))
 	uri := struct {
-		CID uint `uri:"c_id" binding:"required"`
+		CID uint `uri:"camp_id" binding:"required"`
 	}{}
 	body := struct {
 		UserID uint `json:"userID"`
@@ -319,7 +319,7 @@ func (p campController) Promotion(ctx *gin.Context) {
 func (p campController) Demotion(ctx *gin.Context) {
 	userID := (uint)(ctx.Keys["id"].(float64))
 	uri := struct {
-		CID uint `uri:"c_id" binding:"required"`
+		CID uint `uri:"camp_id" binding:"required"`
 	}{}
 	body := struct {
 		UserID uint `json:"userID"`
@@ -338,7 +338,7 @@ func (p campController) Demotion(ctx *gin.Context) {
 func (p campController) ExitCamp(ctx *gin.Context) {
 	userID := (uint)(ctx.Keys["id"].(float64))
 	uri := struct {
-		CID uint `uri:"c_id" binding:"required"`
+		CID uint `uri:"camp_id" binding:"required"`
 	}{}
 	if err := p.campService.ExitCamp(userID, uri.CID); err != nil {
 		responseError(ctx, err)

@@ -25,7 +25,7 @@ type GitService interface {
 
 	Clone(queryID uint, projID uint, branch string) ([]byte, error)
 
-	Dir(queryID, projID uint, path string) ([]storage.File, error)
+	Dir(queryID, projID uint, branch, path string) ([]storage.File, error)
 
 	Read(queryID, projID uint, filePath string) ([]byte, error)
 }
@@ -67,6 +67,9 @@ func (g *gitService) Commit(queryID uint, projID uint, branch string, descriptio
 		Branch: plumbing.ReferenceName("refs/heads/" + branch),
 		Create: true,
 	})
+	if err != nil {
+		return err
+	}
 
 	toRollBack := *w
 
@@ -194,7 +197,7 @@ func (g *gitService) Clone(queryID uint, projID uint, branch string) ([]byte, er
 	return zipData, nil
 }
 
-func (g *gitService) Dir(queryID, projID uint, path string) ([]storage.File, error) {
+func (g *gitService) Dir(queryID, projID uint, branch, path string) ([]storage.File, error) {
 	if err := g.access.IsUserAProjMember(queryID, projID); err != nil {
 		return nil, err
 	}
@@ -202,6 +205,19 @@ func (g *gitService) Dir(queryID, projID uint, path string) ([]storage.File, err
 	if err != nil {
 		return nil, err
 	}
+
+	w, err := g.repo.Worktree()
+	if err != nil {
+		return nil, err
+	}
+	err = w.Checkout(&git.CheckoutOptions{
+		Branch: plumbing.ReferenceName("refs/heads/" + branch),
+		Create: true,
+	})
+	if err != nil {
+		return nil, err
+	}
+
 	files, err := ioutil.ReadDir(project.Path + path)
 	var fileList []storage.File
 	for _, file := range files {

@@ -191,7 +191,7 @@ jwt_auth: true
 func (c userController) CampInfo(ctx *gin.Context) {
 	userID := (uint)(ctx.Keys["id"].(float64))
 	uri := struct {
-		CID uint `uri:"c_id" binding:"required"`
+		CID uint `uri:"camp_id" binding:"required"`
 	}{}
 
 	if err := ctx.BindUri(&uri); err != nil {
@@ -216,7 +216,7 @@ func (c userController) EditCampInfo(ctx *gin.Context) {
 	userID := (uint)(ctx.Keys["id"].(float64))
 	camp := entity.Camp{}
 	uri := struct {
-		CID uint `uri:"c_id" binding:"required"`
+		CID uint `uri:"camp_id" binding:"required"`
 	}{}
 	if err := ctx.BindUri(&uri); err != nil {
 		responseError(ctx, err)

@@ -99,11 +99,11 @@ func (g gitController) OpenFile(ctx *gin.Context) {
 		PID    uint   `uri:"project_id" binding:"required"`
 		Branch string `uri:"branch" binding:"required"`
 	}{}
-	filePath := ctx.Query("path")
 	if err := ctx.BindUri(&uri); err != nil {
 		responseError(ctx, err)
 		return
 	}
+	filePath := ctx.Query("path")
 	data, err := g.gitService.Read(userID, uri.PID, filePath)
 
 	responseJSON(ctx, struct {
@@ -138,8 +138,12 @@ func (g gitController) RepoDir(ctx *gin.Context) {
 		PID    uint   `uri:"project_id" binding:"required"`
 		Branch string `uri:"branch" binding:"required"`
 	}{}
+	if err := ctx.BindUri(&uri); err != nil {
+		responseError(ctx, err)
+		return
+	}
 	path := ctx.Query("path")
-	files, err := g.gitService.Dir(userID, uri.PID, path)
+	files, err := g.gitService.Dir(userID, uri.PID, uri.Branch, path)
 
 	responseJSON(ctx, struct {
 		Files []storage.File `json:"files"`
