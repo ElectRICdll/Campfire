@@ -31,7 +31,10 @@ type GitService interface {
 }
 
 func NewGitService() GitService {
-	return &gitService{}
+	return &gitService{
+		access: auth.SecurityInstance,
+		query:  dao.ProjectDaoContainer,
+	}
 }
 
 type gitService struct {
