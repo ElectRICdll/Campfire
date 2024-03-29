@@ -29,11 +29,18 @@ type SessionService struct {
 	eventHandler EventService
 }
 
-func (s *SessionService) NewSession(w http.ResponseWriter, r *http.Request, h http.Header) error {
+func (s *SessionService) NewSession(w http.ResponseWriter, r *http.Request, h http.Header, token string) error {
+	res, err := s.sec.WSTokenVerify(token)
+	if err != nil {
+
+		return util.NewExternalError("unauthorized")
+	}
+
 	conn, err := s.generator.Upgrade(w, r, h)
 	if err != nil {
 		return err
 	}
+	s.pool.AddSession(res, conn, token)
 	go func(conn *websocket.Conn, handle DataHandler) {
 		defer func() {
 			err := conn.Close()
@@ -107,21 +114,12 @@ func (s *SessionService) handle(conn *websocket.Conn, wsType int, payload []byte
 		s.sendError(conn, err)
 		return
 	}
-	if tempMsg.EType == AuthEventType {
-		res, err := s.sec.WSTokenVerify(tempMsg.Token)
-		if err != nil {
-			s.sendError(conn, err)
-			defer conn.Close()
-			return
-		}
-		s.pool.AddSession(res, conn, tempMsg.Token)
-		return
-	}
-	if s.pool.Session()[tempMsg.OperatorID].Conn != conn {
-		s.sendError(conn, util.NewExternalError("unauthorized"))
-		defer conn.Close()
-		return
-	}
+
+	//if s.pool.Session()[tempMsg.OperatorID].Conn != conn {
+	//	s.sendError(conn, util.NewExternalError("unauthorized"))
+	//	defer conn.Close()
+	//	return
+	//}
 	if tempMsg.EType == PingEventType {
 		s.sendText(conn, websocket.TextMessage, "pong")
 		return

@@ -31,7 +31,8 @@ path: /ws (WebSocket)
 	}
 */
 func (c *sessionController) NewSession(ctx *gin.Context) {
-	if err := c.s.NewSession(ctx.Writer, ctx.Request, nil); err != nil {
+	token := ctx.Query("token")
+	if err := c.s.NewSession(ctx.Writer, ctx.Request, nil, token); err != nil {
 		responseError(ctx, err)
 		return
 	}
