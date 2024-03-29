@@ -31,7 +31,7 @@ type UserService interface {
 
 	PublicCamps(userID uint) ([]BriefCampDTO, error)
 
-	Projects(userID uint) ([]BriefProjectDTO, error)
+	Projects(userID uint) ([]Project, error)
 }
 
 func NewUserService() UserService {
@@ -157,11 +157,11 @@ func (s *userService) PublicCamps(userID uint) ([]BriefCampDTO, error) {
 	return camps, err
 }
 
-func (s *userService) Projects(userID uint) ([]BriefProjectDTO, error) {
+func (s *userService) Projects(userID uint) ([]Project, error) {
 	res, err := s.userQuery.ProjectsOfUser(userID)
-	projs := []BriefProjectDTO{}
+	projs := []Project{}
 	for _, proj := range res {
-		projs = append(projs, proj.BriefDTO())
+		projs = append(projs, proj)
 	}
 	return projs, err
 }
