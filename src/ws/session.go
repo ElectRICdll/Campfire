@@ -14,8 +14,12 @@ type SessionSender func(*websocket.Conn, int, []byte) error
 
 func NewSessionService() *SessionService {
 	res := &SessionService{
-		sec:          auth.SecurityInstance,
-		generator:    websocket.Upgrader{},
+		sec: auth.SecurityInstance,
+		generator: websocket.Upgrader{
+			CheckOrigin: func(r *http.Request) bool {
+				return true
+			},
+		},
 		pool:         NewSessionPool(),
 		eventHandler: EventService{},
 	}
@@ -32,7 +36,6 @@ type SessionService struct {
 func (s *SessionService) NewSession(w http.ResponseWriter, r *http.Request, h http.Header, token string) error {
 	res, err := s.sec.WSTokenVerify(token)
 	if err != nil {
-
 		return util.NewExternalError("unauthorized")
 	}
 
