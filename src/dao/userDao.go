@@ -91,9 +91,9 @@ func (d userDao) PrivateCampsOfUser(userID uint) ([]Camp, error) {
 
 func (d userDao) ProjectsOfUser(userID uint) ([]Project, error) {
 	var projects []Project
-	if err := d.db.Preload("ProjectMembers.User"). // 预加载项目成员的用户信息
-							Where("project_members.user_id = ?", userID).
-							Find(&projects).Error; err != nil {
+	if err := d.db.Preload("ProjectMembers.User").Model(&Project{}).
+		Where("project_members.user_id = ?", userID).
+		Find(&projects).Error; err != nil {
 		return nil, err
 	}
 
