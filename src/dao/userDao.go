@@ -66,28 +66,18 @@ func (d userDao) TasksOfUser(userID uint) ([]Task, error) {
 }
 
 func (d userDao) CampsOfUser(userID uint) ([]Camp, error) {
-	camps := make([]Camp, 0)
-	if err := d.db.Preload("Members").
-		Preload("Members.Camp").
-		Where("members.user_id = ?", userID).
-		Where("camps.is_private = ?", false).
-		Find(&camps).Error; err != nil {
+	var camps []Camp
+	if err := d.db.Where("owner_id = ?", userID).Where("is_private = ?", false).Find(&camps).Error; err != nil {
 		return nil, err
 	}
-
 	return camps, nil
 }
 
 func (d userDao) PrivateCampsOfUser(userID uint) ([]Camp, error) {
-	camps := make([]Camp, 0)
-	if err := d.db.Preload("Members").
-		Preload("Members.Camp").
-		Where("members.user_id = ?", userID).
-		Where("camps.is_private = ?", true).
-		Find(&camps).Error; err != nil {
+	var camps []Camp
+	if err := d.db.Where("owner_id = ?", userID).Where("is_private = ?", true).Find(&camps).Error; err != nil {
 		return nil, err
 	}
-
 	return camps, nil
 }
 
