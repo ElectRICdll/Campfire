@@ -68,10 +68,8 @@ func (d userDao) TasksOfUser(userID uint) ([]Task, error) {
 func (d userDao) CampsOfUser(userID uint) ([]Camp, error) {
 	var camps []Camp
 
-	if err := d.db.Table("members").
-		Select("camps.*").
-		Joins("JOIN camps ON members.camp_id = camps.id").
-		Where("members.user_id = ? and is_private = false", userID).
+	if err := d.db.Preload("Members").
+		Where("members.user_id = ? AND camps.is_private = false", userID).
 		Find(&camps).Error; err != nil {
 		return nil, err
 	}
@@ -82,10 +80,8 @@ func (d userDao) CampsOfUser(userID uint) ([]Camp, error) {
 func (d userDao) PrivateCampsOfUser(userID uint) ([]Camp, error) {
 	var camps []Camp
 
-	if err := d.db.Table("members").
-		Select("camps.*").
-		Joins("JOIN camps ON members.camp_id = camps.id").
-		Where("members.user_id = ? and is_private = true", userID).
+	if err := d.db.Preload("Members").
+		Where("members.user_id = ? AND camps.is_private = true", userID).
 		Find(&camps).Error; err != nil {
 		return nil, err
 	}
@@ -95,12 +91,9 @@ func (d userDao) PrivateCampsOfUser(userID uint) ([]Camp, error) {
 
 func (d userDao) ProjectsOfUser(userID uint) ([]Project, error) {
 	var projects []Project
-	if err := d.db.Table("project_members").
-		Select("projects.*, users.*"). // 选择项目及项目成员的用户名和邮箱
-		Joins("JOIN projects ON project_members.proj_id = projects.id").
-		Joins("JOIN users ON project_members.user_id = users.id"). // 联接用户表
-		Where("project_members.user_id = ?", userID).
-		Find(&projects).Error; err != nil {
+	if err := d.db.Preload("Members.User"). // 预加载项目成员的用户信息
+						Where("project_members.user_id = ?", userID).
+						Find(&projects).Error; err != nil {
 		return nil, err
 	}
 
