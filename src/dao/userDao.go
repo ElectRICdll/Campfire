@@ -68,7 +68,7 @@ func (d userDao) TasksOfUser(userID uint) ([]Task, error) {
 func (d userDao) CampsOfUser(userID uint) ([]Camp, error) {
 	var camps []Camp
 
-	if err := d.db.Preload("Members", d.db.Where("members.user_id = ?", userID)).
+	if err := d.db.Preload("Owner").Preload("Members", d.db.Where("members.user_id = ?", userID)).
 		Where("camps.is_private = false").
 		Find(&camps).Error; err != nil {
 		return nil, err
