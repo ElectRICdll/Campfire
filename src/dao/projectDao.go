@@ -3,7 +3,9 @@ package dao
 import (
 	. "campfire/entity"
 	"campfire/util"
+	"fmt"
 	"gorm.io/gorm/clause"
+	"time"
 
 	//"fmt"
 	//"time"
@@ -91,6 +93,8 @@ func (d *projectDao) SetProjectInfo(project Project) error {
 func (d *projectDao) AddProject(ownerID uint, proj Project, usersID ...uint) (uint, error) {
 	var project = &proj
 	project.OwnerID = ownerID
+	project.BeginAt = time.Now()
+
 	tran := d.db.Begin()
 	if err := tran.Create(project).Error; err != nil {
 		tran.Rollback()
@@ -105,6 +109,11 @@ func (d *projectDao) AddProject(ownerID uint, proj Project, usersID ...uint) (ui
 			tran.Rollback()
 			return 0, err
 		}
+	}
+	project.Path = fmt.Sprintf("%s/%d-%s", util.CONFIG.NativeStorageRootPath, proj.ID, project.Title)
+	if err := tran.Updates(&project).Error; err != nil {
+		tran.Rollback()
+		return 0, err
 	}
 	tran.Commit()
 	return proj.ID, nil

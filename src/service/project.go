@@ -6,8 +6,6 @@ import (
 	. "campfire/entity"
 	"campfire/util"
 	"campfire/ws"
-	"fmt"
-	"time"
 )
 
 type ProjectService interface {
@@ -52,8 +50,7 @@ func (p projectService) CreateProject(userID uint, project Project, usersID ...u
 	if ok := util.ValidateTitle(project.Title); !ok {
 		return 0, util.NewExternalError("Illegal title format")
 	}
-	project.BeginAt = time.Now()
-	project.Path = fmt.Sprintf("%s/%d-%s", util.CONFIG.NativeStorageRootPath, res, project.Title)
+
 	res, err := p.query.AddProject(userID, project, usersID...)
 	if err != nil {
 		return 0, err
