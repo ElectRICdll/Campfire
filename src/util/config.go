@@ -3,7 +3,7 @@ package util
 import "time"
 
 var CONFIG = struct {
-	Port    string `yaml:"port""`
+	Port    string `yaml:"port"`
 	SQLConn string `yaml:"sql_conn"`
 
 	OSSEndPoint    string `yaml:"oss_end_point"`
@@ -25,5 +25,5 @@ var CONFIG = struct {
 	SecretKey:          []byte("Clover"),
 	MessageRecordCount: 50,
 
-	NativeStorageRootPath: "./",
+	NativeStorageRootPath: "../repo",
 }

@@ -58,7 +58,7 @@ func (p projectService) CreateProject(userID uint, project Project, usersID ...u
 	if err != nil {
 		return 0, err
 	}
-	project.Path = fmt.Sprintf("%d-%s", project)
+	project.Path = fmt.Sprintf("%s/%d-%s", util.CONFIG.NativeStorageRootPath, project.ID, project.Title)
 	if err := p.git.CreateRepo(&project); err != nil {
 		return 0, err
 	}

@@ -71,22 +71,22 @@ func (g *gitService) Commit(queryID uint, projID uint, branch string, descriptio
 	for _, file := range files {
 		switch file.Type {
 		case "add":
-			_, err = toRollBack.Add(file.Filepath)
+			_, err = toRollBack.Add(project.Path + file.Filepath)
 			if err != nil {
 				return err
 			}
 
 		case "delete":
-			_, err = toRollBack.Remove(file.Filepath)
+			_, err = toRollBack.Remove(project.Path + file.Filepath)
 			if err != nil {
 				return err
 			}
 		case "update":
-			err := os.WriteFile(file.Filepath, []byte(file.Content), 0644)
+			err := os.WriteFile(project.Path+file.Filepath, []byte(file.Content), 0644)
 			if err != nil {
 				return err
 			}
-			_, err = toRollBack.Add(file.Filepath)
+			_, err = toRollBack.Add(project.Path + file.Filepath)
 		}
 	}
 
@@ -197,7 +197,11 @@ func (g *gitService) Dir(queryID, projID uint, path string) ([]storage.File, err
 	if err := g.access.IsUserAProjMember(queryID, projID); err != nil {
 		return nil, err
 	}
-	files, err := ioutil.ReadDir(path)
+	project, err := g.query.ProjectInfo(projID)
+	if err != nil {
+		return nil, err
+	}
+	files, err := ioutil.ReadDir(project.Path + path)
 	var fileList []storage.File
 	for _, file := range files {
 		fileList = append(fileList, storage.File{
@@ -215,7 +219,11 @@ func (g *gitService) Read(queryID, projID uint, filePath string) ([]byte, error)
 	if err := g.access.IsUserAProjMember(queryID, projID); err != nil {
 		return nil, err
 	}
-	content, err := ioutil.ReadFile(filePath)
+	project, err := g.query.ProjectInfo(projID)
+	if err != nil {
+		return nil, err
+	}
+	content, err := ioutil.ReadFile(project.Path + filePath)
 	return content, err
 }
 
