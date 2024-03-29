@@ -34,14 +34,14 @@ type gitController struct {
 func (g gitController) Commit(ctx *gin.Context) {
 	userID := (uint)(ctx.Keys["id"].(float64))
 	uri := struct {
-		PID uint `uri:"project_id" binding:"required"`
+		PID    uint   `uri:"project_id" binding:"required"`
+		Branch string `uri:"branch" binding:"required"`
 	}{}
 	if err := ctx.BindUri(&uri); err != nil {
 		responseError(ctx, err)
 		return
 	}
 	body := struct {
-		Branch      string              `json:"branch"`
 		Description string              `json:"description"`
 		Actions     []service.GitAction `json:"actions"`
 	}{}
@@ -49,7 +49,7 @@ func (g gitController) Commit(ctx *gin.Context) {
 		responseError(ctx, err)
 		return
 	}
-	err := g.gitService.Commit(userID, uri.PID, body.Branch, body.Description, body.Actions...)
+	err := g.gitService.Commit(userID, uri.PID, uri.Branch, body.Description, body.Actions...)
 	if err != nil {
 		responseError(ctx, err)
 		return
@@ -96,7 +96,8 @@ func (g gitController) RemoveBranch(ctx *gin.Context) {
 func (g gitController) OpenFile(ctx *gin.Context) {
 	userID := (uint)(ctx.Keys["id"].(float64))
 	uri := struct {
-		PID uint `uri:"project_id" binding:"required"`
+		PID    uint   `uri:"project_id" binding:"required"`
+		Branch string `uri:"branch" binding:"required"`
 	}{}
 	filePath := ctx.Query("path")
 	if err := ctx.BindUri(&uri); err != nil {
@@ -134,7 +135,8 @@ func (g gitController) Clone(ctx *gin.Context) {
 func (g gitController) RepoDir(ctx *gin.Context) {
 	userID := (uint)(ctx.Keys["id"].(float64))
 	uri := struct {
-		PID uint `uri:"project_id" binding:"required"`
+		PID    uint   `uri:"project_id" binding:"required"`
+		Branch string `uri:"branch" binding:"required"`
 	}{}
 	path := ctx.Query("path")
 	files, err := g.gitService.Dir(userID, uri.PID, path)
