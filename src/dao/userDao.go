@@ -68,8 +68,8 @@ func (d userDao) TasksOfUser(userID uint) ([]Task, error) {
 func (d userDao) CampsOfUser(userID uint) ([]Camp, error) {
 	var camps []Camp
 
-	if err := d.db.Preload("Members").
-		Where("members.user_id = ? AND camps.is_private = false", userID).
+	if err := d.db.Preload("Members", d.db.Where("members.user_id = ?", userID)).
+		Where("camps.is_private = false").
 		Find(&camps).Error; err != nil {
 		return nil, err
 	}
@@ -80,8 +80,8 @@ func (d userDao) CampsOfUser(userID uint) ([]Camp, error) {
 func (d userDao) PrivateCampsOfUser(userID uint) ([]Camp, error) {
 	var camps []Camp
 
-	if err := d.db.Preload("Members").
-		Where("members.user_id = ? AND camps.is_private = true", userID).
+	if err := d.db.Preload("Members", d.db.Where("members.user_id = ?", userID)).
+		Where("camps.is_private = true").
 		Find(&camps).Error; err != nil {
 		return nil, err
 	}
@@ -91,8 +91,7 @@ func (d userDao) PrivateCampsOfUser(userID uint) ([]Camp, error) {
 
 func (d userDao) ProjectsOfUser(userID uint) ([]Project, error) {
 	var projects []Project
-	if err := d.db.Preload("ProjectMembers.User").Model(&Project{}).
-		Where("project_members.user_id = ?", userID).
+	if err := d.db.Preload("ProjectMembers.User", d.db.Where("project_members.user_id = ?", userID)).Model(&Project{}).
 		Find(&projects).Error; err != nil {
 		return nil, err
 	}
