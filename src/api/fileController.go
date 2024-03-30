@@ -4,6 +4,8 @@ import (
 	"campfire/service"
 	"campfire/util"
 	"github.com/gin-gonic/gin"
+	"io"
+	"os"
 )
 
 type FileController interface {
@@ -38,10 +40,16 @@ func (f fileController) Avatar(ctx *gin.Context) {
 	}
 
 	res, err := f.userService.UserInfo(userID.ID)
-	avatar, err := util.FileToBase64(res.AvatarUrl)
+	avatar, err := os.Open(res.AvatarUrl)
 	if err != nil {
-		avatar = ""
+		responseError(ctx, util.NewExternalError("no avatar found"))
 	}
-	responseJSON(ctx, avatar, err)
+	ctx.Header("Content-Type", "application/octet-stream")
+
+	_, err = io.Copy(ctx.Writer, avatar)
+	if err != nil {
+		ctx.AbortWithStatusJSON(500, err)
+		return
+	}
 	return
 }
