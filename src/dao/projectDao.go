@@ -21,7 +21,7 @@ type ProjectDao interface {
 
 	SetProjectInfo(project Project) error //需要鉴权
 
-	AddProject(ownerID uint, proj Project, usersID ...uint) (uint, error)
+	AddProject(ownerID uint, proj Project, usersID ...uint) (uint, string, error)
 
 	DeleteProject(projID uint) error //需要鉴权
 
@@ -90,7 +90,7 @@ func (d *projectDao) SetProjectInfo(project Project) error {
 	return nil
 }
 
-func (d *projectDao) AddProject(ownerID uint, proj Project, usersID ...uint) (uint, error) {
+func (d *projectDao) AddProject(ownerID uint, proj Project, usersID ...uint) (uint, string, error) {
 	var project = &proj
 	project.OwnerID = ownerID
 	project.BeginAt = time.Now()
@@ -98,25 +98,25 @@ func (d *projectDao) AddProject(ownerID uint, proj Project, usersID ...uint) (ui
 	tran := d.db.Begin()
 	if err := tran.Create(project).Error; err != nil {
 		tran.Rollback()
-		return 0, err
+		return 0, "", err
 	}
 	if err := tran.Model(project).Association("Members").Append(&ProjectMember{ProjID: project.ID, UserID: ownerID}); err != nil {
 		tran.Rollback()
-		return 0, err
+		return 0, "", err
 	}
 	for _, userID := range usersID {
 		if err := tran.Model(project).Association("Members").Append(&ProjectMember{ProjID: project.ID, UserID: userID}); err != nil {
 			tran.Rollback()
-			return 0, err
+			return 0, "", err
 		}
 	}
 	project.Path = fmt.Sprintf("%s/%d-%s", util.CONFIG.NativeStorageRootPath, proj.ID, project.Title)
 	if err := tran.Updates(&project).Error; err != nil {
 		tran.Rollback()
-		return 0, err
+		return 0, "", err
 	}
 	tran.Commit()
-	return proj.ID, nil
+	return proj.ID, proj.Path, nil
 }
 
 func (d *projectDao) DeleteProject(projID uint) error {
