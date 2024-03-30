@@ -104,13 +104,13 @@ func (g *gitService) Commit(queryID uint, projID uint, branch string, descriptio
 }
 
 func (g *gitService) CreateRepo(path string) error {
-	_, err := git.PlainInit(path, false)
+	res, err := git.PlainInit(path, false)
 	if err != nil {
 		return err
 	}
 	g.mutex.Lock()
 	defer g.mutex.Unlock()
-	g.repo, err = git.PlainClone(path, false, &git.CloneOptions{})
+	g.repo = res
 	defer g.closeRepo()
 
 	head, err := g.repo.Head()
