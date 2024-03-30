@@ -122,7 +122,7 @@ func (c userController) UploadAvatar(ctx *gin.Context) {
 	id := (uint)(ctx.Keys["id"].(float64))
 	file, _, err := ctx.Request.FormFile("file0")
 	if err != nil {
-		responseError(ctx, err)
+		responseError(ctx, util.NewExternalError("图片解析失败"))
 		return
 	}
 	defer file.Close()
@@ -131,7 +131,7 @@ func (c userController) UploadAvatar(ctx *gin.Context) {
 
 	out, err := os.Create(path)
 	if err != nil {
-		responseError(ctx, util.NewExternalError("图片解析失败"))
+		responseError(ctx, err)
 		return
 	}
 	defer out.Close()
