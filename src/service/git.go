@@ -219,7 +219,7 @@ func (g *gitService) Dir(queryID, projID uint, branch, path string) ([]storage.F
 		return nil, err
 	}
 
-	ref, err := res.Reference(plumbing.NewBranchReferenceName(branch), true)
+	ref, err := res.Reference(plumbing.NewBranchReferenceName("/refs/heads/"+branch), true)
 	if err != nil {
 		return nil, err
 	}
