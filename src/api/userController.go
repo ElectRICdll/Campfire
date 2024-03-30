@@ -120,7 +120,7 @@ func (c userController) EditUserInfo(ctx *gin.Context) {
 
 func (c userController) UploadAvatar(ctx *gin.Context) {
 	id := (uint)(ctx.Keys["id"].(float64))
-	file, _, err := ctx.Request.FormFile("file")
+	file, _, err := ctx.Request.FormFile("file0")
 	if err != nil {
 		responseError(ctx, err)
 		return
