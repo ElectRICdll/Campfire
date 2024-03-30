@@ -104,25 +104,10 @@ func (g *gitService) Commit(queryID uint, projID uint, branch string, descriptio
 }
 
 func (g *gitService) CreateRepo(path string) error {
-	res, err := git.PlainInit(path, false)
+	_, err := git.PlainInit(path, true)
 	if err != nil {
 		return err
 	}
-	g.mutex.Lock()
-	defer g.mutex.Unlock()
-	g.repo = res
-	defer g.closeRepo()
-
-	head, err := g.repo.Head()
-	if err != nil {
-		return err
-	}
-
-	ref := plumbing.NewHashReference(plumbing.ReferenceName("refs/heads/main"), head.Hash())
-
-	err = g.repo.Storer.SetReference(ref)
-
-	err = g.repo.Storer.RemoveReference(ref.Name())
 	return nil
 }
 
@@ -133,7 +118,7 @@ func (g *gitService) CreateBranch(queryID uint, projID uint, branch string) erro
 	project, err := g.query.ProjectInfo(projID)
 	g.mutex.Lock()
 	defer g.mutex.Unlock()
-	g.repo, err = git.PlainClone(project.Path, false, &git.CloneOptions{})
+	g.repo, err = git.PlainClone(project.Path, true, &git.CloneOptions{})
 	defer g.closeRepo()
 
 	head, err := g.repo.Head()
@@ -157,7 +142,7 @@ func (g *gitService) RemoveBranch(queryID uint, projID uint, branchName string) 
 	if err != nil {
 		return err
 	}
-	g.repo, err = git.PlainClone(project.Path, false, &git.CloneOptions{})
+	g.repo, err = git.PlainClone(project.Path, true, &git.CloneOptions{})
 	defer g.closeRepo()
 
 	refs, err := g.repo.References()
@@ -237,7 +222,7 @@ func (g *gitService) Dir(queryID, projID uint, branch, path string) ([]storage.F
 		return nil, err
 	}
 	err = w.Checkout(&git.CheckoutOptions{
-		Branch: plumbing.ReferenceName("refs/heads/" + branch),
+		Branch: plumbing.NewBranchReferenceName(branch),
 		Create: true,
 	})
 	if err != nil {
