@@ -71,6 +71,9 @@ func registerDependencies(engine *gin.Engine) {
 	engine.POST("/project/:project_id/workplace/:branch/commit", security.AuthMiddleware(), git.Commit)
 	engine.POST("/project/:project_id/workplace/:branch/create", security.AuthMiddleware(), git.CreateBranch)
 	engine.POST("/project/:project_id/workplace/:branch/rm", security.AuthMiddleware(), git.RemoveBranch)
+
+	file := api.NewFileController()
+	engine.GET("/user/:user_id/avatar", security.AuthMiddleware(), file.Avatar)
 }
 
 func main() {

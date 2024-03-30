@@ -71,10 +71,6 @@ func (s *userService) UserInfo(id uint) (User, error) {
 	if err != nil {
 		return user, err
 	}
-	user.Avatar, err = FileToBase64(user.AvatarUrl)
-	if err != nil {
-		user.Avatar = ""
-	}
 
 	return user, nil
 }
