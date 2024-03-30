@@ -68,8 +68,15 @@ func (s *userService) ChangePassword(userID uint, password string) error {
 
 func (s *userService) UserInfo(id uint) (User, error) {
 	user, err := s.userQuery.UserInfoByID(id)
+	if err != nil {
+		return user, err
+	}
 	user.Avatar, err = FileToBase64(user.AvatarUrl)
-	return user, err
+	if err != nil {
+		user.Avatar = ""
+	}
+
+	return user, nil
 }
 
 func (s *userService) userInfo(id uint) (User, error) {
