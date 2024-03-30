@@ -32,6 +32,7 @@ func registerDependencies(engine *gin.Engine) {
 	engine.GET("/user/project/:project_id/tasks", security.AuthMiddleware(), user.Tasks)
 	engine.POST("/user/edit", security.AuthMiddleware(), user.EditUserInfo)
 	engine.POST("/user/edit/p", security.AuthMiddleware(), user.ChangePassword)
+	engine.POST("/user/edit/avatar", security.AuthMiddleware(), user.UploadAvatar)
 	engine.POST("/user/tasks", security.AuthMiddleware(), user.Tasks)
 
 	proj := api.NewProjectController()

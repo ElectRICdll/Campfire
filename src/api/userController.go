@@ -4,7 +4,10 @@ import (
 	"campfire/entity"
 	"campfire/service"
 	"campfire/util"
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"io"
+	"os"
 )
 
 type UserController interface {
@@ -13,6 +16,8 @@ type UserController interface {
 	FindUsersByName(*gin.Context)
 
 	EditUserInfo(*gin.Context)
+
+	UploadAvatar(*gin.Context)
 
 	ChangeEmail(*gin.Context)
 
@@ -111,6 +116,37 @@ func (c userController) EditUserInfo(ctx *gin.Context) {
 	}
 	responseSuccess(ctx)
 	return
+}
+
+func (c userController) UploadAvatar(ctx *gin.Context) {
+	id := (uint)(ctx.Keys["id"].(float64))
+	file, _, err := ctx.Request.FormFile("avatar")
+	if err != nil {
+		responseError(ctx, err)
+		return
+	}
+	defer file.Close()
+
+	path := fmt.Sprintf("%s/avatar-%d", util.CONFIG.AvatarCacheRootPath, id)
+
+	out, err := os.Create(path)
+	if err != nil {
+		responseError(ctx, util.NewExternalError("图片解析失败"))
+		return
+	}
+	defer out.Close()
+
+	_, err = io.Copy(out, file)
+	if err != nil {
+		responseError(ctx, err)
+		return
+	}
+
+	if err := c.userService.EditUserInfo(entity.User{ID: id, AvatarUrl: path}); err != nil {
+		responseError(ctx, err)
+	}
+
+	responseSuccess(ctx)
 }
 
 /*

@@ -5,7 +5,8 @@ type User struct {
 	Email     string `gorm:"not null;unique" json:"email"`
 	Name      string `gorm:"not null" json:"username"`
 	Password  string `gorm:"size:60;not null" json:"-"`
-	AvatarUrl string `json:"avatarUrl"`
+	AvatarUrl string `json:"-"`
+	Avatar    string `gorm:"-" json:"Avatar"`
 	Signature string `json:"signature"`
 	Status    int    `gorm:"status" json:"status"`
 	Token     string `gorm:"-" json:"token"`

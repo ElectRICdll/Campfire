@@ -10,7 +10,8 @@ var CONFIG = struct {
 	OSSAccessKeyID string `yaml:"oss_access_key_id"`
 	OSSSecretKey   string `yaml:"oss_secret_key"`
 
-	NativeStorageRootPath string `json:"native_storage_root_path"`
+	NativeStorageRootPath string `yaml:"native_storage_root_path"`
+	AvatarCacheRootPath   string `yaml:"avatar_cache_root_path"`
 
 	AuthDuration time.Time `yaml:"auth_duration"`
 	SecretKey    []byte    `yaml:"secret_key"`
@@ -26,4 +27,5 @@ var CONFIG = struct {
 	MessageRecordCount: 50,
 
 	NativeStorageRootPath: "../repo",
+	AvatarCacheRootPath:   "../assets/avatar",
 }
