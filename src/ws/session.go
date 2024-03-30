@@ -128,7 +128,7 @@ func (s *SessionService) handle(conn *websocket.Conn, wsType int, payload []byte
 		return
 	}
 
-	msg := Notification{}
+	var msg Notification
 	msg.EType = tempMsg.EType
 	msg.Event = s.eventSelector(tempMsg.EType)
 	if err := json.Unmarshal(payload, &msg); err != nil {
