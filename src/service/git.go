@@ -8,6 +8,7 @@ import (
 	"campfire/util"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
+	"github.com/go-git/go-git/v5/plumbing/filemode"
 	"io/ioutil"
 	"os"
 	"sync"
@@ -211,36 +212,46 @@ func (g *gitService) Dir(queryID, projID uint, branch, path string) ([]storage.F
 		return nil, err
 	}
 
-	g.repo, err = git.PlainOpen(project.Path + path)
+	res, err := git.PlainOpen(project.Path + path)
+	g.repo = res
 	defer g.closeRepo()
 	if err != nil {
 		return nil, err
 	}
 
-	w, err := g.repo.Worktree()
-	if err != nil {
-		return nil, err
-	}
-	err = w.Checkout(&git.CheckoutOptions{
-		Branch: plumbing.NewBranchReferenceName(branch),
-		Create: true,
-	})
+	ref, err := res.Reference(plumbing.NewBranchReferenceName(branch), true)
 	if err != nil {
 		return nil, err
 	}
 
-	files, err := ioutil.ReadDir(project.Path + path)
-	var fileList []storage.File
-	for _, file := range files {
-		fileList = append(fileList, storage.File{
-			Name:        file.Name(),
-			IsDirectory: file.IsDir(),
-		})
-	}
+	commit, err := res.CommitObject(ref.Hash())
 	if err != nil {
 		return nil, err
 	}
-	return fileList, nil
+
+	tree, err := commit.Tree()
+	if err != nil {
+		return nil, err
+	}
+
+	var files []storage.File
+	for _, entry := range tree.Entries {
+		file := storage.File{}
+		if entry.Mode == filemode.Regular {
+			file.Name = entry.Name
+			file.IsDirectory = false
+		} else if entry.Mode == filemode.Dir {
+			file.Name = entry.Name
+			file.IsDirectory = false
+			//subTree, err := tree.Tree(entry.Name)
+			//if err != nil {
+			//	log.Fatalf("Error getting subtree: %v", err)
+			//}
+		}
+		files = append(files, file)
+	}
+
+	return files, nil
 }
 
 func (g *gitService) Read(queryID, projID uint, filePath string) ([]byte, error) {
