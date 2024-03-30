@@ -212,7 +212,7 @@ func (g *gitService) Dir(queryID, projID uint, branch, path string) ([]storage.F
 		return nil, err
 	}
 
-	g.repo, err = git.PlainOpen(project.Path)
+	g.repo, err = git.PlainOpen(project.Path + path)
 	defer g.closeRepo()
 	if err != nil {
 		return nil, err
