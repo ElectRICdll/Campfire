@@ -51,12 +51,12 @@ func (p projectService) CreateProject(userID uint, project Project, usersID ...u
 		return 0, util.NewExternalError("Illegal title format")
 	}
 
-	res, err := p.query.AddProject(userID, project, usersID...)
+	res, path, err := p.query.AddProject(userID, project, usersID...)
 	if err != nil {
 		return 0, err
 	}
 
-	if err := p.git.CreateRepo(&project); err != nil {
+	if err := p.git.CreateRepo(path); err != nil {
 		return 0, err
 	}
 	return res, nil

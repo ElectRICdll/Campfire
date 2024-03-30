@@ -3,7 +3,6 @@ package service
 import (
 	"campfire/auth"
 	"campfire/dao"
-	"campfire/entity"
 	"campfire/log"
 	"campfire/storage"
 	"campfire/util"
@@ -15,7 +14,7 @@ import (
 )
 
 type GitService interface {
-	CreateRepo(project *entity.Project) error
+	CreateRepo(path string) error
 
 	CreateBranch(queryID uint, projID uint, branch string) error
 
@@ -104,11 +103,26 @@ func (g *gitService) Commit(queryID uint, projID uint, branch string, descriptio
 	return nil
 }
 
-func (g *gitService) CreateRepo(project *entity.Project) error {
-	_, err := git.PlainInit(project.Path, false)
+func (g *gitService) CreateRepo(path string) error {
+	_, err := git.PlainInit(path, false)
 	if err != nil {
 		return err
 	}
+	g.mutex.Lock()
+	defer g.mutex.Unlock()
+	g.repo, err = git.PlainClone(path, false, &git.CloneOptions{})
+	defer g.closeRepo()
+
+	head, err := g.repo.Head()
+	if err != nil {
+		return err
+	}
+
+	ref := plumbing.NewHashReference(plumbing.ReferenceName("refs/heads/main"), head.Hash())
+
+	err = g.repo.Storer.SetReference(ref)
+
+	err = g.repo.Storer.RemoveReference(ref.Name())
 	return nil
 }
 
