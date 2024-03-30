@@ -9,7 +9,7 @@ type Notification struct {
 	Timestamp   time.Time `json:"timestamp"`
 	EType       int       `json:"eType"`
 	ReceiversID []uint    `json:"-"`
-	Event       Event     `json:"eventData"`
+	Event       Event     `json:"data"`
 }
 
 func (n Notification) GetEventType() int {
