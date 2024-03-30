@@ -59,14 +59,17 @@ path: /user/{user_id}
 jwt_auth: false
 */
 func (c userController) UserInfo(ctx *gin.Context) {
-	user := entity.User{}
-	err := ctx.ShouldBindUri(&user)
+	userID := struct {
+		ID uint `uri:"user_id"`
+	}{}
+
+	err := ctx.BindUri(&userID)
 	if err != nil {
 		responseError(ctx, util.NewExternalError("invalid syntax"))
 		return
 	}
 
-	res, err := c.userService.UserInfo(user.ID)
+	res, err := c.userService.UserInfo(userID.ID)
 	responseJSON(ctx, res, err)
 
 	return
