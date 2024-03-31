@@ -20,7 +20,7 @@ const (
 )
 
 type Task struct {
-	ID      uint `gorm:"primaryKey;autoIncrement" json:"taskID"`
+	ID      uint `gorm:"primaryKey;autoIncrement" json:"id"`
 	ProjID  uint `gorm:"primaryKey;autoIncrement:false" json:"projID"`
 	OwnerID uint `gorm:"not null" json:"ownerID"`
 

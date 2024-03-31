@@ -15,7 +15,7 @@ const (
 )
 
 type Project struct {
-	ID uint `gorm:"primaryKey;autoIncrement" json:"projectID"`
+	ID uint `gorm:"primaryKey;autoIncrement" json:"id"`
 
 	Title       string    `gorm:"not null" json:"title"`
 	Description string    `json:"description"`

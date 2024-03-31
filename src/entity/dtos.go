@@ -3,8 +3,8 @@ package entity
 import "time"
 
 type BriefCampDTO struct {
-	ID     uint `json:"id" uri:"camp_id"`
-	ProjID uint `json:"projectID"`
+	ID     uint `json:"id" uri:"id"`
+	ProjID uint `json:"projID"`
 
 	OwnerID   uint   `json:"ownerID"`
 	MembersID []uint `json:"membersID"`

@@ -39,7 +39,7 @@ func (b BinaryMessageEvent) ScopeID() uint {
 
 type CodeGraphMessageEvent struct {
 	entity.Message
-	ProjID    string `json:"projectID"`
+	ProjID    string `json:"projID"`
 	ObjectUrl string `json:"objectUrl"`
 	Lang      string `json:"lang,omitempty"`
 	BeginAt   int    `json:"begin"`

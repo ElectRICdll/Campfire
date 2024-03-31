@@ -13,7 +13,7 @@ type User struct {
 }
 
 type BriefUserDTO struct {
-	ID        uint   `json:"userID" uri:"user_id"`
+	ID        uint   `json:"id" uri:"user_id"`
 	Email     string `json:"email"`
 	Name      string `json:"username"`
 	AvatarUrl string `json:"avatarUrl"`
