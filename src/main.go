@@ -73,7 +73,7 @@ func registerDependencies(engine *gin.Engine) {
 	engine.POST("/project/:project_id/workplace/:branch/rm", security.AuthMiddleware(), git.RemoveBranch)
 
 	file := api.NewFileController()
-	engine.GET("/user/:user_id/avatar", security.AuthMiddleware(), file.Avatar)
+	engine.GET("/user/:user_id/avatar", file.Avatar)
 }
 
 func main() {
@@ -104,6 +104,7 @@ func main() {
 	cache.InitCampCache()
 
 	r := gin.Default()
+
 	r.MaxMultipartMemory = 2 << 20
 	registerDependencies(r)
 
