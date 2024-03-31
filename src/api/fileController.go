@@ -59,6 +59,7 @@ func (f fileController) Avatar(ctx *gin.Context) {
 	ctx.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", res.AvatarUrl))
 	ctx.Header("Content-Type", "application/octet-stream")
 	ctx.Header("Content-Length", strconv.FormatInt(avatarInfo.Size(), 10))
+	ctx.Header("X-Content-Type-Options", "nosniff")
 
 	buffer := make([]byte, 1024*1024)
 	for {
