@@ -6,9 +6,13 @@ import (
 	"campfire/log"
 	"campfire/storage"
 	"campfire/util"
+	"github.com/go-git/go-billy/v5/osfs"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
+	"github.com/go-git/go-git/v5/plumbing/cache"
 	"github.com/go-git/go-git/v5/plumbing/filemode"
+	"github.com/go-git/go-git/v5/storage/filesystem"
+	"github.com/go-git/go-git/v5/storage/filesystem/dotgit"
 	"io/ioutil"
 	"os"
 	"sync"
@@ -105,10 +109,30 @@ func (g *gitService) Commit(queryID uint, projID uint, branch string, descriptio
 }
 
 func (g *gitService) CreateRepo(path string) error {
-	_, err := git.PlainInit(path, true)
+	if _, err := os.Stat(path); !os.IsNotExist(err) {
+		err = os.RemoveAll(path)
+		if err != nil {
+			return err
+		}
+	}
+
+	storer := filesystem.NewStorage(dotgit.NewRepositoryFilesystem(
+		osfs.New(
+			path,
+			osfs.WithBoundOS(),
+			osfs.WithDeduplicatePath(true),
+		),
+		nil,
+	), cache.NewObjectLRUDefault(),
+	)
+
+	_, err := git.InitWithOptions(storer, nil, git.InitOptions{
+		DefaultBranch: plumbing.NewBranchReferenceName("main"),
+	})
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 

@@ -110,7 +110,7 @@ func (d *projectDao) AddProject(ownerID uint, proj Project, usersID ...uint) (ui
 			return 0, "", err
 		}
 	}
-	project.Path = fmt.Sprintf("%s/%d-%s", util.CONFIG.NativeStorageRootPath, proj.ID, project.Title)
+	project.Path = fmt.Sprintf("%s/%d-%s.git", util.CONFIG.NativeStorageRootPath, proj.ID, project.Title)
 	if err := tran.Updates(&project).Error; err != nil {
 		tran.Rollback()
 		return 0, "", err

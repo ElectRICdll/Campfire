@@ -3,9 +3,11 @@ package api
 import (
 	"campfire/service"
 	"campfire/util"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"io"
 	"os"
+	"strconv"
 )
 
 type FileController interface {
@@ -38,18 +40,40 @@ func (f fileController) Avatar(ctx *gin.Context) {
 		responseError(ctx, util.NewExternalError("invalid syntax"))
 		return
 	}
+	w := ctx.Writer
+	w.Header().Set("Content-Type", "multipart/form-data")
 
 	res, err := f.userService.UserInfo(userID.ID)
 	avatar, err := os.Open(res.AvatarUrl)
 	if err != nil {
 		responseError(ctx, util.NewExternalError("no avatar found"))
 	}
-	ctx.Header("Content-Type", "application/octet-stream")
+	defer avatar.Close()
 
-	_, err = io.Copy(ctx.Writer, avatar)
+	avatarInfo, err := avatar.Stat()
 	if err != nil {
-		ctx.AbortWithStatusJSON(500, err)
+		responseError(ctx, err)
 		return
+	}
+
+	ctx.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", res.AvatarUrl))
+	ctx.Header("Content-Type", "application/octet-stream")
+	ctx.Header("Content-Length", strconv.FormatInt(avatarInfo.Size(), 10))
+
+	buffer := make([]byte, 1024*1024)
+	for {
+		n, err := avatar.Read(buffer)
+		if err != nil && err != io.EOF {
+			responseError(ctx, err)
+			return
+		}
+
+		if n == 0 {
+			break
+		}
+
+		ctx.Writer.Write(buffer[:n])
+		ctx.Writer.Flush()
 	}
 	return
 }
