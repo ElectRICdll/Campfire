@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"io"
+	"net/http"
 	"os"
 	"strconv"
 )
@@ -40,15 +41,31 @@ func (f fileController) Avatar(ctx *gin.Context) {
 		responseError(ctx, util.NewExternalError("invalid syntax"))
 		return
 	}
-	w := ctx.Writer
-	w.Header().Set("Content-Type", "multipart/form-data")
 
 	res, err := f.userService.UserInfo(userID.ID)
-	avatar, err := os.Open(res.AvatarUrl)
 	if err != nil {
 		responseError(ctx, util.NewExternalError("no avatar found"))
+		return
+	}
+
+	avatar, err := os.Open(res.AvatarUrl)
+	if err != nil {
+		responseError(ctx, util.NewExternalError("avatar not found"))
+		return
 	}
 	defer avatar.Close()
+
+	buffer := make([]byte, 512)
+	_, err = avatar.Read(buffer)
+	if err != nil {
+		responseError(ctx, err)
+		return
+	}
+
+	mimeType := http.DetectContentType(buffer)
+	if mimeType == "application/octet-stream" {
+		mimeType = "image/jpeg"
+	}
 
 	avatarInfo, err := avatar.Stat()
 	if err != nil {
@@ -57,24 +74,21 @@ func (f fileController) Avatar(ctx *gin.Context) {
 	}
 
 	ctx.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", res.AvatarUrl))
-	ctx.Header("Content-Type", "application/octet-stream")
+	ctx.Header("Content-Type", mimeType)
 	ctx.Header("Content-Length", strconv.FormatInt(avatarInfo.Size(), 10))
-	ctx.Header("X-Content-Type-Options", "nosniff")
+	ctx.Writer.WriteHeader(http.StatusOK) // 写入响应头
 
-	buffer := make([]byte, 1024*1024)
-	for {
-		n, err := avatar.Read(buffer)
-		if err != nil && err != io.EOF {
-			responseError(ctx, err)
-			return
-		}
-
-		if n == 0 {
-			break
-		}
-
-		ctx.Writer.Write(buffer[:n])
-		ctx.Writer.Flush()
+	// 将文件头重新写入响应体
+	_, err = ctx.Writer.Write(buffer)
+	if err != nil {
+		responseError(ctx, err)
+		return
 	}
-	return
+
+	// 写入剩余的文件内容
+	_, err = io.Copy(ctx.Writer, avatar)
+	if err != nil {
+		responseError(ctx, err)
+		return
+	}
 }
