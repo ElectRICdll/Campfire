@@ -104,6 +104,7 @@ func main() {
 	cache.InitCampCache()
 
 	r := gin.Default()
+	r.MaxMultipartMemory = 2 << 20
 	registerDependencies(r)
 
 	if err := r.Run(":" + util.CONFIG.Port); err != nil {
