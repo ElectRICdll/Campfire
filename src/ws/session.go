@@ -143,10 +143,10 @@ func (s *SessionService) eventSelector(eType int) Event {
 }
 
 func (s *SessionService) sendText(conn *websocket.Conn, wsType int, msg string) {
-	//dataStruct := &struct {
-	//	Data string `json:"data"`
-	//}{Data: msg}
-	data, err := json.Marshal(msg)
+	dataStruct := &struct {
+		Data string `json:"data"`
+	}{Data: msg}
+	data, err := json.Marshal(dataStruct)
 	if err != nil {
 		log.Errorf("Illegal transmit!")
 	}
