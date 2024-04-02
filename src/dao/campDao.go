@@ -57,6 +57,10 @@ func (d *campDao) CampInfo(campID uint, with ...string) (Camp, error) {
 	var db *gorm.DB = d.db
 
 	for _, value := range with {
+		if value == "MessageRecords" {
+			db = db.Preload(value).Order("timestamp desc").Limit(50)
+			continue
+		}
 		db = db.Preload(value)
 	}
 	var result = db.Where("id = ?", campID).Find(&camp)

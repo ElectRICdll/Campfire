@@ -160,7 +160,7 @@ func (c campService) CampInfo(queryID uint, campID uint) (Camp, error) {
 	if err := c.access.IsUserACampMember(campID, queryID); err != nil {
 		return Camp{}, err
 	}
-	res, err := c.campQuery.CampInfo(campID)
+	res, err := c.campQuery.CampInfo(campID, "Members.User", "Announcements", "MessageRecords")
 	if err != nil {
 		return Camp{}, err
 	}
