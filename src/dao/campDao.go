@@ -58,7 +58,9 @@ func (d *campDao) CampInfo(campID uint, with ...string) (Camp, error) {
 
 	for _, value := range with {
 		if value == "MessageRecords" {
-			db = db.Preload(value).Order("messages.timestamp desc").Limit(50)
+			db = db.Preload(value, func(db *gorm.DB) *gorm.DB {
+				return db.Order("Timestamp asc").Limit(50)
+			})
 			continue
 		}
 		db = db.Preload(value)
