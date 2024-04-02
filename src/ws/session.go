@@ -94,14 +94,9 @@ func (s *SessionService) handle(conn *websocket.Conn, wsType int, payload []byte
 
 	if wsType == websocket.TextMessage {
 		log.Infof("Received text message: %s\n", payload)
-		s.sendText(
-			conn,
-			websocket.TextMessage,
-			"["+time.Now().String()+"]Received your message.",
-		)
 	} else {
 		log.Infof("Other type message received: %s", payload)
-		s.sendText(conn, websocket.PongMessage, "pong")
+		s.sendText(conn, websocket.TextMessage, "pong")
 		return
 	}
 
@@ -148,10 +143,10 @@ func (s *SessionService) eventSelector(eType int) Event {
 }
 
 func (s *SessionService) sendText(conn *websocket.Conn, wsType int, msg string) {
-	dataStruct := &struct {
-		Data string `json:"data"`
-	}{Data: msg}
-	data, err := json.Marshal(&dataStruct)
+	//dataStruct := &struct {
+	//	Data string `json:"data"`
+	//}{Data: msg}
+	data, err := json.Marshal(msg)
 	if err != nil {
 		log.Errorf("Illegal transmit!")
 	}
