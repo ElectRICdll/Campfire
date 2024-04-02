@@ -7,7 +7,7 @@ import (
 )
 
 type CampDao interface {
-	CampInfo(campID uint) (Camp, error)
+	CampInfo(campID uint, with ...string) (Camp, error)
 
 	AddCamp(ownerID uint, camp Camp, userID ...uint) (uint, error)
 
@@ -52,10 +52,14 @@ type campDao struct {
 	db *gorm.DB
 }
 
-func (d *campDao) CampInfo(campID uint) (Camp, error) {
+func (d *campDao) CampInfo(campID uint, with ...string) (Camp, error) {
 	var camp []Camp
-	var result = d.db.Where("id = ?", campID).Find(&camp)
+	var db *gorm.DB = d.db
 
+	for _, value := range with {
+		db = db.Preload(value)
+	}
+	var result = db.Where("id = ?", campID).Find(&camp)
 	if len(camp) == 0 {
 		return Camp{}, NewExternalError("no such data")
 	}

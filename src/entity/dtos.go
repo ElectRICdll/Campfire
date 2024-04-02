@@ -11,7 +11,7 @@ type BriefCampDTO struct {
 
 	Name         string `json:"name"`
 	IsPrivate    bool   `json:"isPrivate"`
-	MembersCount int    `json:"memberCount"`
+	MembersCount int    `json:"membersCount"`
 }
 
 func (c Camp) BriefDTO() BriefCampDTO {
@@ -34,7 +34,7 @@ type BriefProjectDTO struct {
 	Status       int `json:"status"`
 
 	Branches     []string `json:"branches"`
-	MembersCount int      `json:"memberCount"`
+	MembersCount int      `json:"membersCount"`
 	OwnerID      uint     `json:"ownerID"`
 	MembersID    []uint   `json:"membersID"`
 	CampsID      []uint   `json:"campsID"`

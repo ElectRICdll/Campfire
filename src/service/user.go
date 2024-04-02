@@ -147,7 +147,7 @@ func (s *userService) PrivateCamps(userID uint) ([]BriefCampDTO, error) {
 }
 
 func (s *userService) PublicCamps(userID uint) ([]BriefCampDTO, error) {
-	res, err := s.userQuery.PrivateCampsOfUser(userID)
+	res, err := s.userQuery.CampsOfUser(userID)
 	camps := []BriefCampDTO{}
 	for _, camp := range res {
 		camps = append(camps, BriefCampDTO{
