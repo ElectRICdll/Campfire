@@ -21,7 +21,7 @@ func NewSessionService() *SessionService {
 			},
 		},
 		pool:         NewSessionPool(),
-		eventHandler: EventService{},
+		eventHandler: NewEventService(),
 	}
 	return res
 }
@@ -111,7 +111,6 @@ func (s *SessionService) handle(conn *websocket.Conn, wsType int, payload []byte
 		EType       int       `json:"eType"`
 		ReceiversID []uint    `json:"-"`
 		Event       []byte    `json:"eventData"`
-		Token       string    `json:"token"`
 	}{}
 	if err := json.Unmarshal(payload, &tempMsg); err != nil {
 		s.sendError(conn, err)
@@ -137,6 +136,7 @@ func (s *SessionService) handle(conn *websocket.Conn, wsType int, payload []byte
 	}
 	if err := s.eventHandler.HandleEvent(msg); err != nil {
 		s.sendError(conn, err)
+		return
 	}
 	s.Notify(*msg)
 	return

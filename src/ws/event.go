@@ -10,6 +10,14 @@ type Event interface {
 	ScopeID() uint
 }
 
+func NewEventService() EventService {
+	return EventService{
+		dao.ProjectDaoContainer,
+		dao.CampDaoContainer,
+		dao.MessageDaoContainer,
+	}
+}
+
 type EventService struct {
 	projQuery    dao.ProjectDao
 	campQuery    dao.CampDao
