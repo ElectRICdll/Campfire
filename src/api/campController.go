@@ -174,7 +174,6 @@ jwt_auth: true
 func (p campController) CampInfo(ctx *gin.Context) {
 	userID := (uint)(ctx.Keys["id"].(float64))
 	uri := struct {
-		PID uint `uri:"project_id" binding:"required"`
 		CID uint `uri:"camp_id" binding:"required"`
 	}{}
 	if err := ctx.BindUri(&uri); err != nil {
