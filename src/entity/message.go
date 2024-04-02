@@ -3,8 +3,9 @@ package entity
 import "time"
 
 type Message struct {
-	OwnerID uint `json:"ownerID" gorm:"primaryKey;autoIncrement:false"`
-	CampID  uint `json:"campID" gorm:"primaryKey;autoIncrement:false"`
+	ID      uint `json:"-" gorm:"primaryKey;autoIncrement"`
+	OwnerID uint `json:"ownerID"`
+	CampID  uint `json:"campID"`
 	ReplyID uint `json:"replyID"`
 
 	Timestamp time.Time `json:"timestamp" gorm:"not null"`
