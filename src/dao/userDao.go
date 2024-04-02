@@ -69,7 +69,7 @@ func (d userDao) CampsOfUser(userID uint) ([]Camp, error) {
 	var camps []Camp
 
 	if err := d.db.Preload("Owner").Preload("Members", d.db.Where(&Member{UserID: userID})).
-		Where(&Camp{IsPrivate: false}).
+		Where(&Camp{IsPrivate: false}).Model(&Camp{}).
 		Find(&camps).Error; err != nil {
 		return nil, err
 	}
@@ -80,8 +80,8 @@ func (d userDao) CampsOfUser(userID uint) ([]Camp, error) {
 func (d userDao) PrivateCampsOfUser(userID uint) ([]Camp, error) {
 	var camps []Camp
 
-	if err := d.db.Preload("Members", d.db.Where(d.db.Where(&Member{UserID: userID}))).
-		Where(&Camp{IsPrivate: true}).
+	if err := d.db.Preload("Members", d.db.Where(&Member{UserID: userID})).
+		Where(&Camp{IsPrivate: true}).Model(&Camp{}).
 		Find(&camps).Error; err != nil {
 		return nil, err
 	}
