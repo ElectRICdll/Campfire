@@ -123,7 +123,7 @@ func (s *SessionService) handle(conn *websocket.Conn, wsType int, payload []byte
 	//	return
 	//}
 	if tempMsg.EType == PingEventType {
-		s.sendText(conn, websocket.TextMessage, "pong")
+		s.sendJSON(conn, websocket.TextMessage, "pong")
 		return
 	}
 
