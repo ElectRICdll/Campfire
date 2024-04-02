@@ -128,17 +128,17 @@ func (s *SessionService) handle(conn *websocket.Conn, wsType int, payload []byte
 		return
 	}
 
-	var msg Notification
+	var msg = &Notification{}
 	msg.EType = tempMsg.EType
 	msg.Event = s.eventSelector(tempMsg.EType)
-	if err := json.Unmarshal(payload, &msg); err != nil {
+	if err := json.Unmarshal(payload, msg); err != nil {
 		s.sendError(conn, err)
 		return
 	}
-	if err := s.eventHandler.HandleEvent(&msg); err != nil {
+	if err := s.eventHandler.HandleEvent(msg); err != nil {
 		s.sendError(conn, err)
 	}
-	s.Notify(msg)
+	s.Notify(*msg)
 	return
 }
 
