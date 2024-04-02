@@ -123,7 +123,7 @@ func (s *SessionService) handle(conn *websocket.Conn, wsType int, payload []byte
 	//	return
 	//}
 	if tempMsg.EType == PingEventType {
-		s.sendJSON(conn, websocket.TextMessage, "pong")
+		s.sendText(conn, websocket.TextMessage, "pong")
 		return
 	}
 
@@ -148,8 +148,15 @@ func (s *SessionService) eventSelector(eType int) Event {
 }
 
 func (s *SessionService) sendText(conn *websocket.Conn, wsType int, msg string) {
-	err := conn.WriteMessage(wsType, ([]byte)(msg))
+	dataStruct := &struct {
+		Data string `json:"data"`
+	}{Data: msg}
+	data, err := json.Marshal(dataStruct)
 	if err != nil {
+		log.Errorf("Illegal transmit!")
+	}
+
+	if err := conn.WriteMessage(wsType, data); err != nil {
 		log.Errorf("Error replying to client: %s", err)
 	}
 }
@@ -166,10 +173,16 @@ func (s *SessionService) sendJSON(conn *websocket.Conn, wsType int, data any) {
 }
 
 func (s *SessionService) sendError(conn *websocket.Conn, err error) {
-	if _, ok := err.(util.ExternalError); ok {
-		s.sendText(conn, websocket.TextMessage, err.Error())
-	} else {
-		log.Error(err.Error())
+	dataStruct := &struct {
+		Data error `json:"e"`
+	}{Data: err}
+	data, err := json.Marshal(dataStruct)
+	if err != nil {
+		log.Errorf("Illegal transmit!")
+	}
+
+	if err := conn.WriteMessage(websocket.TextMessage, data); err != nil {
+		log.Errorf("Error replying to client: %s", err)
 	}
 }
 
