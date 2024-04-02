@@ -7,7 +7,7 @@ type Member struct {
 	CampID uint `gorm:"primaryKey;autoIncrement:false" json:"campID"`
 
 	Nickname string `json:"nickname"`
-	Title    string `json:"memberTitle"`
+	Title    string `json:"title"`
 	IsRuler  bool   `gorm:"not null" json:"isRuler"`
 
 	User User `gorm:"foreignKey:UserID;onDelete:CASCADE" json:"user"`
