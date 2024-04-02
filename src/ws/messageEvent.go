@@ -14,6 +14,7 @@ type TextMessageEvent struct {
 }
 
 func (t TextMessageEvent) ToMessage() entity.Message {
+	t.Message.Content = t.Content
 	return t.Message
 }
 
@@ -30,6 +31,7 @@ type BinaryMessageEvent struct {
 }
 
 func (b BinaryMessageEvent) ToMessage() entity.Message {
+	//b.Message.Content =
 	return b.Message
 }
 
@@ -39,14 +41,17 @@ func (b BinaryMessageEvent) ScopeID() uint {
 
 type CodeGraphMessageEvent struct {
 	entity.Message
-	ProjID    string `json:"projID"`
-	ObjectUrl string `json:"objectUrl"`
-	Lang      string `json:"lang,omitempty"`
-	BeginAt   int    `json:"begin"`
-	EndAtAt   int    `json:"end"`
+	ProjID   string `json:"projID"`
+	FilePath string `json:"path"`
+	Lang     string `json:"lang,omitempty"`
+	BeginAt  int    `json:"begin"`
+	EndAtAt  int    `json:"end"`
 }
 
 func (c CodeGraphMessageEvent) ToMessage() entity.Message {
+	//c.Message.content, err := json.Marshal(&struct{
+	//
+	//})
 	return c.Message
 }
 
@@ -60,6 +65,7 @@ type MarkdownMessageEvent struct {
 }
 
 func (c MarkdownMessageEvent) ToMessage() entity.Message {
+	c.Message.Content = c.Content
 	return c.Message
 }
 
