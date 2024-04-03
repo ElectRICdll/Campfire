@@ -68,9 +68,17 @@ func (d userDao) TasksOfUser(userID uint) ([]Task, error) {
 func (d userDao) CampsOfUser(userID uint) ([]Camp, error) {
 	var camps []Camp
 
-	if err := d.db.Preload("Owner").Preload("Members", d.db.Where(&Member{UserID: userID})).Model(&Camp{}).
-		Where(&Camp{IsPrivate: false}).
-		Find(&camps).Error; err != nil {
+	var members []Member
+	if err := d.db.Where("user_id = ?", userID).Find(&members).Error; err != nil {
+		return nil, err
+	}
+
+	var campIDs []uint
+	for _, member := range members {
+		campIDs = append(campIDs, member.CampID)
+	}
+
+	if err := d.db.Where("id IN (?) and is_private = 0", campIDs).Find(&camps).Error; err != nil {
 		return nil, err
 	}
 
@@ -80,9 +88,17 @@ func (d userDao) CampsOfUser(userID uint) ([]Camp, error) {
 func (d userDao) PrivateCampsOfUser(userID uint) ([]Camp, error) {
 	var camps []Camp
 
-	if err := d.db.Preload("Members", d.db.Where(&Member{UserID: userID})).Model(&Camp{}).
-		Where(&Camp{IsPrivate: true}).
-		Find(&camps).Error; err != nil {
+	var members []Member
+	if err := d.db.Where("user_id = ?", userID).Find(&members).Error; err != nil {
+		return nil, err
+	}
+
+	var campIDs []uint
+	for _, member := range members {
+		campIDs = append(campIDs, member.CampID)
+	}
+
+	if err := d.db.Where("id IN (?) and is_private = 1", campIDs).Find(&camps).Error; err != nil {
 		return nil, err
 	}
 
