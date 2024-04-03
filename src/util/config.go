@@ -20,7 +20,7 @@ var CONFIG = struct {
 
 	InvitationKeepDuration time.Duration
 }{
-	Port:               "8080",
+	Port:               "9375",
 	SQLConn:            "root:420204@tcp(120.24.78.233:3443)/Campfire?charset=utf8mb4&parseTime=True&loc=Local",
 	AuthDuration:       time.Now().Add(time.Hour * 24 * 7),
 	SecretKey:          []byte("Clover"),
