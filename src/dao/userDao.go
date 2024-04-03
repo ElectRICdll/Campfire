@@ -107,8 +107,18 @@ func (d userDao) PrivateCampsOfUser(userID uint) ([]Camp, error) {
 
 func (d userDao) ProjectsOfUser(userID uint) ([]Project, error) {
 	var projects []Project
-	if err := d.db.Preload("Owner").Preload("Members.User", d.db.Where(&User{ID: userID})).Model(&Project{}).
-		Find(&projects).Error; err != nil {
+
+	var members []ProjectMember
+	if err := d.db.Where("user_id = ?", userID).Find(&members).Error; err != nil {
+		return nil, err
+	}
+
+	var projectIDs []uint
+	for _, member := range members {
+		projectIDs = append(projectIDs, member.ProjID)
+	}
+
+	if err := d.db.Where("id IN (?)", projectIDs).Preload("Owner").Preload("Members.User").Find(&projects).Error; err != nil {
 		return nil, err
 	}
 
