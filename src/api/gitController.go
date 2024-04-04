@@ -42,6 +42,10 @@ func NewGitController() GitController {
 		service.NewGitService(),
 		auth.SecurityInstance,
 		dao.ProjectDaoContainer,
+		&webdav.Handler{
+			FileSystem: webdav.Dir("../repo"),
+			LockSystem: webdav.NewMemLS(),
+		},
 	}
 }
 
@@ -49,6 +53,7 @@ type gitController struct {
 	gitService service.GitService
 	sec        auth.SecurityGuard
 	projQuery  dao.ProjectDao
+	webdav     *webdav.Handler
 }
 
 func (g gitController) Commit(ctx *gin.Context) {
@@ -199,18 +204,7 @@ func (g gitController) GitHTTPBackend(ctx *gin.Context) {
 		return
 	}
 
-	if ctx.Request.Method == "PROPFIND" ||
-		ctx.Request.Method == "MKCOL" ||
-		ctx.Request.Method == "LOCK" ||
-		ctx.Request.Method == "UNLOCK" ||
-		ctx.Request.Method == "MOVE" {
-		webdavHandler := &webdav.Handler{
-			FileSystem: webdav.Dir("../repo"),
-			LockSystem: webdav.NewMemLS(),
-		}
-		webdavHandler.ServeHTTP(ctx.Writer, ctx.Request)
-		return
-	}
+	g.webdav.ServeHTTP(ctx.Writer, ctx.Request)
 
 	gitHTTPBackendPath := util.CONFIG.GitPath
 	if !util.IsFileExists(gitHTTPBackendPath) {
