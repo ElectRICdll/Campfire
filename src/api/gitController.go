@@ -12,6 +12,13 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
+	"strconv"
+	"strings"
+)
+
+const (
+	gitPattern = `\d+-\w+\.git`
 )
 
 type GitController interface {
@@ -165,15 +172,22 @@ func (g gitController) RepoDir(ctx *gin.Context) {
 
 func (g gitController) GitHTTPBackend(ctx *gin.Context) {
 	uri := struct {
-		PID     uint   `uri:"project_id" binding:"required"`
 		GitPath string `uri:"gitPath"`
 	}{}
 	if err := ctx.BindUri(&uri); err != nil {
 		responseError(ctx, err)
 		return
 	}
+	regexpPattern := regexp.MustCompile(gitPattern)
+	matches := regexpPattern.FindAllString(uri.GitPath, -1)
+	info := strings.Split(matches[0], "-")
+	projID, err := strconv.Atoi(info[0])
+	if err != nil {
+		responseError(ctx, err)
+		return
+	}
 
-	proj, err := g.projQuery.ProjectInfo(uri.PID)
+	proj, err := g.projQuery.ProjectInfo((uint)(projID))
 	if err != nil {
 		responseError(ctx, err)
 		return
@@ -185,33 +199,37 @@ func (g gitController) GitHTTPBackend(ctx *gin.Context) {
 		return
 	}
 
-	if ctx.Request.Method == "PROPFIND" {
+	if ctx.Request.Method == "PROPFIND" ||
+		ctx.Request.Method == "MKCOL" ||
+		ctx.Request.Method == "LOCK" ||
+		ctx.Request.Method == "UNLOCK" ||
+		ctx.Request.Method == "MOVE" {
 		webdavHandler := &webdav.Handler{
-			FileSystem: webdav.Dir("/path/to/your/repository"),
+			FileSystem: webdav.Dir("../repo"),
 			LockSystem: webdav.NewMemLS(),
 		}
 		webdavHandler.ServeHTTP(ctx.Writer, ctx.Request)
-		return 
+		return
 	}
-	
+
 	gitHTTPBackendPath := util.CONFIG.GitPath
 	if !util.IsFileExists(gitHTTPBackendPath) {
 		responseError(ctx, err)
 		return
 	}
-	
+
 	cmd := exec.Command(gitHTTPBackendPath)
 	cmd.Dir = repoPath
 	cmd.Stdout = ctx.Writer
 	cmd.Stderr = os.Stderr
 	cmd.Stdin = ctx.Request.Body
-	
+
 	if err := cmd.Run(); err != nil {
 		responseError(ctx, err)
 		return
 	}
-	
+
 	responseSuccess(ctx)
-	
+
 	return
 }

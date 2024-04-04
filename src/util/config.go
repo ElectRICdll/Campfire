@@ -29,5 +29,5 @@ var CONFIG = struct {
 
 	NativeStorageRootPath: "../repo",
 	AvatarCacheRootPath:   "../assets/avatar",
-	GitPath: "C:/Program Files/Git/mingw64/libexec/git-core",
+	GitPath:               "F:\\Git\\mingw64\\libexec\\git-core",
 }
