@@ -165,7 +165,8 @@ func (g gitController) RepoDir(ctx *gin.Context) {
 func (g gitController) GitHTTPBackend(ctx *gin.Context) {
 	//userID := (uint)(ctx.Keys["id"].(float64))
 	uri := struct {
-		PID uint `uri:"project_id" binding:"required"`
+		PID     uint   `uri:"project_id" binding:"required"`
+		GitPath string `uri:"gitPath"`
 	}{}
 	if err := ctx.BindUri(&uri); err != nil {
 		responseError(ctx, err)
