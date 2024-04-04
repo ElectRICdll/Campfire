@@ -1,10 +1,16 @@
 package api
 
 import (
+	"campfire/auth"
+	"campfire/dao"
 	"campfire/service"
 	"campfire/storage"
+	"campfire/util"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"os"
+	"os/exec"
+	"path/filepath"
 )
 
 type GitController interface {
@@ -19,16 +25,22 @@ type GitController interface {
 	RepoDir(*gin.Context)
 
 	OpenFile(*gin.Context)
+
+	GitHTTPBackend(*gin.Context)
 }
 
 func NewGitController() GitController {
 	return gitController{
 		service.NewGitService(),
+		auth.SecurityInstance,
+		dao.ProjectDaoContainer,
 	}
 }
 
 type gitController struct {
 	gitService service.GitService
+	sec        auth.SecurityGuard
+	projQuery  dao.ProjectDao
 }
 
 func (g gitController) Commit(ctx *gin.Context) {
@@ -49,7 +61,7 @@ func (g gitController) Commit(ctx *gin.Context) {
 		responseError(ctx, err)
 		return
 	}
-	err := g.gitService.Commit(userID, uri.PID, uri.Branch, body.Description, body.Actions...)
+	err := g.gitService.CommitFromWeb(userID, uri.PID, uri.Branch, body.Description, body.Actions...)
 	if err != nil {
 		responseError(ctx, err)
 		return
@@ -148,4 +160,47 @@ func (g gitController) RepoDir(ctx *gin.Context) {
 	responseJSON(ctx, struct {
 		Files []storage.File `json:"files"`
 	}{files}, err)
+}
+
+func (g gitController) GitHTTPBackend(ctx *gin.Context) {
+	//userID := (uint)(ctx.Keys["id"].(float64))
+	uri := struct {
+		PID uint `uri:"project_id" binding:"required"`
+	}{}
+	if err := ctx.BindUri(&uri); err != nil {
+		responseError(ctx, err)
+		return
+	}
+
+	proj, err := g.projQuery.ProjectInfo(uri.PID)
+	if err != nil {
+		responseError(ctx, err)
+		return
+	}
+
+	repoPath := filepath.Join(util.CONFIG.NativeStorageRootPath, proj.Path)
+	if _, err := os.Stat(repoPath); os.IsNotExist(err) {
+		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": "Repository not found"})
+		return
+	}
+
+	gitHTTPBackendPath := util.CONFIG.GitPath
+	if !util.IsFileExists(gitHTTPBackendPath) {
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "git-http-backend not found"})
+		return
+	}
+
+	cmd := exec.Command(gitHTTPBackendPath)
+	cmd.Dir = repoPath
+	cmd.Stdout = ctx.Writer
+	cmd.Stderr = os.Stderr
+	cmd.Stdin = ctx.Request.Body
+
+	if err := cmd.Run(); err != nil {
+		responseError(ctx, err)
+		return
+	}
+
+	responseSuccess(ctx)
+	return
 }

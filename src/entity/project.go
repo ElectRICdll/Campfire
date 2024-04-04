@@ -22,7 +22,7 @@ type Project struct {
 	Status      int       `gorm:"not null" json:"status"`
 	BeginAt     time.Time `json:"begin"`
 
-	Branches []Branch `gorm:"foreignKey:ProjID;onDelete:CASCADE" json:"branches"`
+	Branches []Branch `gorm:"-" json:"branches"`
 
 	OwnerID uint `json:"-"`
 	Owner   User `gorm:"foreignKey:OwnerID;onDelete:CASCADE" json:"owner"`
@@ -42,8 +42,9 @@ const (
 )
 
 type Branch struct {
-	Name   string `gorm:"not null;" json:"branch"`
-	ProjID uint   `gorm:"not null" json:"projID"`
+	Name   string `gorm:"-" json:"name"`
+	IsMain bool   `gorm:"-" json:"isMain"`
+	ProjID uint   `gorm:"-" json:"projID"`
 }
 
 type Release struct {

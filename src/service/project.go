@@ -68,12 +68,12 @@ func (p projectService) ProjectInfo(queryID uint, projectID uint) (Project, erro
 	}
 	res, err := p.query.ProjectInfo(
 		projectID,
-		"Branches",
 		"Owner",
 		"Members.User",
 		"Camps",
 		"Tasks",
 	)
+	res.Branches, err = p.git.Branches(res.ID, res.Path)
 	return res, err
 }
 

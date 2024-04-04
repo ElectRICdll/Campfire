@@ -71,6 +71,7 @@ func registerDependencies(engine *gin.Engine) {
 	engine.POST("/project/:project_id/workplace/:branch/commit", security.AuthMiddleware(), git.Commit)
 	engine.POST("/project/:project_id/workplace/:branch/create", security.AuthMiddleware(), git.CreateBranch)
 	engine.POST("/project/:project_id/workplace/:branch/rm", security.AuthMiddleware(), git.RemoveBranch)
+	engine.POST("/project/:project_id/workplace/git-backend", git.GitHTTPBackend)
 
 	file := api.NewFileController()
 	engine.GET("/user/:user_id/avatar", file.Avatar)
@@ -82,8 +83,6 @@ func main() {
 
 	if err := db.AutoMigrate(
 		&entity.Project{},
-		&entity.Branch{},
-		&entity.Branch{},
 		&entity.Release{},
 		&entity.User{},
 		&entity.Member{},
