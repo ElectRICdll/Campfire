@@ -189,9 +189,9 @@ func (g *gitService) Branches(projID uint, path string) ([]entity.Branch, error)
 		var ref = entity.Branch{
 			ProjID: projID,
 		}
-		if reference.Type() != plumbing.InvalidReference {
+		if reference.Type() == plumbing.SymbolicReference {
 			splits := strings.Split(reference.Target().String(), "/")
-			ref.Name = splits[1]
+			ref.Name = splits[2]
 			if ref.Name == "main" {
 				ref.IsMain = true
 			} else {
