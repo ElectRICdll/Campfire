@@ -7,6 +7,7 @@ import (
 	"campfire/storage"
 	"campfire/util"
 	"github.com/gin-gonic/gin"
+	"golang.org/x/net/webdav"
 	"net/http"
 	"os"
 	"os/exec"
@@ -163,7 +164,6 @@ func (g gitController) RepoDir(ctx *gin.Context) {
 }
 
 func (g gitController) GitHTTPBackend(ctx *gin.Context) {
-	//userID := (uint)(ctx.Keys["id"].(float64))
 	uri := struct {
 		PID     uint   `uri:"project_id" binding:"required"`
 		GitPath string `uri:"gitPath"`
@@ -185,21 +185,31 @@ func (g gitController) GitHTTPBackend(ctx *gin.Context) {
 		return
 	}
 
-	gitHTTPBackendPath := util.CONFIG.GitPath
-	if !util.IsFileExists(gitHTTPBackendPath) {
-		responseError(ctx, err)
-		return
-	}
+	switch ctx.Request.Method {
+	case "PROPFIND":
+		webdavHandler := &webdav.Handler{
+			FileSystem: webdav.Dir(repoPath),
+			LockSystem: webdav.NewMemLS(),
+		}
+		webdavHandler.ServeHTTP(ctx.Writer, ctx.Request)
+	default:
+		// 其他类型的请求转发到 git-http-backend
+		gitHTTPBackendPath := util.CONFIG.GitPath
+		if !util.IsFileExists(gitHTTPBackendPath) {
+			responseError(ctx, err)
+			return
+		}
 
-	cmd := exec.Command(gitHTTPBackendPath)
-	cmd.Dir = repoPath
-	cmd.Stdout = ctx.Writer
-	cmd.Stderr = os.Stderr
-	cmd.Stdin = ctx.Request.Body
+		cmd := exec.Command(gitHTTPBackendPath)
+		cmd.Dir = repoPath
+		cmd.Stdout = ctx.Writer
+		cmd.Stderr = os.Stderr
+		cmd.Stdin = ctx.Request.Body
 
-	if err := cmd.Run(); err != nil {
-		responseError(ctx, err)
-		return
+		if err := cmd.Run(); err != nil {
+			responseError(ctx, err)
+			return
+		}
 	}
 
 	responseSuccess(ctx)
