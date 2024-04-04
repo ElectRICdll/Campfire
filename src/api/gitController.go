@@ -180,13 +180,13 @@ func (g gitController) GitHTTPBackend(ctx *gin.Context) {
 
 	repoPath := filepath.Join(util.CONFIG.NativeStorageRootPath, proj.Path)
 	if _, err := os.Stat(repoPath); os.IsNotExist(err) {
-		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": "Repository not found"})
+		responseError(ctx, err)
 		return
 	}
 
 	gitHTTPBackendPath := util.CONFIG.GitPath
 	if !util.IsFileExists(gitHTTPBackendPath) {
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "git-http-backend not found"})
+		responseError(ctx, err)
 		return
 	}
 
