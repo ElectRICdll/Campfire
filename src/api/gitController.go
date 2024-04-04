@@ -185,33 +185,33 @@ func (g gitController) GitHTTPBackend(ctx *gin.Context) {
 		return
 	}
 
-	switch ctx.Request.Method {
-	case "PROPFIND":
+	if ctx.Request.Method == "PROPFIND" {
 		webdavHandler := &webdav.Handler{
-			FileSystem: webdav.Dir(repoPath),
+			FileSystem: webdav.Dir("/path/to/your/repository"),
 			LockSystem: webdav.NewMemLS(),
 		}
 		webdavHandler.ServeHTTP(ctx.Writer, ctx.Request)
-	default:
-		// 其他类型的请求转发到 git-http-backend
-		gitHTTPBackendPath := util.CONFIG.GitPath
-		if !util.IsFileExists(gitHTTPBackendPath) {
-			responseError(ctx, err)
-			return
-		}
-
-		cmd := exec.Command(gitHTTPBackendPath)
-		cmd.Dir = repoPath
-		cmd.Stdout = ctx.Writer
-		cmd.Stderr = os.Stderr
-		cmd.Stdin = ctx.Request.Body
-
-		if err := cmd.Run(); err != nil {
-			responseError(ctx, err)
-			return
-		}
+		return 
 	}
-
+	
+	gitHTTPBackendPath := util.CONFIG.GitPath
+	if !util.IsFileExists(gitHTTPBackendPath) {
+		responseError(ctx, err)
+		return
+	}
+	
+	cmd := exec.Command(gitHTTPBackendPath)
+	cmd.Dir = repoPath
+	cmd.Stdout = ctx.Writer
+	cmd.Stderr = os.Stderr
+	cmd.Stdin = ctx.Request.Body
+	
+	if err := cmd.Run(); err != nil {
+		responseError(ctx, err)
+		return
+	}
+	
 	responseSuccess(ctx)
+	
 	return
 }
