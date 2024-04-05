@@ -78,7 +78,7 @@ func (s *SessionService) NotifyByEvent(event Event, eType int) error {
 
 func (s *SessionService) Notify(n Notification) {
 	for _, value := range n.ReceiversID {
-		if res, ok := s.pool.Session()[value]; ok {
+		if res := s.pool.Session(value); res.Conn != nil {
 			s.sendJSON(
 				res.Conn,
 				websocket.TextMessage,

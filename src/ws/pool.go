@@ -34,11 +34,11 @@ func (p *SessionPool) AddSession(id uint, conn *websocket.Conn, token string) {
 	}{Conn: conn, Token: token}
 }
 
-func (p *SessionPool) Session() map[uint]struct {
+func (p *SessionPool) Session(value uint) struct {
 	Conn  *websocket.Conn
 	Token string
 } {
-	return (*p).pool
+	return (*p).pool[value]
 }
 
 func (p *SessionPool) CloseSession(id uint) {
