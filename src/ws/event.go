@@ -52,7 +52,7 @@ func (s EventService) HandleEvent(msg *Notification) error {
 			return res
 		}(res)
 	case OnSomeone:
-
+		msg.ReceiversID = append(msg.ReceiversID, msg.Event.ScopeID())
 	default:
 		return errors.New("unknown scope area")
 	}
