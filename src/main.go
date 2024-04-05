@@ -48,9 +48,9 @@ func registerDependencies(engine *gin.Engine) {
 
 	task := api.NewTaskController()
 	engine.POST("/project/:project_id/new_task", security.AuthMiddleware(), task.CreateTask)
-	engine.POST("/project/:project_id/:task_id/edit", security.AuthMiddleware(), task.EditTaskInfo)
-	engine.POST("/project/:project_id/:task_id/del", security.AuthMiddleware(), task.DeleteTask)
-	engine.GET("/project/:project_id/:task_id", security.AuthMiddleware(), task.TaskInfo)
+	engine.POST("/project/:project_id/tasks/:task_id/edit", security.AuthMiddleware(), task.EditTaskInfo)
+	engine.POST("/project/:project_id/tasks/:task_id/del", security.AuthMiddleware(), task.DeleteTask)
+	engine.GET("/project/:project_id/tasks/:task_id", security.AuthMiddleware(), task.TaskInfo)
 	engine.GET("/project/:project_id/tasks", security.AuthMiddleware(), task.Tasks)
 
 	camp := api.NewCampController()
