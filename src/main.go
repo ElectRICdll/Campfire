@@ -43,6 +43,8 @@ func registerDependencies(engine *gin.Engine) {
 	engine.POST("/project/new_proj", security.AuthMiddleware(), proj.CreateProject)
 	engine.POST("/project/:project_id/edit", security.AuthMiddleware(), proj.EditProjectInfo)
 	engine.POST("/project/:project_id/new_camp", security.AuthMiddleware(), proj.CreateCamp)
+	engine.POST("/project/:project_id/invite", security.AuthMiddleware(), proj.InviteMember)
+	engine.POST("/project/:project_id/kick", security.AuthMiddleware(), proj.KickMember)
 
 	task := api.NewTaskController()
 	engine.POST("/project/:project_id/new_task", security.AuthMiddleware(), task.CreateTask)

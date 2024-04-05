@@ -208,26 +208,117 @@ func (p projectController) DisableProject(ctx *gin.Context) {
 }
 
 func (p projectController) InviteMember(ctx *gin.Context) {
-	//TODO implement me
-	panic("implement me")
+	userID := (uint)(ctx.Keys["id"].(float64))
+	uri := struct {
+		PID uint `uri:"project_id" binding:"required"`
+	}{}
+	if err := ctx.BindUri(&uri); err != nil {
+		responseError(ctx, err)
+		return
+	}
+	body := struct {
+		UserID uint `json:"userID"`
+	}{}
+	if err := ctx.BindJSON(&body); err != nil {
+		responseError(ctx, util.NewExternalError("invalid syntax"))
+		return
+	}
+	if err := p.projService.InviteMember(userID, uri.PID, body.UserID); err != nil {
+		responseError(ctx, err)
+		return
+	}
+	responseSuccess(ctx)
 }
 
 func (p projectController) KickMember(ctx *gin.Context) {
-	//TODO implement me
-	panic("implement me")
+	userID := (uint)(ctx.Keys["id"].(float64))
+	uri := struct {
+		PID uint `uri:"project_id" binding:"required"`
+	}{}
+	if err := ctx.BindUri(&uri); err != nil {
+		responseError(ctx, err)
+		return
+	}
+	body := struct {
+		UserID uint `json:"userID"`
+	}{}
+	if err := ctx.BindJSON(&body); err != nil {
+		responseError(ctx, util.NewExternalError("invalid syntax"))
+		return
+	}
+	if err := p.projService.KickMember(userID, uri.PID, body.UserID); err != nil {
+		responseError(ctx, err)
+		return
+	}
+	responseSuccess(ctx)
 }
 
 func (p projectController) GiveOwner(ctx *gin.Context) {
-	//TODO implement me
-	panic("implement me")
+	userID := (uint)(ctx.Keys["id"].(float64))
+	uri := struct {
+		PID uint `uri:"project_id" binding:"required"`
+	}{}
+	if err := ctx.BindUri(&uri); err != nil {
+		responseError(ctx, err)
+		return
+	}
+	body := struct {
+		UserID uint `json:"userID"`
+	}{}
+	if err := ctx.BindJSON(&body); err != nil {
+		responseError(ctx, util.NewExternalError("invalid syntax"))
+		return
+	}
+	if err := p.projService.GiveOwner(userID, uri.PID, body.UserID); err != nil {
+		responseError(ctx, err)
+		return
+	}
+	responseSuccess(ctx)
 }
 
 func (p projectController) GiveTitle(ctx *gin.Context) {
-	//TODO implement me
-	panic("implement me")
+	userID := (uint)(ctx.Keys["id"].(float64))
+	uri := struct {
+		PID uint `uri:"project_id" binding:"required"`
+	}{}
+	if err := ctx.BindUri(&uri); err != nil {
+		responseError(ctx, err)
+		return
+	}
+	body := struct {
+		UserID uint   `json:"userID"`
+		Title  string `json:"title"`
+	}{}
+	if err := ctx.BindJSON(&body); err != nil {
+		responseError(ctx, util.NewExternalError("invalid syntax"))
+		return
+	}
+	if err := p.projService.GiveTitle(userID, uri.PID, body.UserID, body.Title); err != nil {
+		responseError(ctx, err)
+		return
+	}
+	responseSuccess(ctx)
 }
 
 func (p projectController) RemoveTitle(ctx *gin.Context) {
-	//TODO implement me
-	panic("implement me")
+	userID := (uint)(ctx.Keys["id"].(float64))
+	uri := struct {
+		PID uint `uri:"project_id" binding:"required"`
+	}{}
+	if err := ctx.BindUri(&uri); err != nil {
+		responseError(ctx, err)
+		return
+	}
+	body := struct {
+		UserID uint `json:"userID"`
+	}{}
+	if err := ctx.BindJSON(&body); err != nil {
+		responseError(ctx, util.NewExternalError("invalid syntax"))
+		return
+	}
+	if err := p.projService.RemoveTitle(userID, uri.PID, body.UserID); err != nil {
+		responseError(ctx, err)
+		return
+	}
+	responseSuccess(ctx)
 }
