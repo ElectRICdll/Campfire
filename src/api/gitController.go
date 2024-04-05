@@ -6,15 +6,13 @@ import (
 	"campfire/service"
 	"campfire/storage"
 	"campfire/util"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/net/webdav"
 	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
-	"regexp"
-	"strconv"
-	"strings"
 )
 
 const (
@@ -177,22 +175,16 @@ func (g gitController) RepoDir(ctx *gin.Context) {
 
 func (g gitController) GitHTTPBackend(ctx *gin.Context) {
 	uri := struct {
-		GitPath string `uri:"gitPath"`
+		PID      uint   `uri:"project_id"`
+		GitPath  string `uri:"gitPath"`
+		GitParam string `uri:"any"`
 	}{}
 	if err := ctx.BindUri(&uri); err != nil {
 		responseError(ctx, err)
 		return
 	}
-	regexpPattern := regexp.MustCompile(gitPattern)
-	matches := regexpPattern.FindAllString(uri.GitPath, -1)
-	info := strings.Split(matches[0], "-")
-	projID, err := strconv.Atoi(info[0])
-	if err != nil {
-		responseError(ctx, err)
-		return
-	}
 
-	proj, err := g.projQuery.ProjectInfo((uint)(projID))
+	proj, err := g.projQuery.ProjectInfo(uri.PID)
 	if err != nil {
 		responseError(ctx, err)
 		return
@@ -204,6 +196,7 @@ func (g gitController) GitHTTPBackend(ctx *gin.Context) {
 		return
 	}
 
+	ctx.Request.URL.Path = fmt.Sprintf("/%d-%s/%s", uri.PID, uri.GitPath, uri.GitParam)
 	g.webdav.ServeHTTP(ctx.Writer, ctx.Request)
 
 	gitHTTPBackendPath := util.CONFIG.GitPath
