@@ -126,13 +126,12 @@ func (g gitController) OpenFile(ctx *gin.Context) {
 		responseError(ctx, err)
 		return
 	}
-	filePath := ctx.Query("path")
-	data, err := g.gitService.Read(userID, uri.PID, filePath)
+	filePath := ctx.Query("filename")
+	data, err := g.gitService.Read(userID, uri.PID, uri.Branch, filePath)
 
 	responseJSON(ctx, struct {
-		Data []byte `json:"data"`
+		Data string `json:"content"`
 	}{data}, err)
-	responseSuccess(ctx)
 }
 
 func (g gitController) Clone(ctx *gin.Context) {

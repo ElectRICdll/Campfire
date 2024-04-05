@@ -12,11 +12,11 @@ import (
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/config"
 	"github.com/go-git/go-git/v5/plumbing"
+	"github.com/go-git/go-git/v5/plumbing/cache"
 	"github.com/go-git/go-git/v5/plumbing/filemode"
 	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/go-git/go-git/v5/storage/filesystem"
 	"github.com/go-git/go-git/v5/storage/memory"
-	"io/ioutil"
 	"os"
 	"strings"
 	"sync"
@@ -42,7 +42,7 @@ type GitService interface {
 
 	Dir(queryID, projID uint, branch, path string) ([]storage.File, error)
 
-	Read(queryID, projID uint, filePath string) ([]byte, error)
+	Read(queryID, projID uint, branch, filePath string) (string, error)
 }
 
 func NewGitService() GitService {
@@ -307,7 +307,7 @@ func (g *gitService) Dir(queryID, projID uint, branch, path string) ([]storage.F
 		return nil, err
 	}
 
-	storer := filesystem.NewStorage(osfs.New(project.Path+path, osfs.WithBoundOS()), nil)
+	storer := filesystem.NewStorage(osfs.New(project.Path, osfs.WithBoundOS()), cache.NewObjectLRUDefault())
 
 	repo, err := git.Open(storer, nil)
 
@@ -328,9 +328,11 @@ func (g *gitService) Dir(queryID, projID uint, branch, path string) ([]storage.F
 	if err != nil {
 		return nil, err
 	}
-	tree, err = tree.Tree(path)
-	if err != nil {
-		return nil, err
+	if path != "/" && path != "\\" && path != "" {
+		tree, err = tree.Tree(path)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	var files []storage.File
@@ -354,15 +356,50 @@ func (g *gitService) Dir(queryID, projID uint, branch, path string) ([]storage.F
 	return files, nil
 }
 
-func (g *gitService) Read(queryID, projID uint, filePath string) ([]byte, error) {
-	if err := g.access.IsUserAProjMember(queryID, projID); err != nil {
-		return nil, err
+func (g *gitService) Read(queryID, projID uint, branch, filePath string) (string, error) {
+	if err := g.access.IsUserAProjMember(projID, queryID); err != nil {
+		return "", err
 	}
 	project, err := g.projQuery.ProjectInfo(projID)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
-	content, err := ioutil.ReadFile(project.Path + filePath)
+
+	storer := filesystem.NewStorage(osfs.New(project.Path, osfs.WithBoundOS()), cache.NewObjectLRUDefault())
+
+	repo, err := git.Open(storer, nil)
+
+	if err != nil {
+		return "", err
+	}
+
+	ref, err := repo.Reference(plumbing.NewBranchReferenceName(branch), false)
+	if err != nil {
+		return "", util.NewExternalError("branch " + branch + " not found")
+	}
+	commit, err := repo.CommitObject(ref.Hash())
+	if err != nil {
+		return "", err
+	}
+
+	tree, err := commit.Tree()
+	if err != nil {
+		return "", err
+	}
+	file, err := tree.File(filePath)
+	if err != nil {
+		return "", err
+	}
+	ok, err := file.IsBinary()
+	if err != nil {
+		return "", err
+	}
+	if ok {
+		return "", util.NewExternalError("could not open binary")
+	}
+
+	content, err := file.Contents()
+
 	return content, err
 }
 
