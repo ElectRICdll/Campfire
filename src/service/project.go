@@ -108,12 +108,12 @@ func (p projectService) InviteMember(queryID, projID, userID uint) error {
 	if err := p.sec.IsUserAProjLeader(projID, queryID); err != nil {
 		return err
 	}
-	if err := p.sec.IsUserAProjMember(projID, userID); err != nil {
+	if err := p.sec.IsUserAProjMember(projID, userID); err == nil {
 		return util.NewExternalError("user has already been in project")
 	}
-	if err := p.query.AddMember(ProjectMember{UserID: userID, ProjID: projID}); err != nil {
-		return err
-	}
+	//if err := p.query.AddMember(ProjectMember{UserID: userID, ProjID: projID}); err != nil {
+	//	return err
+	//}
 	res, err := p.query.ProjectInfo(projID)
 	if err != nil {
 		return err

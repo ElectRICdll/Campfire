@@ -217,7 +217,7 @@ func (c campService) InviteMember(queryID uint, campID uint, userID uint) error 
 	if err := c.access.IsUserACampLeader(campID, queryID); err != nil {
 		return err
 	}
-	if err := c.access.IsUserACampMember(campID, userID); err != nil {
+	if err := c.access.IsUserACampMember(campID, userID); err == nil {
 		return util.NewExternalError("用户已在群聊中")
 	}
 	if err := c.campQuery.AddMember(Member{UserID: userID, CampID: campID}); err != nil {
