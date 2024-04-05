@@ -89,7 +89,7 @@ jwt_auth: false
 query: username
 */
 func (c userController) FindUsersByName(ctx *gin.Context) {
-	name := ctx.Query("username")
+	name := ctx.Query("keyword")
 	users, err := c.userService.FindUsersByName(name)
 
 	responseJSON(ctx, users, err)
