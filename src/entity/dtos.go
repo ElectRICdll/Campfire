@@ -12,6 +12,7 @@ type BriefCampDTO struct {
 	Name         string `json:"name"`
 	IsPrivate    bool   `json:"isPrivate"`
 	MembersCount int    `json:"membersCount"`
+	Opposite     Member `json:"opposite"`
 }
 
 func (c Camp) BriefDTO() BriefCampDTO {
@@ -21,6 +22,25 @@ func (c Camp) BriefDTO() BriefCampDTO {
 		ProjID:       c.ProjID,
 		Name:         c.Name,
 		MembersCount: len(c.Members) + 1,
+	}
+}
+
+func (c Camp) BriefDTOPrivate(userID uint) BriefCampDTO {
+	return BriefCampDTO{
+		ID:           c.ID,
+		OwnerID:      c.OwnerID,
+		ProjID:       c.ProjID,
+		Name:         c.Name,
+		MembersCount: len(c.Members) + 1,
+		Opposite: func() Member {
+			if c.IsPrivate {
+				if userID == c.Members[0].UserID {
+					return c.Members[1]
+				}
+				return c.Members[0]
+			}
+			return Member{}
+		}(),
 	}
 }
 

@@ -137,11 +137,7 @@ func (s *userService) PrivateCamps(userID uint) ([]BriefCampDTO, error) {
 	}
 	camps := []BriefCampDTO{}
 	for _, camp := range res {
-		camps = append(camps, BriefCampDTO{
-			ID:        camp.ID,
-			Name:      camp.Name,
-			IsPrivate: camp.IsPrivate,
-		})
+		camps = append(camps, camp.BriefDTOPrivate(userID))
 	}
 	return camps, nil
 }
@@ -150,12 +146,7 @@ func (s *userService) PublicCamps(userID uint) ([]BriefCampDTO, error) {
 	res, err := s.userQuery.CampsOfUser(userID)
 	camps := []BriefCampDTO{}
 	for _, camp := range res {
-		camps = append(camps, BriefCampDTO{
-			ID:           camp.ID,
-			Name:         camp.Name,
-			MembersCount: len(camp.Members) + 1,
-			IsPrivate:    camp.IsPrivate,
-		})
+		camps = append(camps, camp.BriefDTO())
 	}
 	return camps, err
 }
