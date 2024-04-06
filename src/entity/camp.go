@@ -3,7 +3,7 @@ package entity
 type Camp struct {
 	ID      uint `gorm:"primaryKey;autoIncrement" json:"id"`
 	ProjID  uint `gorm:"not null" json:"projID"`
-	OwnerID uint `gorm:"not null" json:"ownerID"`
+	OwnerID uint `json:"ownerID"`
 
 	Name      string `gorm:"not null" json:"name"`
 	IsPrivate bool   `gorm:"not null" json:"isPrivate"`
