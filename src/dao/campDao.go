@@ -93,9 +93,11 @@ func (d *campDao) AddCamp(ownerID uint, camp *Camp, usersID ...uint) error {
 		tran.Rollback()
 		return result.Error
 	}
-	if err := tran.Model(camp).Update("Owner", &Member{CampID: camp.ID, UserID: ownerID}).Error; err != nil {
-		tran.Rollback()
-		return err
+	if !camp.IsPrivate {
+		if err := tran.Model(camp).Update("Owner", &Member{CampID: camp.ID, UserID: ownerID}).Error; err != nil {
+			tran.Rollback()
+			return err
+		}
 	}
 	if err := tran.Model(camp).Association("Members").Append(&Member{CampID: camp.ID, UserID: ownerID}); err != nil {
 		tran.Rollback()
