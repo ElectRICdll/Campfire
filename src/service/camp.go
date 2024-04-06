@@ -176,11 +176,23 @@ func (c campService) CreateCamp(queryID uint, camp Camp, usersID ...uint) (uint,
 			return 0, util.NewExternalError("some user have no access.")
 		}
 	}
-	id, err := c.campQuery.AddCamp(queryID, camp, usersID...)
-	if err != nil {
-		return 0, err
+	if camp.IsPrivate == true {
+		err := c.campQuery.AddCamp(queryID, &camp, usersID...)
+
+		if err != nil {
+			return 0, err
+		}
+		return camp.ID, nil
+	} else {
+		err := c.campQuery.AddCamp(queryID, &camp)
+		if err != nil {
+			return 0, err
+		}
+		for _, userID := range usersID {
+			c.mention.NotifyByEvent(ws.NewCampInvitationEvent(camp.BriefDTO(), userID), ws.CampInvitationEventType)
+		}
+		return camp.ID, nil
 	}
-	return id, nil
 }
 
 func (c campService) EditCampInfo(queryID uint, camp Camp) error {
@@ -220,9 +232,9 @@ func (c campService) InviteMember(queryID uint, campID uint, userID uint) error 
 	if err := c.access.IsUserACampMember(campID, userID); err == nil {
 		return util.NewExternalError("用户已在群聊中")
 	}
-	if err := c.campQuery.AddMember(Member{UserID: userID, CampID: campID}); err != nil {
-		return err
-	}
+	//if err := c.campQuery.AddMember(Member{UserID: userID, CampID: campID}); err != nil {
+	//	return err
+	//}
 	res, err := c.campQuery.CampInfo(campID)
 	if err != nil {
 		return err

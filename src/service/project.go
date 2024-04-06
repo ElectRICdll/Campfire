@@ -51,15 +51,18 @@ func (p projectService) CreateProject(userID uint, project Project, usersID ...u
 		return 0, util.NewExternalError("Illegal title format")
 	}
 
-	res, path, err := p.query.AddProject(userID, project, usersID...)
+	err := p.query.AddProject(userID, &project)
 	if err != nil {
 		return 0, err
 	}
+	for _, userID := range usersID {
+		p.mention.NotifyByEvent(ws.NewProjectInvitationEvent(project.BriefDTO(), userID), ws.CampInvitationEventType)
+	}
 
-	if err := p.git.CreateRepo(path); err != nil {
+	if err := p.git.CreateRepo(project.Path); err != nil {
 		return 0, err
 	}
-	return res, nil
+	return project.ID, nil
 }
 
 func (p projectService) ProjectInfo(queryID uint, projectID uint) (Project, error) {

@@ -21,7 +21,7 @@ type ProjectDao interface {
 
 	SetProjectInfo(project Project) error //需要鉴权
 
-	AddProject(ownerID uint, proj Project, usersID ...uint) (uint, string, error)
+	AddProject(ownerID uint, proj *Project, usersID ...uint) error
 
 	DeleteProject(projID uint) error //需要鉴权
 
@@ -90,33 +90,32 @@ func (d *projectDao) SetProjectInfo(project Project) error {
 	return nil
 }
 
-func (d *projectDao) AddProject(ownerID uint, proj Project, usersID ...uint) (uint, string, error) {
-	var project = &proj
-	project.OwnerID = ownerID
-	project.BeginAt = time.Now()
+func (d *projectDao) AddProject(ownerID uint, proj *Project, usersID ...uint) error {
+	proj.OwnerID = ownerID
+	proj.BeginAt = time.Now()
 
 	tran := d.db.Begin()
-	if err := tran.Create(project).Error; err != nil {
+	if err := tran.Create(proj).Error; err != nil {
 		tran.Rollback()
-		return 0, "", err
+		return err
 	}
-	if err := tran.Model(project).Association("Members").Append(&ProjectMember{ProjID: project.ID, UserID: ownerID}); err != nil {
+	if err := tran.Model(proj).Association("Members").Append(&ProjectMember{ProjID: proj.ID, UserID: ownerID}); err != nil {
 		tran.Rollback()
-		return 0, "", err
+		return err
 	}
 	for _, userID := range usersID {
-		if err := tran.Model(project).Association("Members").Append(&ProjectMember{ProjID: project.ID, UserID: userID}); err != nil {
+		if err := tran.Model(proj).Association("Members").Append(&ProjectMember{ProjID: proj.ID, UserID: userID}); err != nil {
 			tran.Rollback()
-			return 0, "", err
+			return err
 		}
 	}
-	project.Path = fmt.Sprintf("%s/%d-%s.git", util.CONFIG.NativeStorageRootPath, proj.ID, project.Title)
-	if err := tran.Updates(&project).Error; err != nil {
+	proj.Path = fmt.Sprintf("%s/%d-%s.git", util.CONFIG.NativeStorageRootPath, proj.ID, proj.Title)
+	if err := tran.Updates(proj).Error; err != nil {
 		tran.Rollback()
-		return 0, "", err
+		return err
 	}
 	tran.Commit()
-	return proj.ID, proj.Path, nil
+	return nil
 }
 
 func (d *projectDao) DeleteProject(projID uint) error {

@@ -9,7 +9,7 @@ import (
 type CampDao interface {
 	CampInfo(campID uint, with ...string) (Camp, error)
 
-	AddCamp(ownerID uint, camp Camp, userID ...uint) (uint, error)
+	AddCamp(ownerID uint, camp *Camp, userID ...uint) error
 
 	SetCampInfo(camp Camp) error
 
@@ -86,29 +86,29 @@ func (d *campDao) SetCampInfo(camp Camp) error {
 	return nil
 }
 
-func (d *campDao) AddCamp(ownerID uint, camp Camp, usersID ...uint) (uint, error) {
+func (d *campDao) AddCamp(ownerID uint, camp *Camp, usersID ...uint) error {
 	tran := d.db.Begin()
-	var result = tran.Create(&camp)
+	var result = tran.Create(camp)
 	if result.Error != nil {
 		tran.Rollback()
-		return 0, result.Error
+		return result.Error
 	}
-	if err := tran.Model(&camp).Update("Owner", &Member{CampID: camp.ID, UserID: ownerID}).Error; err != nil {
+	if err := tran.Model(camp).Update("Owner", &Member{CampID: camp.ID, UserID: ownerID}).Error; err != nil {
 		tran.Rollback()
-		return 0, err
+		return err
 	}
-	if err := tran.Model(&camp).Association("Members").Append(&Member{CampID: camp.ID, UserID: ownerID}); err != nil {
+	if err := tran.Model(camp).Association("Members").Append(&Member{CampID: camp.ID, UserID: ownerID}); err != nil {
 		tran.Rollback()
-		return 0, err
+		return err
 	}
 	for _, userID := range usersID {
-		if err := tran.Model(&camp).Association("Members").Append(&Member{CampID: camp.ID, UserID: userID}); err != nil {
+		if err := tran.Model(camp).Association("Members").Append(&Member{CampID: camp.ID, UserID: userID}); err != nil {
 			tran.Rollback()
-			return 0, err
+			return err
 		}
 	}
 	tran.Commit()
-	return camp.ID, nil
+	return nil
 }
 
 func (d *campDao) DeleteCamp(campID uint) error {
