@@ -195,7 +195,7 @@ func (g gitController) GitHTTPBackend(ctx *gin.Context) {
 		return
 	}
 
-	ctx.Request.URL.Path = fmt.Sprintf("/%d-%s/%s", uri.PID, uri.GitPath, uri.GitParam)
+	ctx.Request.URL.Path = fmt.Sprintf("/git/%d-%s%s", uri.PID, uri.GitPath, uri.GitParam)
 	g.webdav.ServeHTTP(ctx.Writer, ctx.Request)
 
 	gitHTTPBackendPath := util.CONFIG.GitPath
