@@ -5,7 +5,7 @@ type Camp struct {
 	ProjID  uint `gorm:"not null" json:"projID"`
 	OwnerID uint `json:"ownerID"`
 
-	Name      string `gorm:"not null" json:"name"`
+	Name      string `json:"name"`
 	IsPrivate bool   `gorm:"not null" json:"isPrivate"`
 
 	Owner   User     `gorm:"foreignKey:OwnerID" json:"owner"`
