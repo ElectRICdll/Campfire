@@ -22,6 +22,7 @@ func (c Camp) BriefDTO() BriefCampDTO {
 		ProjID:       c.ProjID,
 		Name:         c.Name,
 		MembersCount: len(c.Members) + 1,
+		IsPrivate:    c.IsPrivate,
 	}
 }
 
@@ -41,6 +42,7 @@ func (c Camp) BriefDTOPrivate(userID uint) BriefCampDTO {
 			}
 			return Member{}
 		}(),
+		IsPrivate: c.IsPrivate,
 	}
 }
 
