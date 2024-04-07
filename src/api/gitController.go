@@ -12,6 +12,8 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
+	"strings"
 )
 
 const (
@@ -173,32 +175,31 @@ func (g gitController) RepoDir(ctx *gin.Context) {
 
 func (g gitController) GitHTTPBackend(ctx *gin.Context) {
 	uri := struct {
-		PID      uint   `uri:"project_id"`
-		GitPath  string `uri:"gitPath"`
-		GitParam string `uri:"any"`
+		GitPath string `uri:"gitPath"`
 	}{}
 	if err := ctx.BindUri(&uri); err != nil {
 		responseError(ctx, err)
 		return
 	}
 
-	proj, err := g.projQuery.ProjectInfo(uri.PID)
-	if err != nil {
-		responseError(ctx, err)
-		return
-	}
-
-	repoPath := filepath.Join(util.CONFIG.NativeStorageRootPath, proj.Path)
+	repoPath := filepath.Join(util.CONFIG.NativeStorageRootPath, uri.GitPath)
 	if _, err := os.Stat(repoPath); os.IsNotExist(err) {
 		responseError(ctx, err)
 		return
 	}
 
-	//originalURL := ctx.Request.URL.Path
-	//defer func() {
-	//	ctx.Request.URL.Path = originalURL
-	//}()
-	//ctx.Request.URL.Path = fmt.Sprintf("/%d-%s%s", uri.PID, uri.GitPath, uri.GitParam)
+	projID, err := strconv.Atoi(strings.Split(uri.GitPath, "-")[0])
+	if err != nil {
+		responseError(ctx, err)
+		return
+	}
+
+	_, err = g.projQuery.ProjectInfo((uint)(projID))
+	if err != nil {
+		responseError(ctx, err)
+		return
+	}
+
 	g.webdav.ServeHTTP(ctx.Writer, ctx.Request)
 
 	gitHTTPBackendPath := util.CONFIG.GitPath
@@ -217,7 +218,6 @@ func (g gitController) GitHTTPBackend(ctx *gin.Context) {
 		responseError(ctx, err)
 		return
 	}
-
 	responseSuccess(ctx)
 
 	return
