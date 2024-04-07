@@ -77,7 +77,14 @@ func registerDependencies(engine *gin.Engine) {
 	engine.POST("/project/:project_id/workplace/:branch/commit", security.AuthMiddleware(), git.Commit)
 	engine.POST("/project/:project_id/workplace/:branch/create", security.AuthMiddleware(), git.CreateBranch)
 	engine.POST("/project/:project_id/workplace/:branch/rm", security.AuthMiddleware(), git.RemoveBranch)
-	engine.Any("/:gitPath/*any", git.GitHTTPBackend)
+
+	engine.GET("/:gitPath/*any", git.GitHTTPBackend)
+	engine.POST("/:gitPath/*any", git.GitHTTPBackend)
+	engine.PUT("/:gitPath/*any", git.GitHTTPBackend)
+	engine.PATCH("/:gitPath/*any", git.GitHTTPBackend)
+	engine.DELETE("/:gitPath/*any", git.GitHTTPBackend)
+	engine.HEAD("/:gitPath/*any", git.GitHTTPBackend)
+
 	engine.Handle("PROPFIND", "/:gitPath/*any", git.GitHTTPBackend)
 	engine.Handle("MKCOL", "/:gitPath/*any", git.GitHTTPBackend)
 	engine.Handle("LOCK", "/:gitPath/*any", git.GitHTTPBackend)
