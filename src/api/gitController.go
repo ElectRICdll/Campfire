@@ -6,7 +6,6 @@ import (
 	"campfire/service"
 	"campfire/storage"
 	"campfire/util"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/net/webdav"
 	"net/http"
@@ -195,7 +194,11 @@ func (g gitController) GitHTTPBackend(ctx *gin.Context) {
 		return
 	}
 
-	ctx.Request.URL.Path = fmt.Sprintf("/git/%d-%s%s", uri.PID, uri.GitPath, uri.GitParam)
+	//originalURL := ctx.Request.URL.Path
+	//defer func() {
+	//	ctx.Request.URL.Path = originalURL
+	//}()
+	//ctx.Request.URL.Path = fmt.Sprintf("/%d-%s%s", uri.PID, uri.GitPath, uri.GitParam)
 	g.webdav.ServeHTTP(ctx.Writer, ctx.Request)
 
 	gitHTTPBackendPath := util.CONFIG.GitPath
