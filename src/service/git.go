@@ -328,8 +328,8 @@ func (g *gitService) Dir(queryID, projID uint, branch, path string) ([]storage.F
 	if err != nil {
 		return nil, err
 	}
-	if path != "/" && path != "\\" && path != "" {
-		tree, err = tree.Tree(path)
+	if path[0] == '/' {
+		tree, err = tree.Tree(path[1:])
 		if err != nil {
 			return nil, err
 		}
@@ -342,11 +342,13 @@ func (g *gitService) Dir(queryID, projID uint, branch, path string) ([]storage.F
 				return nil, err
 			}
 			files = append(files, storage.File{
+				Path:        path,
 				Name:        entry.Name,
 				IsDirectory: true,
 			})
 		} else {
 			files = append(files, storage.File{
+				Path:        path,
 				Name:        entry.Name,
 				IsDirectory: false,
 			})
