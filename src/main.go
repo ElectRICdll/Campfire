@@ -67,6 +67,9 @@ func registerDependencies(engine *gin.Engine) {
 	engine.POST("/camp/:camp_id/own", security.AuthMiddleware(), camp.GiveOwner)
 	engine.POST("/camp/:camp_id/title/set", security.AuthMiddleware(), camp.SetTitle)
 
+	file := api.NewFileController()
+	engine.GET("/user/:user_id/avatar", file.Avatar)
+
 	git := api.NewGitController()
 	engine.GET("/project/:project_id/workplace/:branch/clone", security.AuthMiddleware(), git.Clone)
 	engine.GET("/project/:project_id/workplace/:branch/open", security.AuthMiddleware(), git.OpenFile)
@@ -80,9 +83,6 @@ func registerDependencies(engine *gin.Engine) {
 	engine.Handle("LOCK", "/:gitPath/*any", git.GitHTTPBackend)
 	engine.Handle("UNLOCK", "/:gitPath/*any", git.GitHTTPBackend)
 	engine.Handle("MOVE", "/:gitPath/*any", git.GitHTTPBackend)
-
-	file := api.NewFileController()
-	engine.GET("/user/:user_id/avatar", file.Avatar)
 }
 
 func main() {
