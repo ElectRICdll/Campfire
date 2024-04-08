@@ -322,13 +322,12 @@ func (g *gitService) Dir(queryID, projID uint, branch, path string) ([]storage.F
 	if err != nil {
 		return nil, err
 	}
-	var parsedPath = path
-	if path[0] == '/' {
-		parsedPath = path[1:]
-	}
-	tree, err = tree.Tree(parsedPath)
-	if err != nil {
-		return nil, err
+
+	if len(path) > 1 && path[0] == '/' {
+		tree, err = tree.Tree(path[1:])
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	var files []storage.File
