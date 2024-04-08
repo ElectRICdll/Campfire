@@ -6,6 +6,7 @@ import (
 	"campfire/service"
 	"campfire/util"
 	"github.com/gin-gonic/gin"
+	"strconv"
 )
 
 type CampController interface {
@@ -259,20 +260,20 @@ func (p campController) MessageRecord(ctx *gin.Context) {
 	uri := struct {
 		CID uint `uri:"camp_id" binding:"required"`
 	}{}
-	beginID := struct {
-		BeginMessageID uint `uri:"beginMessageID"`
-	}{}
-	if err := ctx.BindJSON(&beginID); err != nil {
+	if err := ctx.BindUri(&uri); err != nil {
 		responseError(ctx, err)
 		return
 	}
+	beginMessageID, err := strconv.Atoi(ctx.Query("begin"))
 	if err := auth.SecurityInstance.IsUserACampMember(uri.CID, userID); err != nil {
 		responseError(ctx, util.NewExternalError("access denied"))
+		return
 	}
-	res, err := p.messageService.PullMessageRecord(uri.CID, beginID.BeginMessageID)
+	res, err := p.messageService.PullMessageRecord(uri.CID, (uint)(beginMessageID))
 	resStruct := struct {
-		Msgs []entity.Message `json:"msgs"`
-	}{res}
+		CampID uint             `json:"campID"`
+		Msgs   []entity.Message `json:"msgs"`
+	}{uri.CID, res}
 	responseJSON(ctx, resStruct, err)
 	return
 }

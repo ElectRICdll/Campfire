@@ -16,10 +16,14 @@ type MessageDao interface {
 }
 
 func NewMessageDao() MessageDao {
-	return messageDao{}
+	return messageDao{
+		DBConn(),
+	}
 }
 
-type messageDao struct{}
+type messageDao struct {
+	db *gorm.DB
+}
 
 func (d messageDao) AddMessageRecord(msg ...Message) error {
 	result := DB.Create(&msg)
@@ -28,17 +32,23 @@ func (d messageDao) AddMessageRecord(msg ...Message) error {
 	}
 	return nil
 }
+
 func (d messageDao) PullCampMessageRecord(campID uint, beginMessageID uint, msgCount uint) ([]Message, error) {
-	var message []Message
-	result := DB.Where("camp_id = ? AND id >= ? AND id <= ?", campID, beginMessageID, beginMessageID-msgCount+1).Find(&message)
-	if result.Error == gorm.ErrRecordNotFound {
-		return message, util.NewExternalError("no record found")
+	var messages []Message
+
+	query := d.db.Where("camp_id = ?", campID).Order("timestamp DESC")
+
+	if beginMessageID != 0 {
+		query = query.Where("id < ?", beginMessageID)
 	}
-	if result.Error != nil {
-		return message, result.Error
+
+	if err := query.Limit(50).Find(&messages).Error; err != nil {
+		return nil, err
 	}
-	return message, nil
+
+	return messages, nil
 }
+
 func (d messageDao) MessageRecord(campID uint, msgID uint) (Message, error) {
 	var message Message
 	result := DB.Where("camp_id = ? AND id = ?", campID, msgID).Find(&message)
