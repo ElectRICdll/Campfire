@@ -1,15 +1,17 @@
 package entity
 
+import "time"
+
 type User struct {
-	ID        uint   `gorm:"primaryKey;autoIncrement" json:"id"`
-	Email     string `gorm:"not null;unique" json:"email"`
-	Name      string `gorm:"not null" json:"username"`
-	Password  string `gorm:"size:60;not null" json:"-"`
-	AvatarUrl string `json:"-"`
-	Signature string `json:"signature"`
-	Status    int    `gorm:"status" json:"status"`
-	Token     string `gorm:"-" json:"token"`
-	LastMsgID int    `gorm:"-" json:"lastMsgID"`
+	ID         uint      `gorm:"primaryKey;autoIncrement" json:"id"`
+	Email      string    `gorm:"not null;unique" json:"email"`
+	Name       string    `gorm:"not null" json:"username"`
+	Password   string    `gorm:"size:60;not null" json:"-"`
+	AvatarUrl  string    `json:"-"`
+	Signature  string    `json:"signature"`
+	Status     int       `json:"status"`
+	Token      string    `gorm:"-" json:"token"`
+	LastOnline time.Time `json:"lastOnline"`
 }
 
 type BriefUserDTO struct {

@@ -49,9 +49,10 @@ func (s *loginService) Login(email string, password string) (entity.LoginDTO, er
 	s.user.online(&user)
 	cache.StoreUserInCache(user)
 	return entity.LoginDTO{
-		ID:    user.ID,
-		Name:  user.Name,
-		Token: token,
+		ID:         user.ID,
+		Name:       user.Name,
+		Token:      token,
+		LastOnline: user.LastOnline,
 	}, nil
 }
 

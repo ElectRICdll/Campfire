@@ -2,6 +2,8 @@ package ws
 
 import (
 	"campfire/auth"
+	"campfire/dao"
+	"campfire/entity"
 	"campfire/log"
 	"campfire/util"
 	"encoding/json"
@@ -22,6 +24,7 @@ func NewSessionService() *SessionService {
 		},
 		pool:         NewSessionPool(),
 		eventHandler: NewEventService(),
+		userQuery:    dao.UserDaoContainer,
 	}
 	return res
 }
@@ -31,6 +34,7 @@ type SessionService struct {
 	generator    websocket.Upgrader
 	pool         SessionPool
 	eventHandler EventService
+	userQuery    dao.UserDao
 }
 
 func (s *SessionService) NewSession(w http.ResponseWriter, r *http.Request, h http.Header, token string) error {
@@ -54,6 +58,10 @@ func (s *SessionService) NewSession(w http.ResponseWriter, r *http.Request, h ht
 		for {
 			messageType, p, err := conn.ReadMessage()
 			if err != nil {
+				_ = s.userQuery.SetUserInfo(entity.User{
+					ID:         res,
+					LastOnline: time.Now(),
+				})
 				log.Error(err.Error())
 				return
 			}

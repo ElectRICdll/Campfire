@@ -81,8 +81,8 @@ func (proj Project) BriefDTO() BriefProjectDTO {
 }
 
 type LoginDTO struct {
-	ID        uint   `json:"id"`
-	Name      string `json:"username"`
-	Token     string `json:"token"`
-	AvatarUrl string `json:"avatarUrl"`
+	ID         uint      `json:"id"`
+	Name       string    `json:"username"`
+	Token      string    `json:"token"`
+	LastOnline time.Time `json:"lastOnline"`
 }

@@ -46,13 +46,6 @@ func GetTaskFromCacheByUserID(userID int) (bool, Task) {
 	return false, Task{}
 }
 
-func GetLastReadMsgIDFromCache(userID int) int {
-	if found, user := GetUserFromCache(userID); found {
-		return user.LastMsgID
-	}
-	return -1 // 返回 -1 表示未找到用户或用户信息中未包含最后已读消息 ID
-}
-
 var (
 	messageCache *cache.Cache
 )
