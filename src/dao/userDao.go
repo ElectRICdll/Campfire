@@ -78,7 +78,7 @@ func (d userDao) CampsOfUser(userID uint) ([]Camp, error) {
 		campIDs = append(campIDs, member.CampID)
 	}
 
-	if err := d.db.Where("id IN (?) and is_private = 0", campIDs).Find(&camps).Error; err != nil {
+	if err := d.db.Preload("Members").Where("id IN (?) and is_private = 0", campIDs).Find(&camps).Error; err != nil {
 		return nil, err
 	}
 

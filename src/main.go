@@ -66,6 +66,7 @@ func registerDependencies(engine *gin.Engine) {
 	engine.POST("/camp/:camp_id/demotion", security.AuthMiddleware(), camp.Demotion)
 	engine.POST("/camp/:camp_id/own", security.AuthMiddleware(), camp.GiveOwner)
 	engine.POST("/camp/:camp_id/title/set", security.AuthMiddleware(), camp.SetTitle)
+	engine.POST("/camp/:camp_id/received", security.AuthMiddleware(), camp.UpdateLastReadMsg)
 
 	file := api.NewFileController()
 	engine.GET("/user/:user_id/avatar", file.Avatar)

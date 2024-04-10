@@ -7,6 +7,7 @@ import (
 	"campfire/util"
 	"github.com/gin-gonic/gin"
 	"strconv"
+	"time"
 )
 
 type CampController interface {
@@ -33,6 +34,8 @@ type CampController interface {
 	SetTitle(*gin.Context)
 
 	MessageRecord(*gin.Context)
+
+	UpdateLastReadMsg(*gin.Context)
 }
 
 func NewCampController() CampController {
@@ -344,5 +347,27 @@ func (p campController) ExitCamp(ctx *gin.Context) {
 		responseError(ctx, err)
 		return
 	}
+	return
+}
+
+func (p campController) UpdateLastReadMsg(ctx *gin.Context) {
+	userID := (uint)(ctx.Keys["id"].(float64))
+	uri := struct {
+		CID uint `uri:"camp_id" binding:"required"`
+	}{}
+	if err := p.campService.ExitCamp(userID, uri.CID); err != nil {
+		responseError(ctx, err)
+		return
+	}
+	timestamp, err := time.Parse("2006-01-02T15:04:05Z", ctx.Query("timestamp"))
+	if err != nil {
+		responseError(ctx, err)
+		return
+	}
+	if err := p.campService.UpdateLastRead(uri.CID, userID, timestamp); err != nil {
+		responseError(ctx, err)
+		return
+	}
+	responseSuccess(ctx)
 	return
 }

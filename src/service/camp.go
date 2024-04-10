@@ -6,6 +6,7 @@ import (
 	. "campfire/entity"
 	"campfire/util"
 	"campfire/ws"
+	"time"
 )
 
 type CampService interface {
@@ -37,6 +38,10 @@ type CampService interface {
 
 	EditMemberInfo(member Member) error
 
+	SetTitle(queryID uint, campID uint, userID uint, title string) error
+
+	UpdateLastRead(campID, userID uint, time time.Time) error
+
 	Announcements(queryID uint, campID uint) ([]Announcement, error)
 
 	AnnouncementInfo(queryID uint, campID uint, annoID uint) (Announcement, error)
@@ -46,8 +51,6 @@ type CampService interface {
 	EditAnnouncementInfo(queryID uint, anno Announcement) error
 
 	DeleteAnnouncement(queryID uint, campID uint, annoID uint) error
-
-	SetTitle(queryID uint, campID uint, userID uint, title string) error
 }
 
 func NewCampService() CampService {
@@ -269,10 +272,23 @@ func (c campService) EditMemberInfo(member Member) error {
 	}
 	if err := c.mention.NotifyByEvent(&ws.MemberInfoChangedEvent{
 		Member: Member{
-			UserID: member.UserID,
-			Title:  member.Title,
+			UserID:   member.UserID,
+			CampID:   member.CampID,
+			Title:    member.Title,
+			Nickname: member.Nickname,
 		},
 	}, ws.MemberInfoChangedEventType); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (c campService) UpdateLastRead(campID, userID uint, time time.Time) error {
+	if err := c.campQuery.SetMemberInfo(Member{
+		UserID:   userID,
+		CampID:   campID,
+		LastRead: time,
+	}); err != nil {
 		return err
 	}
 	return nil

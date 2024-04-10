@@ -1,14 +1,17 @@
 package entity
 
+import "time"
+
 type MemberList map[int]*Member
 
 type Member struct {
 	UserID uint `gorm:"primaryKey;autoIncrement:false" json:"userID"`
 	CampID uint `gorm:"primaryKey;autoIncrement:false" json:"campID"`
 
-	Nickname string `json:"nickname"`
-	Title    string `json:"title"`
-	IsRuler  bool   `gorm:"not null" json:"isRuler"`
+	Nickname string    `json:"nickname"`
+	Title    string    `json:"title"`
+	IsRuler  bool      `gorm:"not null" json:"isRuler"`
+	LastRead time.Time `gorm:"" json:"lastRead"`
 
 	User User `gorm:"foreignKey:UserID;onDelete:CASCADE" json:"user"`
 }

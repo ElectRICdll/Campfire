@@ -9,10 +9,11 @@ type BriefCampDTO struct {
 	OwnerID   uint   `json:"ownerID"`
 	MembersID []uint `json:"membersID"`
 
-	Name         string `json:"name"`
-	IsPrivate    bool   `json:"isPrivate"`
-	MembersCount int    `json:"membersCount"`
-	Opposite     Member `json:"opposite"`
+	Name         string    `json:"name"`
+	IsPrivate    bool      `json:"isPrivate"`
+	MembersCount int       `json:"membersCount"`
+	Opposite     Member    `json:"opposite"`
+	LastRead     time.Time `json:"lastRead"`
 }
 
 func (c Camp) BriefDTO() BriefCampDTO {
@@ -23,6 +24,25 @@ func (c Camp) BriefDTO() BriefCampDTO {
 		Name:         c.Name,
 		MembersCount: len(c.Members) + 1,
 		IsPrivate:    c.IsPrivate,
+	}
+}
+
+func (c Camp) BriefDTOWithUserLastRead(userID uint) BriefCampDTO {
+	return BriefCampDTO{
+		ID:           c.ID,
+		OwnerID:      c.OwnerID,
+		ProjID:       c.ProjID,
+		Name:         c.Name,
+		MembersCount: len(c.Members) + 1,
+		IsPrivate:    c.IsPrivate,
+		LastRead: func() time.Time {
+			for _, member := range c.Members {
+				if member.UserID == userID {
+					return member.LastRead
+				}
+			}
+			return time.Now()
+		}(),
 	}
 }
 
@@ -43,6 +63,14 @@ func (c Camp) BriefDTOPrivate(userID uint) BriefCampDTO {
 			return Member{}
 		}(),
 		IsPrivate: c.IsPrivate,
+		LastRead: func() time.Time {
+			for _, member := range c.Members {
+				if member.UserID == userID {
+					return member.LastRead
+				}
+			}
+			return time.Now()
+		}(),
 	}
 }
 
