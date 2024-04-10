@@ -3,7 +3,7 @@ package entity
 import "time"
 
 type Message struct {
-	ID      uint `json:"-" gorm:"primaryKey;autoIncrement"`
+	ID      uint `json:"id" gorm:"primaryKey;autoIncrement"`
 	OwnerID uint `json:"ownerID"`
 	CampID  uint `json:"campID"`
 	ReplyID uint `json:"replyID"`
